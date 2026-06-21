@@ -377,7 +377,7 @@ function HomeScreen({ onNav }) {
             <ChevronRight size={14} color={COLORS.redLight} />
           </div>
           <div className="flex items-end justify-between">
-            <p className="text-[24px] font-extrabold">AED 2,340</p>
+            <p className="text-[24px] font-extrabold">AED 13,000</p>
             <p className="text-[11px] font-bold" style={{ color: COLORS.tealLight }}>78% of daily target</p>
           </div>
           <div className="w-full h-2 rounded-full mt-2" style={{ background: "rgba(255,255,255,.08)" }}>
@@ -826,15 +826,15 @@ function ShiftsScreen({ onBack, onNavCalendar, onNavMySales }) {
 
 // ---------- MY SALES SCREEN ----------
 function MySalesScreen({ onBack }) {
-  const [todaySales, setTodaySales] = useState(2340);
+  const [todaySales, setTodaySales] = useState(13000);
   const [salesInput, setSalesInput] = useState("");
   const [logged, setLogged] = useState(false);
 
   const [board, setBoard] = useState("individual");
   const [product, setProduct] = useState("Lindt Pistachio Kunafa");
   const leaders = [
-    { name: "Fatima R.", val: "AED 3,180", rank: 1 },
-    { name: "You", val: "AED 2,340", rank: 2, me: true },
+    { name: "You", val: "AED 13,000", rank: 1, me: true },
+    { name: "Fatima R.", val: "AED 3,180", rank: 2 },
     { name: "Omar K.", val: "AED 2,050", rank: 3 },
   ];
   const products = ["Lindt Pistachio Kunafa", "Sony WH-1000XM6", "AirPods Pro 3"];
@@ -2943,7 +2943,7 @@ function StaffApp() {
       ) : (
         <div className="relative h-full">
           {content}
-          <BottomNav active={activeTab} onNav={handleNav} />
+          {screen !== "mysales" && <BottomNav active={activeTab} onNav={handleNav} />}
         </div>
       )}
     </PhoneFrame>
