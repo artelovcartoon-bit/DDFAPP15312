@@ -1,0 +1,3029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DDF Staff App — Demo</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  * { -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: #0a0a0a; overscroll-behavior: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  #status { color: #fff; font-family: -apple-system, sans-serif; padding: 24px; text-align:center; font-size: 13px; opacity: .6; }
+  #error-display {
+    display:none; position:fixed; inset:0; background:#1a0000; color:#ff9999;
+    padding:20px; font-family: ui-monospace, monospace; font-size:11px; line-height:1.6;
+    white-space:pre-wrap; overflow:auto; z-index:9999;
+  }
+</style>
+</head>
+<body>
+<div id="root"><div id="status">Step 1: checking libraries…</div></div>
+<div id="error-display"></div>
+
+<script id="jsx-source" type="application/jsx">
+// Minimal inline-SVG icon set (paths from the Lucide icon library, ISC licensed)
+// Self-contained — no CDN dependency, so the app works reliably offline-after-first-load.
+function makeIcon(paths) {
+  return function Icon({ size = 24, color = "currentColor", className = "", style = {} }) {
+    return (
+      <svg
+        width={size} height={size} viewBox="0 0 24 24" fill="none"
+        stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        className={className} style={style}
+      >
+        {paths}
+      </svg>
+    );
+  };
+}
+
+const Home = makeIcon(<><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></>);
+const Calendar = makeIcon(<><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>);
+const GraduationCap = makeIcon(<><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></>);
+const Users = makeIcon(<><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>);
+const User = makeIcon(<><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>);
+const ChevronLeft = makeIcon(<polyline points="15 18 9 12 15 6"/>);
+const ChevronRight = makeIcon(<polyline points="9 18 15 12 9 6"/>);
+const FileText = makeIcon(<><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></>);
+const CheckCircle2 = makeIcon(<><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></>);
+const Award = makeIcon(<><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></>);
+const TrendingUp = makeIcon(<><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></>);
+const Bell = makeIcon(<><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></>);
+const ClipboardList = makeIcon(<><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></>);
+const Plane = makeIcon(<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.3.5-.1 1.1.4 1.4L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.5.9.7 1.4.4l.5-.3c.4-.2.6-.6.5-1.1z"/>);
+const Cake = makeIcon(<><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v2"/><path d="M12 8v2"/><path d="M17 8v2"/><path d="M7 4h.01"/><path d="M12 4h.01"/><path d="M17 4h.01"/></>);
+const Lock = makeIcon(<><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>);
+const Play = makeIcon(<polygon points="6 3 20 12 6 21 6 3"/>);
+const Trophy = makeIcon(<><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></>);
+const Sparkles = makeIcon(<><path d="m12 3-1.9 4.3L6 9l4.1 1.7L12 15l1.9-4.3L18 9l-4.1-1.7z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></>);
+const Gift = makeIcon(<><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></>);
+const Lightbulb = makeIcon(<><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></>);
+const Tag = makeIcon(<><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></>);
+const Percent = makeIcon(<><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></>);
+const Star = makeIcon(<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>);
+const BookOpen = makeIcon(<><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></>);
+const MessageSquareQuote = makeIcon(<><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 12a2 2 0 0 0 2-2V9a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1zm6 0a2 2 0 0 0 2-2V9a1 1 0 0 0-1-1h-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1z"/></>);
+const Mic2 = makeIcon(<><path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12"/><circle cx="17" cy="7" r="5"/></>);
+const Languages = makeIcon(<><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></>);
+const Volume2 = makeIcon(<><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></>);
+const History = makeIcon(<><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></>);
+const Wine = makeIcon(<><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5z"/></>);
+const Eye = makeIcon(<><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></>);
+const X = makeIcon(<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>);
+const Music = makeIcon(<><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></>);
+const PenTool = makeIcon(<><path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="m2 2 7.586 7.586"/><circle cx="11" cy="11" r="2"/></>);
+const Palette = makeIcon(<><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></>);
+const Video = makeIcon(<><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></>);
+const Globe = makeIcon(<><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></>);
+const EyeOff = makeIcon(<><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></>);
+const Search = makeIcon(<><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></>);
+const Clock = makeIcon(<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>);
+const Camera = makeIcon(<><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></>);
+
+
+
+const LOGO_SRC =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTAwIiBoZWlnaHQ9IjI1MDAiIHZpZXdCb3g9IjAgMCAxOTIuNzU2IDE5Mi43NTYiPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjZmZmIiBkPSJNMCAwaDE5Mi43NTZ2MTkyLjc1NkgwVjB6Ii8+PHBhdGggZD0iTTguNTA0IDk2LjQ1OWMwLTQ4LjY0OSAzOS4zMDYtODcuOTU1IDg3Ljk1NS04Ny45NTUgNDguNDg5IDAgODcuNzkzIDM5LjMwNiA4Ny43OTMgODcuOTU1IDAgNDguNDg4LTM5LjMwNSA4Ny43OTMtODcuNzkzIDg3Ljc5My00OC42NDkgMC04Ny45NTUtMzkuMzA1LTg3Ljk1NS04Ny43OTN6IiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik04NC4yMTYgODEuNjM4bC0yLjA5NCAzLjIyMmgzMC45MjlzLTMuODY1LTMuMDYxLTEwLjk1My0zLjIyMkg4NC4yMTZ6TTExNC4zNCA4NS42NjZIODEuNjM4bC0yLjA5NCAyLjg5OWgzOC4xNzhjLjAwMSAwLTEuMTI2LTEuNzcyLTMuMzgyLTIuODk5ek0xMTguNTI3IDg5LjM3MUg3OS4yMjJsLTIuMDk0IDIuOWg0My40OTNzLTEuMTI3LTIuMDk1LTIuMDk0LTIuOXpNMTAwLjMyNCA5My4wNzZINzYuODA2bC0xLjkzMyAzLjA2MWgyNC4xNjVjLS4wMDEgMCAxLjEyNi0xLjQ1IDEuMjg2LTMuMDYxek0xMDQuNjc0IDkzLjA3NnYzLjA2MWgxOC4wNDNzLS42NDUtMi4wOTQtMS42MTEtMy4wNjFoLTE2LjQzMnpNOTguNzEzIDk3LjEwNEg3NC41NWwtMi4wOTQgMy4yMjFoMTkuMzMxYzAtLjAwMSA0LjAyNy4xNjEgNi45MjYtMy4yMjF6TTEwNC42NzQgOTcuMTA0djMuMjIxaDE5LjAwOHMtLjE2LTEuOTMyLS44MDUtMy4yMjFoLTE4LjIwM3pNMTA0LjUxNCAxMDEuMTMxdjIuODk4aDE5LjMzcy4zMjItMS42MDktLjMyMi0yLjg5OGgtMTkuMDA4ek0xMDQuNTE0IDEwNC44MzZ2My4wNjFoMTkuMDA4cy4zMjItMS42MTEuMzIyLTMuMDYxaC0xOS4zM3pNNjcuMTQgMTA4LjcwMWwtMS45MzMgMi45aDU3LjM0N3MuNjQ1LTEuMTI5LjgwNy0yLjlINjcuMTR6TTY0LjU2MyAxMTIuNDA2bC0yLjA5NCAzLjIyM2g1OC4xNTJzLjk2Ny0xLjQ1MSAxLjYxMS0zLjIyM0g2NC41NjN6TTYxLjk4NiAxMTYuNDM0bC0yLjA5NSAzLjA2MSA1OC4xNTQtLjE2cy0xLjYxMS0xLjYxMSAyLjA5NC0yLjlINjEuOTg2di0uMDAxek01OS4yNDcgMTIwLjEzOWwtMS43NzIgMi45aDU2LjM4czEuOTM0LTEuMjg5IDMuMjIzLTIuOUg1OS4yNDd6TTU2LjY2OSAxMjMuODQ0bC0xLjkzMyAzLjA2MWg0NC42MjFzOC4zNzcuMzIyIDEyLjg4OS0zLjA2MUg1Ni42Njl6IiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iI2M4MmUzNyIvPjxwYXRoIGQ9Ik0xMjAuOTQzIDg3LjkyMXMtMS4xMjctNC4zNS02LjEyMS02LjI4M2MwIDAtNC41MS0xLjc3MS03Ljg5MyAxLjEyOCAwIDAtMi43MzggMS45MzMtMi45IDUuNjM4IDAgMCAuMTYyIDUuOTYgNS4zMTYgNi4xMjIgMCAwIDEuNzcxLjE2MSAzLjIyMy0yLjI1NSAwIDAgLjk2NS0yLjI1NSAyLjQxNi0yLjI1NSAwIDAgMi40MTYtLjE2MSAyLjU3NiAyLjI1NSAwIDAgLjMyMiAxLjI4OS0xLjYwOSAyLjQxNiAwIDAtMS43NzMgMS4yODktMS45MzQgMy4zODQgMCAwIDAgNC4wMjcgNC4zNSA1LjYzNyAwIDAtMS40NTEtMi4wOTQgMS4xMjctNS4zMTQgMCAwIDIuMjU2LTIuOTAxIDIuMDk0LTYuMTIyIDAtLjAwMSAwLTIuMjU3LS42NDUtNC4zNTF6IiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xMjAuOTQzIDg3LjkyMXMtMS4xMjctNC4zNS02LjEyMS02LjI4M2MwIDAtNC41MS0xLjc3MS03Ljg5MyAxLjEyOCAwIDAtMi43MzggMS45MzMtMi45IDUuNjM4IDAgMCAuMTYyIDUuOTYgNS4zMTYgNi4xMjIgMCAwIDEuNzcxLjE2MSAzLjIyMy0yLjI1NSAwIDAgLjk2NS0yLjI1NSAyLjQxNi0yLjI1NSAwIDAgMi40MTYtLjE2MSAyLjU3NiAyLjI1NSAwIDAgLjMyMiAxLjI4OS0xLjYwOSAyLjQxNiAwIDAtMS45MzQgMS4yODktMS45MzQgMy4zODQgMCAwIDAgNC4wMjcgNC4zNSA1LjYzNyAwIDAtMS40NTEtMi4wOTQgMS4xMjctNS4zMTQgMCAwIDIuMjU2LTIuOTAxIDIuMDk0LTYuMTIyIDAtLjAwMSAwLTIuMjU3LS42NDUtNC4zNTF6IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMS40OTciIHN0cm9rZS1taXRlcmxpbWl0PSIyLjYxMyIvPjxwYXRoIGQ9Ik0yNS40MTggNzcuOTMzczIuMjU1IDUuOTYxIDcuNDEgNS42MzhjMCAwIDMuMjIyLjMyMyA0LjgzMy0zLjM4MyAwIDAgNC41MS0xMC4xNDggMTAuMTQ5LTE1Ljc4N2wtMS40NS00LjE4OHMtMS4yODktNC44MzMtOC4yMTUtMi4wOTRjMCAwIC4zMjItMi4wOTUtMS45MzMtNC41MTEgMCAwLTEuNjExLTEuNzcyLTMuNTQ0LTIuMDk0bDEuNDQ5IDQuMzUgMi4wOTUuOTY2cy44MDYuNjQ1LjMyMiAxLjQ1bC0xLjI4OSAyLjQxNiAxLjc3MiAzLjM4M3MzLjA2MS0yLjU3NyA0LjgzMi0yLjU3N2MwIDAgMS43NzItLjQ4My42NDUuNDgzIDAgMC0zLjM4MyA0LjM0OS01Ljc5OSA4LjUzOCAwIDAtMi4wOTUgMy41NDMtNC4wMjcgOC4yMTUgMCAwLTEuMTI4IDMuMDYxLTQuMzUgMS40NSAwIDAtMS42MTEtLjY0NC0yLjktMi4yNTV6TTQ2LjY4MiA1NC40MTVzLjk2NiAyLjczOCAxLjc3MiA0LjAyN2MwIDAgMS4yODkgMy4wNjEgMy44NjYuODA1IDAgMCAzLjIyMi0zLjM4MyA1LjE1NS00Ljk5NGwtMS4yODktMy41NDRzLTEuNDUtNC41MTEtNi40NDQtNi4xMjJjMCAwLTIuMjU1LTEuMTI3LTMuODY2LjMyMiAwIDAtMS42MTEgMS4yODkuODA2IDUuOTYgMCAwIC40ODMtMi43MzkgMy41NDQtMi4wOTUgMCAwIDEuNjExLjE2MiAzLjM4MyAxLjI4OWwtNC42NzEgNC4zNWMwIC4wMDItLjY0NS45NjgtMi4yNTYuMDAyek01OS4wODYgNDUuNzE1bC44MDUgNi42MDVzMy4zODMtMi41NzggNC45OTQtMy4zODNsLS4zMjItNi40NDRjMCAuMDAxLTMuMzgzIDEuNjEyLTUuNDc3IDMuMjIyek01NC4wOTIgNjMuMTEzbC0zLjU0NCAxLjQ1LjE2MSA0LjE4OCAzLjU0NC0xLjc3Mi0uMTYxLTMuODY2ek02OS4wNzQgMjYuMzg1aC00LjM1bC0xLjYxMSAzLjM4MyA0LjE4OC0uMTYyIDEuNzczLTMuMjIxeiIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiMwYzBlMGYiLz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iIzBjMGUwZiIgZD0iTTc0LjA2NyAyNC4yOTFsLTQuMTg4LS4xNjEtMS43NzIgMy41NDMgNC4zNS0uMTYgMS42MS0zLjIyMnpNMTMxLjA5NCAzMS4zNzlsLTIuNzQtMy4yMjItMy43MDYgMS4xMjggMi45MDEgMy4wNiAzLjU0NS0uOTY2eiIvPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjMGMwZTBmIiBkPSJNMTM2LjczIDMzLjYzNGwtMi43MzgtMy4yMjItMy43MDUuOTY3IDIuOTAxIDMuMDYgMy41NDItLjgwNXpNNDguNjE1IDY4LjQyOWwtNC4wMjcgMi43MzguNDgzIDQuMzUgMy44NjctMi44OTktLjMyMy00LjE4OXpNNDQuNzQ5IDc0LjM5bC00LjAyNyAyLjczOC42NDQgNC4zNSAzLjcwNS0yLjktLjMyMi00LjE4OHpNNzYuOTY3IDIzLjQ4NXMtLjMyMiAxLjYxMS42NDUgMi41NzhjMCAwIDAgLjQ4My44MDUuNDgzIDAgMCAuMzIyIDAgLjQ4My0uMzIyIDAgMCAuMTYxLS4zMjIuNDgzLS4zMjIgMCAwIC4xNjEgMCAuNDgzLjE2MSAwIDAgLjMyMi4xNjEuNjQ0IDAgMCAwIC40ODMgMCAuODA1LS42NDUgMCAwIC4xNjItMS4xMjgtLjMyMi0yLjU3OGwtLjE2Mi0uNDgzLS42NDQuOTY2cy4zMjIuNjQ0LjMyMiAxLjEyN2MwIDAgMCAuNjQ1LS4zMjIuNjQ1IDAgMC0uNDgzIDAtLjY0NC0uNjQ1IDAgMCAwLS42NDQtLjQ4My0uOTY2bC0uNDgzLjgwNXMuMzIyLjE2MS4zMjIuNjQ1YzAgMCAwIC42NDUtLjQ4My40ODMgMCAwLS40ODMuMTYxLS42NDUtLjgwNiAwIDAgMC0uNjQ1LS4xNjEtMS4yODkuMDAxLjAwMi0uMzIxLS42NDItLjY0My4xNjN6TTc2IDM1Ljg4OWMuOTY2IDEuNzcyLjgwNSAyLjg5OS44MDUgMi44OTl2My4zODNjLjE2MSAxLjQ1LS40ODMgMS42MTEtLjQ4MyAxLjYxMWwtNC4wMjcgMS40NWMtMS42MTEuNjQ0LTIuMDk0LTEuMjg5LTIuMDk0LTEuMjg5LTEuNDUtNC4zNS0uNjQ1LTguMDU1LS42NDUtOC4wNTUuNjQ1LTMuNzA1LjMyMi01LjYzOC4zMjItNS42MzgtLjE2MS0uODA2LjY0NC0uMzIyLjY0NC0uMzIyQzc0LjcxMSAzMi4zNDUgNzYgMzUuODg5IDc2IDM1Ljg4OXptLTQuNTEtLjQ4M2MtLjQ4My0uMzIyLS42NDUuMTYxLS42NDUuMTYxLS40ODMgMS4yODktLjY0NCAzLjU0NC0uNjQ0IDMuNTQ0IDAgLjk2Ny44MDUuNDgzLjgwNS40ODNsMy41NDQtMS4yODljLTEuNDQ5LTIuMDk0LTMuMDYtMi44OTktMy4wNi0yLjg5OXoiLz48cGF0aCBkPSJNODAuMDI4IDI5LjkyOWwtMS4yODkgNC4wMjcgMi4wOTQgNC4zNXMuMTYyLjMyMiAwIC44MDVjMCAwLTEuMjg4IDIuNzM5LTIuNzM4IDQuNTExIDAgMC0xLjQ1IDIuNzM4LTUuNjM4IDIuNTc3IDAgMC0uNjQ1IDAgMCAuMzIyIDAgMCAxLjkzMyAxLjQ1IDQuMTg4IDEuMTI3IDAgMCA0LjY3MS4zMjIgNi4xMjItNS42MzggMCAwIDYuMTIxLTEuMjg5IDExLjI3Ni0xLjI4OSAwIDAgNy4wODgtLjE2MSAxMi44ODcgMS40NSAwIDAgMS42MTEtMi40MTcgMi4yNTYtMy44NjZsLjMyLTEuMjg5cy0xLjQ1MS01LjYzOCAxLjkzNC04Ljg2YzAgMCAwLS4xNjEuMzIyIDAgMCAwIC4xNjItLjQ4My42NDUtLjgwNiAwIDAgMS4yODktMS4xMjcgMS43NzEtMi41NzcgMCAwLTIuNDE2LTEuMTI3LTMuMzgzLTIuNDE2IDAgMC0xLjkzMiAyLjczOC0yLjI1NCAyLjczOCAwIDAtLjQ4NC42NDUuMTYgMS4xMjdsMS4xMjcuOTY3cy0uMzIyIDEuNDUtLjgwNSAzLjM4M2wtMS4yODkgNS42MzhzLTEuNjExLjE2MS00LjgzMi0uNjQ1YzAgMC0yLjQxNi0uMzIyLTMuNTQ1LTMuMDYxIDAgMC0xLjEyNy0yLjI1NS0xLjYwOS0zLjg2NiAwIDAtLjY0NS0yLjA5NC0zLjA2Mi0yLjQxNyAwIDAtMi4yNTUtLjE2MS0zLjU0NCAyLjQxNyAwIDAtLjk2NiAxLjc3Mi0uOTY2IDIuODk5IDAgMC0uMTYxLjgwNi4zMjIgMCAwIDAgLjgwNS0xLjQ1IDIuNDE2LTEuMjg4IDAgMCAxLjkzMy0uMzIyIDMuMDYxIDIuNDE2IDAgMCAuNDgzIDEuMTI3LjY0NSAyLjQxNiAwIDAtNi40NDMtLjE2MS0xMS41OTkuNjQ1bC0uNjQ0LjE2MXMtLjgwNi4zMjItLjk2Ni0uNDgzYzAgLjAwMi0xLjI4OS0zLjM4MS0zLjM4My01LjQ3NXpNMTE3LjQgMjQuMjkxcy0xLjkzNCAxLjYxMS0yLjU3OCAyLjU3OGwtLjMyMi45NjYtMi40MTYgOS42NjZzLTEuMTI3IDQuMTg4LTEuNzcxIDUuNzk5YzAgMC0uMzIyLjY0NS4zMjIgMCAwIDAgMi41NzYtMi4yNTUgNC4wMjctNi45MjcgMCAwIDEuNjExLTMuNzA1IDMuMDYxLTExLjc2IDAgMCAuMzIyLS42NDUtLjMyMy0uMzIyek0xMjIuNTU1IDM3LjAxN2MtMi40MTYgMS43NzEtMi43MzggNC4wMjctMi43MzggNC4wMjctLjQ4MiAyLjkgMi4yNTYgNS4xNTUgMi4yNTYgNS4xNTUgMy43MDUgMy43MDUgOC41MzcgMi41NzcgOC41MzcgMi41NzcgMS4xMjctMS42MSAxLjEyNy0yLjczOCAxLjEyNy0yLjczOC4xNjItLjk2Ni0uNjQzLS40ODMtLjY0My0uNDgzLTEuMjg5Ljk2Ni0yLjc0LjY0NC0yLjc0LjY0NC0yLjg5OCAwLTMuODY1LTEuNzcxLTMuODY1LTEuNzcxLTEuNDQ5LTEuNzcyLjgwNS0zLjg2Ni44MDUtMy44NjYgMi4yNTYtMi40MTcgNS40NzktMy44NjYgNS40NzktMy44NjYgMi40MTYtLjk2NyAzLjU0My0uMTYxIDMuNTQzLS4xNjEgMS45MzQgMS4xMjcgMS4yODkgNC41MSAxLjI4OSA0LjUxLS44MDcgNi45MjctNS45NjEgOS45ODgtNS45NjEgOS45ODgtNS4xNTQgMy43MDUtMTAuMzA5LS4zMjItMTAuMzA5LS4zMjItNS42MzktNC4zNS0yLjQxOC05LjE4Mi0yLjQxOC05LjE4MiAyLjI1Ni0zLjU0NCA2LjYwNS01LjMxNiA2LjYwNS01LjMxNmwtLjk2Ny44MDR6bTUuNDc2IDIuNzM4cy45NjcgMi4wOTQgMy41NDUgMi44OTljMCAwIC42NDUuNjQ1LjY0NS0uMzIyIDAgMCAuMzIyLTEuNDUtMS4xMjctMi44OTkgMCAwLTEuOTM0LTEuMjg4LTMuMDYzLjMyMnpNMTMxLjI1NCA1Ni4zNDhjMS4yODkuMzIyIDMuMjIzLjE2MSAzLjIyMy4xNjFsLTEuOTM0LTEuOTMzYy0xLjQ0OS0xLjYxMS40ODItMi44OTkuNDgyLTIuODk5IDEuNzcxLTEuNDUgNS4xNTQtMy4wNjEgNS4xNTQtMy4wNjEgMS43NzMtLjk2NyAzLjU0NS0xLjEyNyAzLjU0NS0xLjEyNyAzLjM4My4xNjEgMy4yMjMgMi43MzggMy4yMjMgMi43MzgtLjMyMiAzLjM4My0yLjU3OCA1Ljc5OS0yLjU3OCA1Ljc5OSAxLjI4OSAxLjI4OSA0LjgzMiA1LjYzOSA0LjgzMiA1LjYzOS40ODQtLjMyMiAxLjYxMS0uNjQ1IDEuNjExLS42NDUgMS43NzEtLjE2MSA0LjM1IDAgNC4zNSAwbC0zLjcwNSAyLjA5NGMtLjgwNS42NDQtLjMyMiAxLjQ1LS4zMjIgMS40NS4zMjIuODA2IDEuMjg5IDEuNDUgMS4yODkgMS40NS4zMjItLjMyMiAxLjQ0OS0uNjQ0IDEuNDQ5LS42NDQgMS4xMjcgMCA0LjY3Mi40ODMgNC42NzIuNDgzbC00Ljk5NCAyLjU3Ny42NDUgMS40NSAyLjU3OC0xLjEyN2MxLjEyNyAwIDQuMzUuNDgzIDQuMzUuNDgzbC00LjAyNyAxLjkzM2MtMS40NTEuOTY3LS44MDcgMi4yNTUtLjgwNyAyLjI1NWwuOTY2IDIuNTc2Yy4xNjIuNDgzLjQ4NC4zMjIuNDg0LjMyMmw4LjUzNy0zLjcwNWMtLjE2Mi0xLjYxMS45NjctMS43NzIuOTY3LTEuNzcyaDMuNzA1Yy0uODA3IDIuNzM4LS4xNjIgNC44MzMtLjE2MiA0LjgzMy4zMjIuMzIyIDAgLjQ4MyAwIC40ODNoLTMuMzgzYy0uNDgyIDAtLjY0NS0uMzIyLS42NDUtLjMyMiAwLS4zMjItLjQ4Mi0uMTYxLS40ODItLjE2MWwtOS4xODIgMy4zODMtNC42NzItLjE2MS0yLjI1Ni01LjQ3N2MtLjQ4Mi0xLjYxMSAwLTEuNzcyIDAtMS43NzItMi4yNTYtMS4xMjctMS40NDktMy4wNjEtMS40NDktMy4wNjEtMi4wOTQtLjQ4My0yLjczOC0xLjkzMy0yLjczOC0xLjkzMy0xLjEyOS0xLjI4OS0uMTYyLTIuOS0uMTYyLTIuOWwtMS43NzEuMzIyYy0xLjkzNC0yLjU3Ny01LjMxNi01LjMxNi01LjMxNi01LjMxNi00LjM1IDEuMjg5LTYuNjA0IDAtNi42MDQgMC0zLjM4My0yLjA5NC00LjUxMi00Ljk5NC00LjUxMi00Ljk5NCAyLjkwMSAyLjI1NiA1LjYzOSAyLjU3OSA1LjYzOSAyLjU3OXptNS4zMTYtNS45NjFsMy41NDMgMy4yMjJzLjE2Mi4zMjIuNDg0LS40ODNjMCAwIDEuNDQ5LTMuMDYxLTEuNjExLTMuMzgzIDAgMC0xLjI4OS0uMTYxLTIuNDE2LjY0NHpNMTY3LjAxNiA3OC4yNTVsLTcuODkzIDIuOXMtMi4wOTYuOTY2LTYuNjA1IDEuOTMzYzAgMCAuOTY3LjgwNiAzLjcwNS45NjYgMCAwIDMuNTQ1LS4xNjEgNS45NjEtMS4xMjcgMCAwIDcuNTctMi43MzkgOS4zNDItMy43MDVsLTQuNTEtLjk2N3pNNDEuMjA1IDEwMS4xMzFsLjMyMiAzLjM4M2MuMzIyIDIuNDE2LjMyMiA0LjgzMi0uOTY2IDYuOTI2LTEuMjg5IDEuOTM0LTMuNzA2IDMuMjIzLTUuOTYxIDMuMzgzLTIuMjU1LjMyMi00LjY3MS0uNDgyLTYuNDQzLTEuOTMyLTEuNzcyLTEuNzczLTIuMjU1LTQuMDI3LTIuNTc3LTYuNDQ1bC0uMzIyLTMuMzgzIDE1Ljk0Ny0xLjkzMnptLTEyLjcyNiA0LjgzMmMuMTYxIDEuNzcxLjQ4MyAzLjIyMyAxLjYxMSA0LjUxIDEuMTI3IDEuMTI5IDIuNTc4IDEuNjExIDQuMTg4IDEuNDUxIDEuNjExLS4xNjIgMy4yMjItMS4xMjkgNC4wMjctMi41NzguNjQ1LTEuNDQ5LjQ4My0zLjA2MS4zMjItNC42NzJ2LS4xNmwtMTAuMTQ4IDEuMTI3di4zMjJ6TTQ0LjEwNCAxMTcuNTYxbC05LjAyMSA0LjE4OWMtLjY0NC4zMjItMS40NDkuNDgyLTEuOTMzIDEuMTI3LS40ODMuODA1LS42NDUgMS42MTEtLjMyMiAyLjU3OC4zMjIuNjQ1IDEuMTI3IDEuMjg5IDEuOTMzIDEuMjg5LjgwNS4xNiAxLjYxMS0uMTYyIDIuMjU1LS42NDVsOS4xODItNC4wMjcgMS4yODkgMi41NzYtOS4xODIgNC4xODljLTEuNDUuNjQ1LTIuODk5IDEuMjg5LTQuNTEuODA1LTEuNDUtLjQ4Mi0yLjg5OS0xLjYxMS0zLjU0NC0zLjA2MS0uNjQ1LTEuMjg5LS42NDUtMy4yMjEgMC00LjUxLjgwNS0xLjYxMSAyLjA5NC0yLjQxNiAzLjU0NC0zLjA2MWw5LjE4Mi00LjE4OSAxLjEyNyAyLjc0ek00OC45MzggMTI3Ljg3MWwxLjYxMSAyLjQxNmMuODA1IDEuMjg5IDEuNjExIDIuNDE2IDEuNzcyIDMuODY3LjE2MSAxLjQ0OS0uNDgzIDMuMDYxLTEuNzcyIDMuODY1LS45NjcuODA1LTIuNDE3Ljk2Ny0zLjU0NC4zMjIuNDgzIDEuNzcxLS4xNjEgMy4zODMtMS43NzIgNC4zNS0xLjI4OC45NjctMi43MzguOTY3LTQuMTg4LjQ4Mi0xLjQ1LS40ODItMi40MTctMS43NzEtMy4zODMtMy4wNjFsLTIuMjU1LTMuMzgzIDEzLjUzMS04Ljg1OHptLTguNyAxMC43OTNjLjQ4My42NDUuOTY3IDEuMjg5IDEuNzcyIDEuNzcxLjY0NS4xNjIgMS4xMjguMTYyIDEuNzcyLS4zMjIuNjQ0LS4zMjIuODA1LS45NjcuODA1LTEuNzcxLS4xNjEtLjY0NS0uNDgzLTEuMjg5LS45NjYtMS45MzRsLS42NDUtMS4xMjctMy4zODMgMi4yNTYuNjQ1IDEuMTI3em01LjQ3Ny00LjUxYy4zMjIuNjQzLjgwNiAxLjI4NyAxLjI4OSAxLjYwOS40ODMuMzIyIDEuMjg5LjMyMiAxLjc3MSAwIC40ODMtLjMyMi42NDUtLjk2Ny42NDUtMS42MDktLjE2MS0uNjQ1LS42NDUtMS4yODktLjk2Ni0xLjc3M2wtLjMyMi0uNDgyLTIuNzM5IDEuNzcxLjMyMi40ODR6TTU4LjEyIDEzOS4zMDlsMS45MzMgMS40NDktNC45OTQgMTYuNzU0LTIuNTc4LTIuMDk0IDEuMjg5LTQuMzUtNC4zNS0zLjU0NS00LjAyNyAyLjA5Ni0yLjU3Ny0yLjA5NiAxNS4zMDQtOC4yMTR6bS0zLjM4MyA4Ljg1OWwxLjc3MS00LjgzMi00LjUxIDIuNTc2IDIuNzM5IDIuMjU2ek02NS42OTEgMTQ1Ljc1MmwyLjU3NyAxLjQ0OS04LjA1NSAxMy44NTQtMi41NzctMS40NSA4LjA1NS0xMy44NTN6TTc4LjA5NCAxNTEuNTUxbDMuMjIyLjY0NWMyLjI1NS42NDUgNC42NzIgMS40NDkgNi4xMjIgMy4zODNzMS43NzIgNC41MSAxLjI4OSA2Ljc2NmMtLjQ4MyAyLjI1Ni0yLjA5NCA0LjM1LTQuMTg4IDUuMzE2LTIuMjU1IDEuMTI3LTQuNTEuODA1LTYuOTI3LjMyMmwtMy4yMjItLjgwNSAzLjcwNC0xNS42Mjd6bS4xNjEgMTMuNTMxYzEuNjExLjMyMiAzLjIyMi42NDUgNC42NzIgMHMyLjU3Ny0xLjkzMiAyLjg5OS0zLjM4M2MuMzIyLTEuNjExIDAtMy4zODMtMS4xMjgtNC42NzItMS4xMjctMS4xMjctMi43MzgtMS42MDktNC4xODgtMS45MzJsLS4zMjItLjE2Mi0yLjI1NSAxMC4xNDhoLjMyMnYuMDAxek05NS40OTIgMTU0LjEyOWwuMTYyIDkuOTg2YzAgLjY0NSAwIDEuNDUxLjMyMiAyLjA5Ni40ODMuODA1IDEuMjg5IDEuNDQ5IDIuMjU1IDEuNDQ5LjY0NS0uMTYyIDEuNDQ5LS40ODIgMS45MzQtMS4yODkuNDgyLS42NDUuMzIyLTEuNDQ5LjMyMi0yLjQxNmwtLjE2Mi05Ljk4OGgzLjA2MWwuMTYyIDkuOTg4YzAgMS42MTEtLjE2MiAzLjA2MS0xLjEyNyA0LjM1YTUuMzQ0IDUuMzQ0IDAgMCAxLTQuMTg5IDIuMDk0Yy0xLjYxMS4xNjItMy4yMjItLjY0NS00LjE4OC0xLjc3MS0xLjEyOC0xLjI4OS0xLjI4OS0yLjczOC0xLjQ1LTQuNTEybC0uMTYxLTkuOTg2aDMuMDU5di0uMDAxek0xMDkuNjY4IDE1NS41NzhsLTIuOS42NDUtLjY0NS0yLjczOSA4LjY5OS0xLjkzMy42NDUgMi43MzgtMi44OTkuNjQ1IDIuODk5IDEyLjg4Ni0yLjg5OS42NDUtMi45LTEyLjg4N3pNMTI2LjI2IDE1Ny4xODlsLTkuMTgyLTYuNzY1IDIuOTAxLTEuNDUxIDYuNDQzIDUuMTU2LS4xNjItOC4yMTcgMi45LTEuNDQ5LS4xNjIgMTEuNDM3IDIuNTc4IDUuMzE3LTIuNzM4IDEuMjg5LTIuNTc4LTUuMzE3ek0xMzMuODMyIDEzOS42MzFsNS40NzctNi4xMjEgMi4wOTMgMS43NzEtMy4zODIgNC4wMjggMi43MzggMi40MTYgMy4zODMtMy43MDUgMi4wOTMgMS45MzMtMy4yMiAzLjcwNSA0LjgzMiA0LjM1LTEuOTM0IDIuMjU0LTEyLjA4LTEwLjYzMXpNMTQxLjA4IDEzMS4yNTRsMi4yNTYtNC4wMjdjLjgwNS0xLjI4OSAxLjYxMS0yLjU3OCAzLjA2MS0zLjA2MSAxLjI4OS0uNDg0IDMuMDYxLS40ODQgNC4zNS4zMjIuOTY3LjQ4MiAxLjkzMiAxLjc3MSAyLjQxNiAyLjkuMzIyIDEuMTI3LjE2IDIuMDk0LS4xNjIgMy4yMjFsNy40MS0uOTY3LTEuNzcxIDMuMjIzLTcuNDEuNjQ1aC0uMTZsNS40NzcgMy4wNjEtMS40NDkgMi41NzYtMTQuMDE4LTcuODkzem04Ljg1OS0uMTZjLjQ4NC0uODA3LjgwNy0xLjYxMS42NDUtMi40MTgtLjE2LS42NDUtLjY0NS0xLjEyNy0xLjEyNy0xLjQ0OS0uNjQ1LS40ODItMS40NDktLjQ4Mi0yLjA5NC0uMTYtLjgwNy4zMjItMS4xMjkuOTY1LTEuNjExIDEuNjA5bC0uODA1IDEuNDUxIDQuMTg4IDIuNDE2LjgwNC0xLjQ0OXpNMTQ2Ljg3OSAxMjAuMTM5bDIuNzM4LTguMjE1IDIuNzM4LjgwNS0xLjc3MSA1LjQ3NiAzLjU0NSAxLjEyOSAxLjYxMS01LjE1NiAyLjczOS44MDYtMS42MTIgNS4xNTUgMy41NDMgMS4xMjcgMS42MTEtNS4zMTUgMi45MDEuODA1LTIuNzM4IDguMjE1LTE1LjMwNS00LjgzMnpNMTUwLjEwMiAxMDkuNTA2bDEuMTI3LTguNTM3IDIuNzM4LjMyMi0uNjQ1IDUuNjM5IDMuNzA1LjMyMi42NDUtNS4zMTYgMi45LjMyMi0uNjQ0IDUuNDc2IDMuNzA1LjMyMy42NDQtNS40NzcgMi45MDEuMzIyLTEuMTI5IDguNTM3LTE1Ljk0Ny0xLjkzM3oiIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjMGMwZTBmIi8+PHBhdGggZD0iTTExOC4wNDUgNzcuOTMzczEuNzcxLS4xNjEgMS4yODktMi41NzdjMCAwLTEuNjExLTIuNDE3LTQuMzUtMS4xMjcgMCAwLTIuMjU2IDEuNzcyLS44MDcgNC4zNDlsMTQuODIgMTcuODgxcy45NjcgMS42MTEgMi4wOTYuODA1YzAgMCAuOTY1LS42NDUgMC0xLjc3MmwtNC45OTQtNi4xMjFzLTEuNDUxLTEuNzcyLTEuNjExLTMuMjIyYzAgMC0uNDg0LTIuODk5LTEuNzcxLTQuMDI3IDAgMC0xLjkzNC0xLjc3MS0zLjIyMy0yLjI1NSAwIDAtMi43MzgtMS40NS0zLjA2MS0xLjc3MiAwIDAtLjQ4Mi0uOTY3LjE2Mi0xLjI4OS4wMDEgMCAuOTY2LS40ODQgMS40NSAxLjEyN3oiIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjZjhlMTQ2Ii8+PHBhdGggZD0iTTExNi43NTYgNjMuNzU3YzAtMS4yODktMS42MTEtMS40NDktMS42MTEtMS40NDktMi44OTggMC0yLjg5OCA1LjQ3Ny0yLjg5OCA1LjQ3Ny4xNiAyLjg5OSAxLjQ0OSA0LjUxMSAxLjQ0OSA0LjUxMWEzLjgwNiAzLjgwNiAwIDAgMCAxLjI4OSAxLjQ1Yy42NDUtLjE2MSAyLjA5NC0uMTYxIDIuMDk0LS4xNjEgMi45LjY0NSAyLjU3OCAyLjU3OCAyLjU3OCAyLjU3OC4xNiAxLjI4OS0uODA3IDEuOTMzLS44MDcgMS45MzMtLjQ4Mi40ODMtLjk2Ny4xNjEtLjk2Ny4xNjEtLjMyMi0uMTYxLS4zMjItLjQ4My0uMzIyLS40ODMuMTYyLS40ODMtLjQ4Mi0uNjQ1LS40ODItLjY0NS0uMzIyLS4xNjEtLjQ4Mi4xNjEtLjQ4Mi4xNjEtLjE2Mi4zMjIuNDgyLjgwNi40ODIuODA2Ljk2Ny42NDQgMy4yMjEgMS45MzMgMy4yMjEgMS45MzMgMy41NDUgMS45MzMgNC4xODkgNC41MSA0LjE4OSA0LjUxLjE2Ljk2Ni40ODIgMS45MzMuNDgyIDEuOTMzLjMyMiAxLjI4OSAxLjI4OSAyLjczOCAxLjI4OSAyLjczOGw1LjE1NCA2LjI4MmMuOTY3IDEuMjktLjE2IDIuMDk0LS4xNiAyLjA5NC0xLjI4OS44MDctMi4wOTQtLjQ4Mi0yLjA5NC0uNDgybC0xNC40OTgtMTcuMzk4Yy0xLjc3My0yLjA5NC0xLjI4OS00LjAyNy0xLjI4OS00LjAyNy0uNDg0LTEuMTI4LS45NjctMS43NzItLjk2Ny0xLjc3Mi0yLjQxNi0zLjM4My02Ljc2Ni0zLjIyMi02Ljc2Ni0zLjIyMi0zLjIyMS0uMTYxLTMuMzgzIDEuOTM0LTMuMzgzIDEuOTM0IDAgMS42MTEgMS4yODkgMS43NzIgMS4yODkgMS43NzIgMS4yODkuMTYxIDEuMTI3LS44MDYgMS4xMjctLjgwNi0uNDgyIDAtLjQ4Mi0uNDgzLS40ODItLjQ4MyAwLS4zMjIuNDgyLS4zMjIuNDgyLS4zMjIuNjQ1LjE2MS40ODQuOTY2LjQ4NC45NjYgMCAxLjI4OS0xLjI4OSAxLjI4OS0xLjI4OSAxLjI4OS0yLjI1Ni0uMTYxLTIuMjU2LTIuMjU1LTIuMjU2LS4xNjEgMi45IDQuMTg5IDIuNzM5IDQuMTg5IDIuNzM5IDQuMDI1IDAgNy4yNDggMy4wNjEgNy4yNDggMy4wNjEtMS40NDktMi43MzktMS42MTEtNS4xNTUtMS42MTEtNS4xNTUuMTYyLTYuMjgyIDMuODY3LTYuMjgyIDMuODY3LTYuMjgyIDIuMjU0LjQ4MyAyLjA5NCAyLjI1NSAyLjA5NCAyLjI1NS4xNiAxLjYxMS0xLjI4OSAxLjYxMS0xLjI4OSAxLjYxMS0xLjEyNy0uMTYxLTEuMTI3LS44MDYtMS4xMjctLjgwNi4xNi0uNjQ1LjgwNSAwIC44MDUgMCAxLjEyOC4xNi45NjgtLjk2OC45NjgtLjk2OHptLTEuOTM0IDEwLjk1NXMtMS43NzEgMS45MzMgMCA0LjE4OGwxNC42NiAxNy43MTlzLjY0NSAxLjEyOSAxLjQ0OS40ODRjMCAwIC44MDUtLjY0NSAwLTEuMjg5bC00Ljk5NC02LjEyMnMtMS42MTEtMS45MzMtMS43NzEtMy44NjZjMCAwLS40ODQtMS45MzMtMS40NDktMy4wNjEgMCAwLTEuMTI5LTEuNzcyLTIuOS0yLjQxNmwtMi43MzgtMS42MTFzLTEuMjg5LS40ODMtMS4xMjctMS40NWMwIDAgLjE2LS44MDUuOTY1LS45NjcgMCAwIC44MDcgMCAxLjEyOS44MDYgMCAwIC4xNi45NjcuNjQ1LjE2MSAwIDAgLjgwNS0uOTY3IDAtMS45MzMgMCAwLS40ODQtLjk2Ni0yLjI1Ni0xLjEyNy0uMDAxLjAwMS0uODA2LjAwMS0xLjYxMy40ODR6IiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iIzBjMGUwZiIvPjxwYXRoIGQ9Ik0xMjQuODExIDgzLjg5NHMtMy44NjctMi4yNTYtNC4zNS03LjU3MmMwIDAtLjMyMi00LjgzMyAzLjM4My03LjI0OSAwIDAgMi41NzgtMS45MzQgNi4yODMtMS4xMjggMCAwIDUuNjM3IDEuNzcyIDQuMzUgNi43NjYgMCAwLS40ODQgMS43NzItMy4wNjIgMi40MTYgMCAwLTIuNTc2LjMyMi0yLjg5OCAxLjc3MiAwIDAtLjgwNSAyLjI1NSAxLjQ0OSAzLjA2MSAwIDAgMS4xMjkuNjQ1IDIuNzM4LS44MDUgMCAwIDEuNzczLTEuNDUgMy44NjctLjgwNSAwIDAgMy43MDUuOTY2IDQuMDI3IDUuNjM4IDAgMC0xLjYxMS0yLjA5NC01LjMxNi0uNDgzIDAgMC0zLjM4MyAxLjQ1LTYuNjA1LjMyMi0uMDAxIDAtMi4wOTUtLjY0NS0zLjg2Ni0xLjkzM3pNMTIwLjk0MyA4Ny45MjFzLTEuMTI3LTQuMzUtNS45NTktNi40NDNjMCAwLTQuNTEyLTEuNjExLTguMDU1IDEuMjg5IDAgMC0yLjU3OCAxLjkzMy0yLjczOCA1LjYzOCAwIDAgMCA1Ljk2IDUuMTU0IDYuMTIyIDAgMCAxLjc3MS4xNjEgMy4yMjMtMi4yNTUgMCAwIC45NjUtMi4yNTUgMi41NzYtMi4yNTUgMCAwIDIuMjU2LS4xNjEgMi40MTYgMi4yNTUgMCAwIC4zMjIgMS4yODktMS40NDkgMi40MTYgMCAwLTEuOTM0IDEuMjg5LTEuOTM0IDMuMzg0IDAgMC0uMTYgNC4wMjcgNC4xODkgNS42MzcgMCAwLTEuNDUxLTIuMDk0IDEuMTI3LTUuMzE0IDAgMCAyLjI1Ni0yLjkwMSAyLjA5NC02LjEyMi4wMDEtLjAwMi4wMDEtMi4yNTgtLjY0NC00LjM1MnoiIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjZjhlMTQ2IiBzdHJva2U9IiMwYzBlMGYiIHN0cm9rZS13aWR0aD0iLjQ1IiBzdHJva2UtbWl0ZXJsaW1pdD0iMi42MTMiLz48L3N2Zz4=";
+
+const COLORS = {
+  bg: "#0c0c0c",
+  card: "#161210",
+  cardAlt: "#1a1413",
+  border: "#261e19",
+  red: "#c8102e",
+  redLight: "#e8485f",
+  gold: "#c9a227",
+  goldLight: "#e0c267",
+  teal: "#0d9488",
+  tealLight: "#5eead4",
+  text: "#f2efec",
+  textMuted: "#a89e98",
+  textDim: "#6b615a",
+};
+
+// ---------- Shared shell ----------
+const PhoneFrame = React.forwardRef(({ children, onScroll }, ref) => {
+  return (
+    <div className="w-full min-h-screen flex items-center justify-center bg-neutral-900 py-6 px-3">
+      <div
+        className="relative w-[375px] h-[780px] rounded-[44px] overflow-hidden shadow-2xl border-[6px]"
+        style={{ borderColor: "#1c1c1c", backgroundColor: COLORS.bg }}
+      >
+        {/* notch */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-50" />
+        <div ref={ref} onScroll={onScroll} className="w-full h-full overflow-y-auto no-scrollbar" style={{ color: COLORS.text }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+function StatusBar() {
+  return (
+    <div className="flex justify-between items-center px-6 pt-3 pb-1 text-[11px] font-semibold" style={{ color: COLORS.text }}>
+      <span>9:41</span>
+      <div className="flex items-center gap-1">
+        <span>●●●●</span>
+        <span>Wi-Fi</span>
+        <span>🔋</span>
+      </div>
+    </div>
+  );
+}
+
+function TopBar({ title, onBack, onCalendar }) {
+  const [showNotifs, setShowNotifs] = useState(false);
+  const notifications = [
+    { from: "Anoop Kumar", role: "Your Supervisor", msg: "Great work today — closed 3 big sales! 👏", time: "2h ago", manager: true },
+    { from: "Yasa Tahir", role: "VP Human Resources", msg: "New Wellness Leave policy is now live — check Leave & Wellness.", time: "1d ago", manager: true },
+    { from: "DDF Staff App", role: "System", msg: "Your shift schedule for July has been published.", time: "2d ago", manager: false },
+  ];
+  return (
+    <div className="px-5 pt-2 pb-4 relative">
+      <div className="flex items-center gap-3">
+        {onBack ? (
+          <button onClick={onBack} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: COLORS.card }}>
+            <ChevronLeft size={18} color={COLORS.text} />
+          </button>
+        ) : (
+          <img src={LOGO_SRC} alt="logo" className="w-8 h-8 rounded-full" />
+        )}
+        <h1 className="text-[17px] font-bold flex-1">{title}</h1>
+        {onCalendar && (
+          <button onClick={onCalendar} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: COLORS.card }}>
+            <Calendar size={15} color={COLORS.text} />
+          </button>
+        )}
+        <button onClick={() => setShowNotifs(!showNotifs)} className="w-8 h-8 rounded-full flex items-center justify-center relative" style={{ background: COLORS.card }}>
+          <Bell size={15} color={COLORS.text} />
+          <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{ background: COLORS.red, color: "#fff" }}>2</span>
+        </button>
+      </div>
+
+      {showNotifs && (
+        <div className="absolute right-5 top-12 w-72 rounded-2xl overflow-hidden z-50 shadow-2xl" style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}>
+          <div className="px-4 py-3" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
+            <p className="text-[11px] font-bold" style={{ color: COLORS.textMuted }}>NOTIFICATIONS</p>
+          </div>
+          {notifications.map((n, i) => (
+            <div key={i} className="px-4 py-3 flex gap-3" style={{ borderBottom: i < notifications.length - 1 ? `1px solid ${COLORS.border}` : "none", background: n.manager ? "rgba(200,16,46,.05)" : "transparent" }}>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ background: n.manager ? "rgba(200,16,46,.18)" : "rgba(255,255,255,.06)", color: n.manager ? COLORS.redLight : COLORS.textMuted }}>
+                {n.manager ? <Star size={12} /> : <Bell size={12} />}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-[11px] font-bold">{n.from}</p>
+                  {n.manager && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(200,16,46,.18)", color: COLORS.redLight }}>{n.role}</span>}
+                </div>
+                <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: COLORS.text }}>{n.msg}</p>
+                <p className="text-[9.5px] mt-1" style={{ color: COLORS.textDim }}>{n.time}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BottomNav({ active, onNav }) {
+  const items = [
+    { id: "home", icon: Home, label: "Home" },
+    { id: "shifts", icon: Calendar, label: "Shifts" },
+    { id: "training", icon: GraduationCap, label: "Training" },
+    { id: "team", icon: Users, label: "Leadership" },
+    { id: "profile", icon: User, label: "Profile" },
+  ];
+  return (
+    <div
+      className="absolute bottom-0 left-0 right-0 flex justify-around items-center pt-2 pb-6 border-t"
+      style={{ background: "#0e0c0c", borderColor: COLORS.border }}
+    >
+      {items.map((it) => {
+        const Icon = it.icon;
+        const isActive = active === it.id;
+        return (
+          <button key={it.id} onClick={() => onNav(it.id)} className="flex flex-col items-center gap-1 px-1">
+            <Icon size={20} color={isActive ? COLORS.red : COLORS.textDim} strokeWidth={isActive ? 2.4 : 1.8} />
+            <span className="text-[9.5px] font-medium" style={{ color: isActive ? COLORS.red : COLORS.textDim }}>
+              {it.label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---------- HOME SCREEN ----------
+function HomeScreen({ onNav }) {
+  const coreMenu = [
+    { id: "leave", icon: Plane, label: "Leave & Wellness", sub: "Annual + medical requests", color: COLORS.teal },
+    { id: "shifts", icon: Calendar, label: "My Shifts & Area", sub: "Schedule, zone & supervisor", color: COLORS.gold },
+    { id: "ideas", icon: Lightbulb, label: "Ideas & Suggestions", sub: "Company growth + app feedback", color: COLORS.gold },
+    { id: "quickhelp", icon: BookOpen, label: "Quick Help", sub: "Products, FAQs, phrases & gear", color: COLORS.gold },
+    { id: "points", icon: Sparkles, label: "My Points", sub: "Earn & unlock rewards", color: COLORS.gold },
+    { id: "discounts", icon: Percent, label: "Staff Discounts", sub: "For everyone", color: COLORS.teal },
+    { id: "eom", icon: Star, label: "Employee of the Month", sub: "How to get there", color: COLORS.gold },
+    { id: "bodylanguage", icon: Eye, label: "Body Language", sub: "Do's and don'ts, in photos", color: COLORS.gold },
+    { id: "miles", icon: Plane, label: "Skyward Miles", sub: "Payment rules & rates", color: COLORS.teal },
+    { id: "transport", icon: Bell, label: "Transport", sub: "Bus numbers & routes", color: COLORS.gold },
+    { id: "feedback", icon: Lock, label: "Private Feedback", sub: "Confidential channel", color: COLORS.red },
+    { id: "reference", icon: ClipboardList, label: "Quick Reference", sub: "Holidays, currencies & contacts", color: COLORS.red },
+    { id: "docs", icon: FileText, label: "Documents", sub: "Certificates & forms", color: COLORS.gold },
+  ];
+  const growMenu = [
+    { id: "training", icon: GraduationCap, label: "Training", sub: "Videos & leaderboard", color: COLORS.red },
+  ];
+  const serviceMenu = [
+    { id: "autism", icon: Sparkles, label: "Autism-Friendly Service", sub: "How to assist with care", color: COLORS.teal },
+    { id: "commendations", icon: Award, label: "Commendation Letters", sub: "What customers said about you", color: COLORS.red },
+  ];
+  const rewardsMenu = [
+    { id: "mystery", icon: Eye, label: "Mystery Shopper", sub: "Your visit results", color: COLORS.red },
+  ];
+  const communityMenu = [
+    { id: "team", icon: Users, label: "Meet Leadership", sub: "Know your managers", color: COLORS.teal },
+    { id: "talents", icon: Lightbulb, label: "Dubai Talents", sub: "Ideas, art, music & more", color: COLORS.gold },
+    { id: "competition", icon: Trophy, label: "DDF Talents Cup", sub: "Annual team competition", color: COLORS.red },
+    { id: "story", icon: History, label: "Our Story", sub: "DDF history & milestones", color: COLORS.teal },
+    { id: "careers", icon: ClipboardList, label: "Careers", sub: "Internal open positions", color: COLORS.gold },
+  ];
+
+  const Section = ({ title, items }) => (
+    <>
+      <div className="px-5 mb-3 mt-6 flex items-center justify-between">
+        <p className="text-[12px] font-bold tracking-wide" style={{ color: COLORS.textMuted }}>{title}</p>
+      </div>
+      <div className="px-5 grid grid-cols-2 gap-3">
+        {items.map((m) => {
+          const Icon = m.icon;
+          return (
+            <button
+              key={m.id}
+              onClick={() => onNav(m.id)}
+              className="rounded-2xl p-4 text-left flex flex-col gap-3 active:scale-95 transition-transform"
+              style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+            >
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${m.color}22` }}>
+                <Icon size={17} color={m.color} />
+              </div>
+              <div>
+                <p className="text-[12.5px] font-bold leading-tight">{m.label}</p>
+                <p className="text-[10px] mt-0.5" style={{ color: COLORS.textMuted }}>{m.sub}</p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </>
+  );
+
+  const allItems = [...coreMenu, ...growMenu, ...serviceMenu, ...rewardsMenu, ...communityMenu];
+  const [query, setQuery] = useState("");
+  const searchResults = query.trim()
+    ? allItems.filter((m) => m.label.toLowerCase().includes(query.toLowerCase()) || m.sub.toLowerCase().includes(query.toLowerCase()))
+    : [];
+
+  const [showNotifs, setShowNotifs] = useState(false);
+  const notifications = [
+    { from: "Anoop Kumar", role: "Your Supervisor", msg: "Great work today — closed 3 big sales! 👏", time: "2h ago", manager: true },
+    { from: "Yasa Tahir", role: "VP Human Resources", msg: "New Wellness Leave policy is now live — check Leave & Wellness.", time: "1d ago", manager: true },
+    { from: "DDF Staff App", role: "System", msg: "Your shift schedule for July has been published.", time: "2d ago", manager: false },
+  ];
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <div className="px-5 pt-3 pb-4 flex items-center gap-3 relative">
+        <img src={LOGO_SRC} alt="logo" className="w-11 h-11 rounded-full" />
+        <div className="flex-1">
+          <p className="text-[11px]" style={{ color: COLORS.textMuted }}>Good evening</p>
+          <p className="text-[16px] font-bold">Aibek, Terminal 2</p>
+        </div>
+        <button onClick={() => setShowNotifs(!showNotifs)} className="w-9 h-9 rounded-full flex items-center justify-center relative flex-shrink-0" style={{ background: COLORS.card }}>
+          <Bell size={16} color={COLORS.text} />
+          <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{ background: COLORS.red, color: "#fff" }}>2</span>
+        </button>
+
+        {showNotifs && (
+          <div className="absolute right-5 top-16 w-72 rounded-2xl overflow-hidden z-50 shadow-2xl" style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}>
+            <div className="px-4 py-3" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
+              <p className="text-[11px] font-bold" style={{ color: COLORS.textMuted }}>NOTIFICATIONS</p>
+            </div>
+            {notifications.map((n, i) => (
+              <div key={i} className="px-4 py-3 flex gap-3" style={{ borderBottom: i < notifications.length - 1 ? `1px solid ${COLORS.border}` : "none", background: n.manager ? "rgba(200,16,46,.05)" : "transparent" }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ background: n.manager ? "rgba(200,16,46,.18)" : "rgba(255,255,255,.06)", color: n.manager ? COLORS.redLight : COLORS.textMuted }}>
+                  {n.manager ? <Star size={12} /> : <Bell size={12} />}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-[11px] font-bold">{n.from}</p>
+                    {n.manager && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(200,16,46,.18)", color: COLORS.redLight }}>{n.role}</span>}
+                  </div>
+                  <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: COLORS.text }}>{n.msg}</p>
+                  <p className="text-[9.5px] mt-1" style={{ color: COLORS.textDim }}>{n.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="px-5 mb-4">
+        <div className="rounded-xl px-3.5 py-2.5 flex items-center gap-2.5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <Search size={15} color={COLORS.textDim} />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search wellness leave, training, points..."
+            className="flex-1 bg-transparent outline-none text-[12.5px]"
+            style={{ color: COLORS.text }}
+          />
+          {query && <button onClick={() => setQuery("")}><X size={14} color={COLORS.textDim} /></button>}
+        </div>
+        {query.trim() && (
+          <div className="mt-2 rounded-xl overflow-hidden" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+            {searchResults.length === 0 ? (
+              <p className="text-[11.5px] p-3.5" style={{ color: COLORS.textMuted }}>No matches for "{query}"</p>
+            ) : (
+              searchResults.map((m, i) => {
+                const Icon = m.icon;
+                return (
+                  <button key={m.id} onClick={() => onNav(m.id)} className="w-full flex items-center gap-3 p-3 text-left" style={{ borderTop: i > 0 ? `1px solid ${COLORS.border}` : "none" }}>
+                    <Icon size={14} color={m.color} />
+                    <div>
+                      <p className="text-[12px] font-bold">{m.label}</p>
+                      <p className="text-[10px]" style={{ color: COLORS.textMuted }}>{m.sub}</p>
+                    </div>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="px-5 mb-2">
+        <button onClick={() => onNav("mysales")} className="w-full rounded-2xl p-4 text-left" style={{ background: `linear-gradient(135deg, rgba(200,16,46,.16), rgba(200,16,46,.04))`, border: `1px solid ${COLORS.red}50` }}>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10.5px] font-bold tracking-wide" style={{ color: COLORS.redLight }}>TODAY'S SALES</p>
+            <ChevronRight size={14} color={COLORS.redLight} />
+          </div>
+          <div className="flex items-end justify-between">
+            <p className="text-[24px] font-extrabold">AED 2,340</p>
+            <p className="text-[11px] font-bold" style={{ color: COLORS.tealLight }}>78% of daily target</p>
+          </div>
+          <div className="w-full h-2 rounded-full mt-2" style={{ background: "rgba(255,255,255,.08)" }}>
+            <div className="h-2 rounded-full" style={{ width: "78%", background: COLORS.red }} />
+          </div>
+        </button>
+      </div>
+
+      <button
+        onClick={() => onNav("calendar")}
+        className="w-full mx-0 px-5"
+      >
+        <div
+          className="rounded-2xl p-4 mb-2 flex items-center justify-between"
+          style={{ background: `linear-gradient(135deg, ${COLORS.cardAlt}, #1f1413)`, border: `1px solid ${COLORS.border}` }}
+        >
+          <div className="text-left">
+            <p className="text-[10.5px] font-bold tracking-wide" style={{ color: COLORS.goldLight }}>NEXT SHIFT</p>
+            <p className="text-[15px] font-bold mt-0.5">Tomorrow · Day · 7:00 AM</p>
+            <p className="text-[11.5px] mt-1" style={{ color: COLORS.textMuted }}>2 days on, then 2 off</p>
+          </div>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,162,39,.15)" }}>
+            <Calendar size={20} color={COLORS.goldLight} />
+          </div>
+        </div>
+      </button>
+
+      <Section title="DAILY ESSENTIALS" items={coreMenu} />
+      <Section title="LEARN & SELL BETTER" items={growMenu} />
+      <Section title="SERVICE EXCELLENCE" items={serviceMenu} />
+      <Section title="REWARDS & RECOGNITION" items={rewardsMenu} />
+      <Section title="COMMUNITY" items={communityMenu} />
+
+      <div className="px-5 mt-6">
+        <button onClick={() => onNav("whatsnew")} className="w-full rounded-xl p-3.5 flex items-center gap-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <Clock size={15} color={COLORS.goldLight} />
+          <span className="text-[12px] font-bold flex-1 text-left">What's New in the App</span>
+          <ChevronRight size={14} color={COLORS.textDim} />
+        </button>
+      </div>
+
+      <div className="px-5 mt-6 pt-5" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+        <p className="text-[11px] font-bold text-center mb-3" style={{ color: COLORS.textMuted }}>FOLLOW DUBAI DUTY FREE</p>
+        <div className="flex justify-center gap-3 mb-5">
+          {["IG", "X", "FB", "IN"].map((s) => (
+            <div key={s} className="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, color: COLORS.goldLight }}>{s}</div>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => window.open("http://myddf.ae", "_blank")} className="flex-1 py-2.5 rounded-lg text-[11px] font-bold" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>myddf.ae ↗</button>
+          <button onClick={() => window.open("https://www.oracle.com/cloud/saas/fusion-cloud/", "_blank")} className="flex-1 py-2.5 rounded-lg text-[11px] font-bold" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>Oracle Fusion ↗</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- LEAVE / WELLNESS SCREEN ----------
+function LeaveScreen({ onBack }) {
+  const [tab, setTab] = useState("annual");
+  const [certUploaded, setCertUploaded] = useState(false);
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Leave & Wellness" onBack={onBack} />
+      <div className="px-5 flex gap-2 mb-5 overflow-x-auto no-scrollbar">
+        {["annual", "sick", "wellness", "more"].map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className="flex-shrink-0 px-4 py-2.5 rounded-xl text-[12px] font-bold"
+            style={{
+              background: tab === t ? COLORS.red : COLORS.card,
+              color: tab === t ? "#fff" : COLORS.textMuted,
+              border: `1px solid ${tab === t ? COLORS.red : COLORS.border}`,
+            }}
+          >
+            {t === "annual" ? "Annual" : t === "sick" ? "Sick Leave" : t === "wellness" ? "Wellness" : "More"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "annual" && (
+        <div className="px-5">
+          <div className="rounded-2xl p-5 mb-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+            <p className="text-[11px] font-bold" style={{ color: COLORS.goldLight }}>BALANCE</p>
+            <p className="text-[32px] font-extrabold mt-1">18<span className="text-[15px] font-medium" style={{ color: COLORS.textMuted }}> / 30 days</span></p>
+            <div className="w-full h-2 rounded-full mt-3" style={{ background: COLORS.border }}>
+              <div className="h-2 rounded-full" style={{ width: "60%", background: COLORS.gold }} />
+            </div>
+          </div>
+          <button className="w-full py-3.5 rounded-xl font-bold text-[14px]" style={{ background: COLORS.red, color: "#fff" }}>
+            Request Annual Leave
+          </button>
+        </div>
+      )}
+
+      {tab === "sick" && (
+        <div className="px-5">
+          <div className="rounded-2xl p-5 mb-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+            <p className="text-[11px] font-bold" style={{ color: COLORS.redLight }}>SICK LEAVE USED</p>
+            <p className="text-[32px] font-extrabold mt-1">6<span className="text-[15px] font-medium" style={{ color: COLORS.textMuted }}> / 15 days/year</span></p>
+            <div className="w-full h-2 rounded-full mt-3" style={{ background: COLORS.border }}>
+              <div className="h-2 rounded-full" style={{ width: "40%", background: COLORS.red }} />
+            </div>
+            <div className="flex justify-between mt-3 pt-3" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+              <p className="text-[10.5px]" style={{ color: COLORS.textMuted }}>Includes 2 Wellness Leave days used</p>
+              <p className="text-[11px] font-bold" style={{ color: COLORS.tealLight }}>9 days remaining</p>
+            </div>
+          </div>
+
+          <div className="rounded-2xl p-4 mb-5 flex items-start gap-3" style={{ background: "rgba(200,16,46,.07)", border: `1px solid ${COLORS.red}40` }}>
+            <FileText size={16} color={COLORS.redLight} className="mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-[11.5px] font-bold mb-1" style={{ color: COLORS.redLight }}>Medical certificate required</p>
+              <p className="text-[11px] leading-relaxed" style={{ color: COLORS.textMuted }}>
+                Unlike Wellness Leave, regular sick days need a valid medical certificate submitted within the required timeframe.
+              </p>
+            </div>
+          </div>
+
+          <p className="text-[11.5px] font-bold mb-2" style={{ color: COLORS.textMuted }}>ATTACH MEDICAL CERTIFICATE</p>
+          <button
+            onClick={() => setCertUploaded(true)}
+            className="w-full rounded-2xl p-6 flex flex-col items-center gap-2 mb-5"
+            style={{
+              background: certUploaded ? "rgba(13,148,136,.08)" : COLORS.card,
+              border: `1.5px dashed ${certUploaded ? COLORS.teal : COLORS.border}`,
+            }}
+          >
+            {certUploaded ? (
+              <>
+                <CheckCircle2 size={26} color={COLORS.tealLight} />
+                <p className="text-[12.5px] font-bold" style={{ color: COLORS.tealLight }}>Converted to PDF ✓</p>
+                <p className="text-[10.5px]" style={{ color: COLORS.textMuted }}>medical_certificate.pdf</p>
+              </>
+            ) : (
+              <>
+                <Camera size={26} color={COLORS.textMuted} />
+                <p className="text-[12.5px] font-bold">Tap to photograph certificate</p>
+                <p className="text-[10.5px]" style={{ color: COLORS.textMuted }}>Just snap a photo — auto-converts to PDF</p>
+              </>
+            )}
+          </button>
+
+          <button className="w-full py-3.5 rounded-xl font-bold text-[14px]" style={{ background: COLORS.red, color: "#fff" }}>
+            Request Sick Leave
+          </button>
+        </div>
+      )}
+
+      {tab === "wellness" && (
+        <div className="px-5">
+          <div className="rounded-2xl p-5 mb-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+            <p className="text-[11px] font-bold" style={{ color: COLORS.tealLight }}>WELLNESS LEAVE USED</p>
+            <p className="text-[32px] font-extrabold mt-1">2<span className="text-[15px] font-medium" style={{ color: COLORS.textMuted }}> / 4 per year</span></p>
+            <div className="flex gap-1.5 mt-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex-1 h-2 rounded-full" style={{ background: i <= 2 ? COLORS.teal : COLORS.border }} />
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl p-4 mb-5 flex items-start gap-3" style={{ background: "rgba(13,148,136,.07)", border: `1px solid ${COLORS.teal}40` }}>
+            <Sparkles size={16} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-[11.5px] font-bold mb-1" style={{ color: COLORS.tealLight }}>No certificate needed</p>
+              <p className="text-[11px] leading-relaxed" style={{ color: COLORS.textMuted }}>
+                Wellness Leave is part of your 15-day paid sick leave, not in addition to it. No medical report required — just request the day. Days can't be taken back-to-back and don't carry forward.
+              </p>
+            </div>
+          </div>
+
+          <button className="w-full py-3.5 rounded-xl font-bold text-[14px]" style={{ background: COLORS.teal, color: "#fff" }}>
+            Request Wellness Day
+          </button>
+        </div>
+      )}
+
+      {tab === "more" && (
+        <div className="px-5">
+          <p className="text-[11.5px] mb-4" style={{ color: COLORS.textMuted }}>Special paid leave for life events — none of these carry forward or get monetized on resignation.</p>
+          <div className="flex flex-col gap-2.5">
+            <div className="rounded-xl p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <p className="text-[13px] font-bold mb-1">Paternity Leave</p>
+              <p className="text-[11.5px] leading-relaxed" style={{ color: COLORS.textMuted }}>3 days, up to 3 times in your career with DDF. Must be used within 6 months of the baby's birth — birth certificate required.</p>
+            </div>
+            <div className="rounded-xl p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <p className="text-[13px] font-bold mb-1">Marriage Leave</p>
+              <p className="text-[11.5px] leading-relaxed" style={{ color: COLORS.textMuted }}>5 days, once in your employment, after 1 year of service. Must be used within 1 year of your registered marriage date.</p>
+            </div>
+            <div className="rounded-xl p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <p className="text-[13px] font-bold mb-1">Umrah Leave</p>
+              <p className="text-[11.5px] leading-relaxed" style={{ color: COLORS.textMuted }}>5 days per 5 years of service, for staff of the Islamic faith. Doesn't carry over if unused in the first 5 years.</p>
+            </div>
+          </div>
+          <button className="w-full py-3.5 rounded-xl font-bold text-[14px] mt-5" style={{ background: COLORS.red, color: "#fff" }}>
+            Request Special Leave
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------- SHIFTS SCREEN ----------
+function ShiftsScreen({ onBack, onNavCalendar, onNavMySales }) {
+  // 4-team rotation: A/B/C/D, each cycling Day/Day/Off/Off/Night/Night/Off/Off (8-day cycle), offset by 2 days per team
+  const myTeam = "B";
+
+  const [showAllPLU, setShowAllPLU] = useState(false);
+
+  const dutyOfficerUpdates = [
+    { msg: "Great push today, team — let's close strong before shift change. Double-check your sale is logged before you leave.", time: "Today · 2:15 PM" },
+    { msg: "Tomorrow we're running a push on AirPods Pro — every team member, please prioritize the bundle offer.", time: "Today · 9:00 AM" },
+    { msg: "Reminder: Lindt Kunafa stock running low in AS1 — flag to stockroom if you're running out.", time: "Yesterday · 6:40 PM" },
+  ];
+
+  // Company-wide budget — mirrors the real "Sales as of [date]" terminal report
+  const companyBudget = {
+    sale2025: 20866880.67,
+    sale2026: 18250262.32,
+    financeBudget: 22911605.00,
+    shopfloorBudget: 17156927.00,
+    mtdSale: 310115154.79,
+    mtdFinanceBudget: 437572490.00,
+    mtdShopfloorBudget: 330723703.00,
+    ytdSale: 2868996861.50,
+    ytdFinanceBudget: 3945454290.00,
+    ytdShopfloorBudget: 3260590091.00,
+  };
+
+  // Per-location breakdown — mirrors the "Sales as of [date]" report exactly
+  const locationSales = [
+    { loc: "Concourse B", s2025: 7596031.36, s2026: 7188964.73, finBudget: 7993750.00, shopBudget: 7107647.00 },
+    { loc: "Concourse D", s2025: 4151884.20, s2026: 2114548.65, finBudget: 5217500.00, shopBudget: 1746112.00 },
+    { loc: "Concourse A", s2025: 4253874.26, s2026: 4933104.00, finBudget: 4625675.00, shopBudget: 4254619.00 },
+    { loc: "Terminal 2 Dep", s2025: 1617468.74, s2026: 1663753.81, finBudget: 1688125.00, shopBudget: 1421550.00 },
+    { loc: "Concourse C", s2025: 1265503.67, s2026: 1168577.50, finBudget: 1296975.00, shopBudget: 1154252.00 },
+    { loc: "Terminal 3 Arr & PS", s2025: 560059.28, s2026: 553712.12, finBudget: 662075.00, shopBudget: 615997.00 },
+    { loc: "Terminal 1 Arr & PS", s2025: 472892.11, s2026: 227014.00, finBudget: 548350.00, shopBudget: 263117.00 },
+    { loc: "Terminal 2 Arr & PS", s2025: 182165.40, s2026: 120340.36, finBudget: 229650.00, shopBudget: 157996.00 },
+    { loc: "Other Shops", s2025: 670255.59, s2026: 267685.40, finBudget: 521430.00, shopBudget: 422263.00 },
+    { loc: "Al Maktoum Intl Airport", s2025: 96746.06, s2026: 12561.75, finBudget: 128075.00, shopBudget: 13374.00 },
+  ];
+  const locationTotal = {
+    s2025: 20866880.67, s2026: 18250262.32, finBudget: 22911605.00, shopBudget: 17156927.00,
+  };
+  const [showLocations, setShowLocations] = useState(false);
+
+  // Area sale vs budget, by zone — mirrors the real shift report (Sale / Budget / Amt Var / % Var)
+  const areaZones = [
+    { zone: "AS 1 — Finest, P&C, Web, Pharmacy", sale: 164384, budget: 114415 },
+    { zone: "AS 2 — GFD, LT & Foodplus", sale: 152222, budget: 137368 },
+    { zone: "AS 3 — Fashion, Gold & Watches, Electronics", sale: 60324, budget: 62614 },
+    { zone: "AS 4 — Arrivals, Web Shop, PS 7", sale: 25527, budget: 33104 },
+  ];
+
+  // Full terminal-wide leaderboard for one PLU — every staff member who sold it, not just your zone
+  const fullPLULeaders = [
+    { name: "A.Sese", val: "58 units", amt: "AED 2,610" },
+    { name: "A.Zamirbekov", val: "37 units", amt: "AED 1,665" },
+    { name: "Am.Mangalath", val: "28 units", amt: "AED 1,260" },
+    { name: "Ma.Kamau", val: "16 units", amt: "AED 720" },
+    { name: "I.Lama", val: "14 units", amt: "AED 630" },
+    { name: "G.Lasiste", val: "8 units", amt: "AED 360" },
+    { name: "Di.Velasco", val: "8 units", amt: "AED 360" },
+    { name: "Ro.Verdan", val: "8 units", amt: "AED 360" },
+    { name: "Sh.Shah", val: "8 units", amt: "AED 360" },
+    { name: "Ba.Liu", val: "8 units", amt: "AED 360" },
+    { name: "As.Zhekshalieva", val: "7 units", amt: "AED 315" },
+    { name: "Jo.Jaen", val: "4 units", amt: "AED 180" },
+    { name: "M.Kulakandy", val: "3 units", amt: "AED 135" },
+    { name: "Ke.Macaalay", val: "3 units", amt: "AED 135" },
+    { name: "Jo.Jacinto", val: "3 units", amt: "AED 135" },
+    { name: "G.Ledesma", val: "2 units", amt: "AED 90" },
+    { name: "N.Hannachi", val: "2 units", amt: "AED 90" },
+    { name: "M.Ndegwa", val: "2 units", amt: "AED 90" },
+    { name: "A.Alawaidy", val: "2 units", amt: "AED 90" },
+    { name: "Yo.Adhikari", val: "1 unit", amt: "AED 45" },
+  ];
+  const fullPLUTotal = { units: 222, amt: "AED 9,990" };
+  const visiblePLULeaders = showAllPLU ? fullPLULeaders : fullPLULeaders.slice(0, 3);
+
+  const fmt = (n) => "AED " + Math.round(n).toLocaleString();
+  const ytdVarPct = (((companyBudget.ytdSale - companyBudget.ytdFinanceBudget) / companyBudget.ytdFinanceBudget) * 100).toFixed(2);
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="My Shifts & Area" onBack={onBack} onCalendar={() => onNavCalendar && onNavCalendar()} />
+      <div className="px-5">
+
+        <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>DUBAI DUTY FREE — BUDGET</p>
+        <div className="rounded-2xl p-4 mb-3" style={{ background: `linear-gradient(135deg, ${COLORS.cardAlt}, #1f1413)`, border: `1px solid ${COLORS.border}` }}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>SALE 2025 (YTD)</span>
+            <span className="text-[13px] font-bold">{fmt(companyBudget.ytdSale * 1.0271)}</span>
+          </div>
+          <div className="flex items-center justify-between mb-3 pb-3" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
+            <span className="text-[10px] font-bold" style={{ color: COLORS.goldLight }}>SALE 2026 (YTD)</span>
+            <span className="text-[15px] font-extrabold" style={{ color: COLORS.goldLight }}>{fmt(companyBudget.ytdSale)}</span>
+          </div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px]" style={{ color: COLORS.textMuted }}>YTD Finance Budget</span>
+            <span className="text-[11.5px] font-bold">{fmt(companyBudget.ytdFinanceBudget)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px]" style={{ color: COLORS.textMuted }}>YTD % vs Finance Budget</span>
+            <span className="text-[12px] font-bold" style={{ color: COLORS.redLight }}>{ytdVarPct}%</span>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2.5 mb-3">
+          <div className="rounded-xl p-3.5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+            <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>MTD SALE 2026</p>
+            <p className="text-[13.5px] font-extrabold mt-1" style={{ color: COLORS.goldLight }}>{fmt(companyBudget.mtdSale)}</p>
+          </div>
+          <div className="rounded-xl p-3.5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+            <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>MTD FINANCE BUDGET</p>
+            <p className="text-[13.5px] font-extrabold mt-1">{fmt(companyBudget.mtdFinanceBudget)}</p>
+          </div>
+        </div>
+
+        <button onClick={() => setShowLocations(!showLocations)} className="w-full rounded-xl p-3.5 mb-6 flex items-center justify-between" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <span className="text-[12px] font-bold">Sales as of 20 June 2026 — by location</span>
+          <ChevronRight size={14} color={COLORS.textDim} style={{ transform: showLocations ? "rotate(90deg)" : "none" }} />
+        </button>
+
+        {showLocations && (
+          <div className="mb-6 -mx-5 px-5 overflow-x-auto no-scrollbar">
+            <table className="w-full" style={{ minWidth: 560, borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th className="text-left text-[9px] font-bold pb-2" style={{ color: COLORS.textMuted }}>Location</th>
+                  <th className="text-right text-[9px] font-bold pb-2" style={{ color: COLORS.textMuted }}>Sale 2025</th>
+                  <th className="text-right text-[9px] font-bold pb-2" style={{ color: COLORS.textMuted }}>Sale 2026</th>
+                  <th className="text-right text-[9px] font-bold pb-2" style={{ color: COLORS.textMuted }}>Fin. Budget</th>
+                  <th className="text-right text-[9px] font-bold pb-2" style={{ color: COLORS.textMuted }}>Shop Budget</th>
+                  <th className="text-right text-[9px] font-bold pb-2" style={{ color: COLORS.textMuted }}>vs 2025</th>
+                </tr>
+              </thead>
+              <tbody>
+                {locationSales.map((l) => {
+                  const vsLastYear = (((l.s2026 - l.s2025) / l.s2025) * 100).toFixed(2);
+                  const positive = vsLastYear >= 0;
+                  return (
+                    <tr key={l.loc} style={{ borderTop: `1px solid ${COLORS.border}` }}>
+                      <td className="text-[10px] font-bold py-2">{l.loc}</td>
+                      <td className="text-[10px] text-right py-2" style={{ color: COLORS.textMuted }}>{Math.round(l.s2025).toLocaleString()}</td>
+                      <td className="text-[10px] text-right py-2 font-bold">{Math.round(l.s2026).toLocaleString()}</td>
+                      <td className="text-[10px] text-right py-2" style={{ color: COLORS.textMuted }}>{Math.round(l.finBudget).toLocaleString()}</td>
+                      <td className="text-[10px] text-right py-2" style={{ color: COLORS.textMuted }}>{Math.round(l.shopBudget).toLocaleString()}</td>
+                      <td className="text-[10px] text-right py-2 font-bold" style={{ color: positive ? COLORS.tealLight : COLORS.redLight }}>{positive ? "+" : ""}{vsLastYear}%</td>
+                    </tr>
+                  );
+                })}
+                <tr style={{ borderTop: `2px solid ${COLORS.gold}` }}>
+                  <td className="text-[10.5px] font-extrabold py-2.5" style={{ color: COLORS.goldLight }}>Total</td>
+                  <td className="text-[10.5px] text-right font-extrabold py-2.5" style={{ color: COLORS.goldLight }}>{Math.round(locationTotal.s2025).toLocaleString()}</td>
+                  <td className="text-[10.5px] text-right font-extrabold py-2.5" style={{ color: COLORS.goldLight }}>{Math.round(locationTotal.s2026).toLocaleString()}</td>
+                  <td className="text-[10.5px] text-right font-extrabold py-2.5" style={{ color: COLORS.goldLight }}>{Math.round(locationTotal.finBudget).toLocaleString()}</td>
+                  <td className="text-[10.5px] text-right font-extrabold py-2.5" style={{ color: COLORS.goldLight }}>{Math.round(locationTotal.shopBudget).toLocaleString()}</td>
+                  <td className="text-[10.5px] text-right font-extrabold py-2.5" style={{ color: COLORS.redLight }}>-12.54%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>FROM YOUR DUTY OFFICER</p>
+        <div className="flex flex-col gap-2 mb-6">
+          {dutyOfficerUpdates.map((u, i) => (
+            <div key={i} className="rounded-xl p-3.5 flex items-start gap-3" style={{ background: i === 0 ? "rgba(201,162,39,.08)" : COLORS.card, border: `1px solid ${i === 0 ? COLORS.gold + "40" : COLORS.border}` }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ background: "rgba(201,162,39,.18)", color: COLORS.goldLight }}>KM</div>
+              <div className="flex-1">
+                <p className="text-[11.5px] leading-relaxed">{u.msg}</p>
+                <p className="text-[9.5px] mt-1.5" style={{ color: COLORS.textDim }}>Ciprian Mazilu, Duty Officer · {u.time}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button onClick={() => onNavMySales && onNavMySales()} className="w-full rounded-xl p-3.5 mb-6 flex items-center gap-3" style={{ background: "rgba(200,16,46,.07)", border: `1px solid ${COLORS.red}40` }}>
+          <TrendingUp size={16} color={COLORS.redLight} className="flex-shrink-0" />
+          <span className="text-[12px] font-bold flex-1 text-left">Looking for your personal sales & area? Check My Sales</span>
+          <ChevronRight size={14} color={COLORS.redLight} />
+        </button>
+
+        <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>AREA SALE vs BUDGET — TODAY</p>
+        <div className="flex flex-col gap-2 mb-6">
+          {areaZones.map((z) => {
+            const variance = z.sale - z.budget;
+            const pct = ((variance / z.budget) * 100).toFixed(2);
+            const positive = variance >= 0;
+            return (
+              <div key={z.zone} className="rounded-xl p-3.5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                <p className="text-[11px] font-bold mb-2">{z.zone}</p>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px]" style={{ color: COLORS.textMuted }}>Sale AED {z.sale.toLocaleString()} · Budget AED {z.budget.toLocaleString()}</span>
+                </div>
+                <div className="w-full h-1.5 rounded-full mb-2" style={{ background: "rgba(255,255,255,.08)" }}>
+                  <div className="h-1.5 rounded-full" style={{ width: `${Math.min((z.sale / z.budget) * 100, 100)}%`, background: positive ? COLORS.teal : COLORS.red }} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: COLORS.textMuted }}>Amt Var: {positive ? "+" : "-"} AED {Math.abs(variance).toLocaleString()}</span>
+                  <span className="text-[12px] font-bold" style={{ color: positive ? COLORS.tealLight : COLORS.redLight }}>{positive ? "+" : ""}{pct}%</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="rounded-xl p-3.5 mb-6 flex items-start gap-2.5" style={{ background: "rgba(13,148,136,.07)", border: `1px solid ${COLORS.teal}40` }}>
+          <Sparkles size={14} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+          <p className="text-[11px] leading-relaxed" style={{ color: COLORS.textMuted }}>
+            Tip: bundle AirPods Pro with a screen protector — bundle attach rate is up 12% this month.
+          </p>
+        </div>
+
+        <p className="text-[12.5px] font-bold mb-1" style={{ color: COLORS.textMuted }}>TERMINAL SALES — LINDT PISTACHIO KUNAFA</p>
+        <p className="text-[10px] mb-3" style={{ color: COLORS.textDim }}>PLU 118221355 · 20-Jun-26 · Shift 7PM–7AM · all staff who sold this item</p>
+        <div className="rounded-xl overflow-hidden mb-2" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          {visiblePLULeaders.map((l, i) => (
+            <div key={l.name} className="flex items-center gap-3 px-3.5 py-2.5" style={{ borderBottom: i < visiblePLULeaders.length - 1 ? `1px solid ${COLORS.border}` : "none" }}>
+              <span className="text-[10px] font-bold w-5" style={{ color: COLORS.textDim }}>{i + 1}</span>
+              <p className="text-[12px] font-bold flex-1">{l.name}</p>
+              <div className="text-right">
+                <p className="text-[11.5px] font-bold" style={{ color: COLORS.goldLight }}>{l.val}</p>
+                <p className="text-[9px]" style={{ color: COLORS.textDim }}>{l.amt}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button onClick={() => setShowAllPLU(!showAllPLU)} className="w-full text-center py-2 mb-2">
+          <span className="text-[11px] font-bold" style={{ color: COLORS.goldLight }}>
+            {showAllPLU ? "Show less" : `Show all ${fullPLULeaders.length} staff`}
+          </span>
+        </button>
+        <div className="rounded-xl p-3 mb-6 flex items-center justify-between" style={{ background: "rgba(201,162,39,.1)", border: `1px solid ${COLORS.gold}40` }}>
+          <span className="text-[11px] font-bold" style={{ color: COLORS.goldLight }}>Grand Total</span>
+          <span className="text-[12.5px] font-extrabold" style={{ color: COLORS.goldLight }}>{fullPLUTotal.units} units · {fullPLUTotal.amt}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- MY SALES SCREEN ----------
+function MySalesScreen({ onBack }) {
+  const [todaySales, setTodaySales] = useState(2340);
+  const [salesInput, setSalesInput] = useState("");
+  const [logged, setLogged] = useState(false);
+
+  const [board, setBoard] = useState("individual");
+  const [product, setProduct] = useState("Lindt Pistachio Kunafa");
+  const leaders = [
+    { name: "Fatima R.", val: "AED 3,180", rank: 1 },
+    { name: "You", val: "AED 2,340", rank: 2, me: true },
+    { name: "Omar K.", val: "AED 2,050", rank: 3 },
+  ];
+  const products = ["Lindt Pistachio Kunafa", "Sony WH-1000XM6", "AirPods Pro 3"];
+  const productLeaders = {
+    "Lindt Pistachio Kunafa": [
+      { name: "A.Sese", val: "12 units", amt: "AED 540", rank: 1 },
+      { name: "You", val: "8 units", amt: "AED 360", rank: 2, me: true },
+      { name: "Priya N.", val: "5 units", amt: "AED 225", rank: 3 },
+      { name: "Omar K.", val: "3 units", amt: "AED 135", rank: 4 },
+    ],
+    "Sony WH-1000XM6": [
+      { name: "You", val: "12 units", amt: "AED 14,388", rank: 1, me: true },
+      { name: "Omar K.", val: "9 units", amt: "AED 10,791", rank: 2 },
+      { name: "Priya N.", val: "6 units", amt: "AED 7,194", rank: 3 },
+    ],
+    "AirPods Pro 3": [
+      { name: "Priya N.", val: "11 units", amt: "AED 9,339", rank: 1 },
+      { name: "You", val: "10 units", amt: "AED 8,490", rank: 2, me: true },
+      { name: "Omar K.", val: "7 units", amt: "AED 5,943", rank: 3 },
+    ],
+  };
+
+  const submitSales = () => {
+    const val = parseFloat(salesInput);
+    if (!isNaN(val) && val > 0) {
+      setTodaySales((prev) => prev + val);
+      setSalesInput("");
+      setLogged(true);
+      setTimeout(() => setLogged(false), 2000);
+    }
+  };
+
+  const dailyTarget = 3000;
+  const variance = todaySales - dailyTarget;
+  const pct = ((variance / dailyTarget) * 100).toFixed(2);
+  const positive = variance >= 0;
+
+  const spiffs = [
+    { item: "Merlin Wireless Headphones — AED 1,399", bonus: "AED 20", icon: Music },
+    { item: "SanDisk 2TB Flash Drive — AED 2,000", bonus: "AED 50", icon: ClipboardList },
+    { item: "Sony WH-1000XM6 — AED 1,199", bonus: "AED 35", icon: Music },
+  ];
+
+  const zoneProducts = [
+    { name: "Sony WH-1000XM6", was: "AED 1,499", now: "AED 1,199", off: "-20%" },
+    { name: "Apple AirPods Pro 3", was: "AED 999", now: "AED 849", off: "-15%" },
+    { name: "Samsung Galaxy Buds", was: "AED 599", now: "AED 459", off: "-23%" },
+  ];
+
+  const bonusTiers = [
+    { pct: "100%", amount: "AED 1,500" },
+    { pct: "104%", amount: "AED 2,000" },
+    { pct: "110%", amount: "AED 2,500" },
+    { pct: "115%+", amount: "AED 3,000" },
+  ];
+  const myTeam = "B";
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="My Sales" onBack={onBack} />
+      <div className="px-5">
+
+        <div className="rounded-2xl p-4 mb-6" style={{ background: `linear-gradient(135deg, ${COLORS.cardAlt}, #1f1413)`, border: `1px solid ${COLORS.border}` }}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10.5px] font-bold tracking-wide" style={{ color: COLORS.goldLight }}>YOUR AREA</p>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(201,162,39,.15)", color: COLORS.goldLight }}>#15312</span>
+          </div>
+          <p className="text-[16px] font-extrabold">Aibek Electronics</p>
+          <p className="text-[11.5px] mt-1" style={{ color: COLORS.textMuted }}>Terminal 2 · Electronics · Shift {myTeam}</p>
+          <div className="flex items-center gap-2 mt-3 pt-3" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ background: "rgba(13,148,136,.18)", color: COLORS.tealLight }}>AK</div>
+            <div>
+              <p className="text-[11px] font-bold">Anoop Kumar</p>
+              <p className="text-[9.5px]" style={{ color: COLORS.textMuted }}>Your Supervisor</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 mt-2.5">
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ background: "rgba(201,162,39,.18)", color: COLORS.goldLight }}>NN</div>
+            <div>
+              <p className="text-[11px] font-bold">Nickson Nireri</p>
+              <p className="text-[9.5px]" style={{ color: COLORS.textMuted }}>Assistant Supervisor</p>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>LOG TODAY'S SALES</p>
+        <div className="rounded-2xl p-4 mb-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <p className="text-[10.5px] mb-2.5" style={{ color: COLORS.textMuted }}>Enter your sales at the end of your shift — same as the paper sheet, just digital.</p>
+          <div className="flex gap-2">
+            <div className="flex-1 rounded-lg px-3 py-2.5 flex items-center gap-1.5" style={{ background: "rgba(255,255,255,.04)", border: `1px solid ${COLORS.border}` }}>
+              <span className="text-[12px] font-bold" style={{ color: COLORS.textMuted }}>AED</span>
+              <input
+                value={salesInput}
+                onChange={(e) => setSalesInput(e.target.value.replace(/[^0-9.]/g, ""))}
+                placeholder="0.00"
+                inputMode="decimal"
+                className="flex-1 bg-transparent outline-none text-[14px] font-bold"
+                style={{ color: COLORS.text }}
+              />
+            </div>
+            <button
+              onClick={submitSales}
+              className="px-4 rounded-lg font-bold text-[12.5px] flex items-center gap-1.5"
+              style={{ background: logged ? "rgba(13,148,136,.18)" : COLORS.red, color: logged ? COLORS.tealLight : "#fff" }}
+            >
+              {logged ? <><CheckCircle2 size={14} /> Logged</> : "Add"}
+            </button>
+          </div>
+        </div>
+
+        <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>SALE vs TARGET — TODAY</p>
+        <div className="rounded-2xl p-4 mb-6" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>SALE</p>
+              <p className="text-[19px] font-extrabold mt-0.5" style={{ color: COLORS.goldLight }}>AED {todaySales.toLocaleString()}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>TARGET</p>
+              <p className="text-[19px] font-extrabold mt-0.5">AED {dailyTarget.toLocaleString()}</p>
+            </div>
+          </div>
+          <div className="w-full h-2 rounded-full mb-2" style={{ background: "rgba(255,255,255,.08)" }}>
+            <div className="h-2 rounded-full" style={{ width: `${Math.min((todaySales / dailyTarget) * 100, 100)}%`, background: positive ? COLORS.teal : COLORS.gold }} />
+          </div>
+          <div className="flex items-center justify-between pt-2" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+            <span className="text-[10.5px]" style={{ color: COLORS.textMuted }}>Amt Var</span>
+            <span className="text-[12.5px] font-bold" style={{ color: positive ? COLORS.tealLight : COLORS.redLight }}>
+              {positive ? "+" : "-"} AED {Math.abs(variance).toLocaleString()}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-[10.5px]" style={{ color: COLORS.textMuted }}>% Var</span>
+            <span className="text-[12.5px] font-bold" style={{ color: positive ? COLORS.tealLight : COLORS.redLight }}>{positive ? "+" : ""}{pct}%</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5 mb-6">
+          <div className="rounded-xl p-3.5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+            <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>MTD SALE</p>
+            <p className="text-[15px] font-extrabold mt-1" style={{ color: COLORS.goldLight }}>AED 41,750</p>
+          </div>
+          <div className="rounded-xl p-3.5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+            <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>MTD % VAR</p>
+            <p className="text-[15px] font-extrabold mt-1" style={{ color: COLORS.tealLight }}>+7.33%</p>
+          </div>
+        </div>
+
+        <p className="text-[12.5px] font-bold mb-2" style={{ color: COLORS.textMuted }}>SPIFFS — BONUS ON THESE ITEMS</p>
+        <p className="text-[10.5px] mb-3" style={{ color: COLORS.textDim }}>Updated monthly · sell these, get paid extra on top of your salary</p>
+        <div className="flex flex-col gap-2 mb-6">
+          {spiffs.map((s) => {
+            const Icon = s.icon;
+            return (
+              <div key={s.item} className="rounded-xl p-3.5 flex items-center gap-3" style={{ background: "rgba(201,162,39,.07)", border: `1px solid ${COLORS.gold}40` }}>
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,162,39,.15)" }}>
+                  <Icon size={15} color={COLORS.goldLight} />
+                </div>
+                <p className="text-[11.5px] font-bold flex-1">{s.item}</p>
+                <span className="text-[12.5px] font-extrabold" style={{ color: COLORS.goldLight }}>+{s.bonus}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="rounded-2xl p-4 mb-6" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[11.5px] font-bold" style={{ color: COLORS.text }}>Team Target Bonus</p>
+            <span className="text-[9.5px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,.06)", color: COLORS.textDim }}>PAUSED</span>
+          </div>
+          <p className="text-[11px] leading-relaxed mb-3" style={{ color: COLORS.textMuted }}>
+            Currently on hold, returning soon. When active, the bonus is paid to every team member once your shift's full team target is reached for the month — the higher you go over 100%, the higher the payout.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {bonusTiers.map((t) => (
+              <div key={t.pct} className="rounded-lg p-2.5" style={{ background: "rgba(255,255,255,.03)", border: `1px solid ${COLORS.border}` }}>
+                <p className="text-[10px] font-bold" style={{ color: COLORS.goldLight }}>{t.pct} of target</p>
+                <p className="text-[13px] font-extrabold mt-0.5">{t.amount}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>PROMOTION AND REDUCED PRICE FOR JUNE</p>
+        <div className="flex flex-col gap-2 mb-3">
+          {zoneProducts.map((p) => (
+            <div key={p.name} className="rounded-xl p-3.5 flex items-center justify-between" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <div>
+                <p className="text-[12px] font-bold">{p.name}</p>
+                <p className="text-[10.5px] mt-0.5" style={{ color: COLORS.textMuted }}><span style={{ textDecoration: "line-through" }}>{p.was}</span> → {p.now}</p>
+              </div>
+              <span className="text-[10.5px] font-bold px-2 py-1 rounded-full" style={{ background: "rgba(200,16,46,.15)", color: COLORS.redLight }}>{p.off}</span>
+            </div>
+          ))}
+        </div>
+        <div className="rounded-xl p-3.5 mb-6 flex items-start gap-3" style={{ background: "rgba(200,16,46,.07)", border: `1px solid ${COLORS.red}40` }}>
+          <TrendingUp size={16} color={COLORS.redLight} className="mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-[11.5px] font-bold mb-1" style={{ color: COLORS.redLight }}>This Month's Promotion</p>
+            <p className="text-[11px] leading-relaxed" style={{ color: COLORS.textMuted }}>
+              Sony noise-cancelling headphones — 20% staff incentive on every unit sold in your area.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-[12.5px] font-bold" style={{ color: COLORS.textMuted }}>SALES LEADERBOARD — TODAY</p>
+          <Trophy size={14} color={COLORS.goldLight} />
+        </div>
+        <p className="text-[10px] mb-3" style={{ color: COLORS.textDim }}>Aibek Electronics, Terminal 2 · your team only</p>
+
+        <div className="flex gap-2 mb-3">
+          {["individual", "team", "by product"].map((b) => (
+            <button key={b} onClick={() => setBoard(b)} className="flex-1 py-2 rounded-lg text-[10.5px] font-bold capitalize"
+              style={{ background: board === b ? COLORS.red : COLORS.card, color: board === b ? "#fff" : COLORS.textMuted, border: `1px solid ${board === b ? COLORS.red : COLORS.border}` }}>
+              {b}
+            </button>
+          ))}
+        </div>
+
+        {board === "by product" && (
+          <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar">
+            {products.map((p) => (
+              <button key={p} onClick={() => setProduct(p)} className="px-3 py-1.5 rounded-lg text-[10.5px] font-bold flex-shrink-0"
+                style={{ background: product === p ? COLORS.gold : COLORS.card, color: product === p ? "#1a1410" : COLORS.textMuted, border: `1px solid ${product === p ? COLORS.gold : COLORS.border}` }}>
+                {p}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {board === "by product" && (
+          <p className="text-[10px] mb-3" style={{ color: COLORS.textDim }}>PLU 118221355 · your zone only — see the full terminal list in My Shifts & Area</p>
+        )}
+
+        <div className="flex flex-col gap-2">
+          {(board === "by product" ? productLeaders[product] : leaders).map((l) => (
+            <div key={l.name} className="rounded-xl p-3 flex items-center gap-3" style={{ background: l.me ? "rgba(200,16,46,.08)" : COLORS.card, border: `1px solid ${l.me ? COLORS.red + "55" : COLORS.border}` }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{ background: l.rank === 1 ? COLORS.gold : COLORS.border, color: l.rank === 1 ? "#1a1410" : COLORS.textMuted }}>
+                {l.rank}
+              </div>
+              <p className="text-[12.5px] font-bold flex-1">{l.name}</p>
+              <div className="text-right">
+                <p className="text-[12px] font-bold" style={{ color: COLORS.goldLight }}>{l.val}</p>
+                {l.amt && <p className="text-[9.5px]" style={{ color: COLORS.textDim }}>{l.amt}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- SHIFT CALENDAR SCREEN ----------
+function CalendarScreen({ onBack }) {
+  const teamColors = {
+    A: { fg: COLORS.goldLight, bg: "rgba(201,162,39,.16)", bd: "rgba(201,162,39,.4)" },
+    B: { fg: COLORS.tealLight, bg: "rgba(13,148,136,.16)", bd: "rgba(13,148,136,.4)" },
+    C: { fg: COLORS.redLight, bg: "rgba(200,16,46,.16)", bd: "rgba(200,16,46,.4)" },
+    D: { fg: "#a78bfa", bg: "rgba(167,139,250,.16)", bd: "rgba(167,139,250,.4)" },
+  };
+  const cyclePattern = ["day", "day", "off", "off", "night", "night", "off", "off"];
+  const myTeam = "B";
+  const monthDays = Array.from({ length: 30 }, (_, i) => i + 1);
+  const offsetForTeam = { A: 0, B: 2, C: 4, D: 6 };
+  const shiftForDay = (day, team) => cyclePattern[(day - 1 + offsetForTeam[team]) % 8];
+
+  const [viewTeam, setViewTeam] = useState(myTeam);
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Shift Calendar" onBack={onBack} />
+      <div className="px-5">
+        <p className="text-[12.5px] mb-4" style={{ color: COLORS.textMuted }}>June 2026 · Tap a team to see their schedule.</p>
+
+        <div className="flex gap-2 mb-5">
+          {Object.entries(teamColors).map(([team, c]) => (
+            <button
+              key={team}
+              onClick={() => setViewTeam(team)}
+              className="flex-1 py-2.5 rounded-xl flex items-center justify-center gap-1.5"
+              style={{ background: viewTeam === team ? c.bg : COLORS.card, border: `1px solid ${viewTeam === team ? c.bd : COLORS.border}` }}
+            >
+              <div className="w-2 h-2 rounded-full" style={{ background: c.fg }} />
+              <span className="text-[11px] font-bold" style={{ color: viewTeam === team ? c.fg : COLORS.textMuted }}>
+                {team}{team === myTeam ? " (you)" : ""}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-1.5 mb-4">
+          {monthDays.map((day) => {
+            const t = shiftForDay(day, viewTeam);
+            const c = teamColors[viewTeam];
+            const isOff = t === "off";
+            return (
+              <div key={day} className="rounded-lg py-2 text-center" style={{ background: isOff ? "rgba(255,255,255,.03)" : c.bg, border: `1px solid ${isOff ? "rgba(255,255,255,.06)" : c.bd}` }}>
+                <p className="text-[9px] font-bold" style={{ color: isOff ? COLORS.textDim : c.fg }}>{day}</p>
+                <p className="text-[7.5px] mt-0.5" style={{ color: isOff ? COLORS.textDim : c.fg }}>{t === "off" ? "Off" : t === "day" ? "Day" : "Night"}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="text-[10.5px] mb-6" style={{ color: COLORS.textDim }}>
+          4 teams (A/B/C/D) rotate on an 8-day cycle: 2 days · 2 off · 2 nights · 2 off — offset so the floor is always covered.
+        </p>
+
+        <div className="rounded-xl p-3.5 flex items-center justify-around" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: "rgba(201,162,39,.15)" }}>
+              <span className="text-[10px] font-bold" style={{ color: COLORS.goldLight }}>D</span>
+            </div>
+            <span className="text-[10.5px]" style={{ color: COLORS.textMuted }}>Day · 7AM–7PM</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: "rgba(13,148,136,.15)" }}>
+              <span className="text-[10px] font-bold" style={{ color: COLORS.tealLight }}>N</span>
+            </div>
+            <span className="text-[10.5px]" style={{ color: COLORS.textMuted }}>Night · 7PM–7AM</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- TRAINING SCREEN ----------
+function TrainingScreen({ onBack }) {
+  const videos = [
+    { title: "Upselling Fragrances", points: 50, done: true },
+    { title: "Handling VIP Customers", points: 75, done: true },
+    { title: "New Electronics Catalog 2026", points: 60, done: false },
+  ];
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Training" onBack={onBack} />
+      <div className="px-5">
+        <div className="rounded-2xl p-4 mb-5 flex items-center justify-between" style={{ background: `linear-gradient(135deg, ${COLORS.cardAlt}, #1f1413)`, border: `1px solid ${COLORS.border}` }}>
+          <div>
+            <p className="text-[11px] font-bold" style={{ color: COLORS.goldLight }}>YOUR POINTS</p>
+            <p className="text-[26px] font-extrabold mt-0.5">1,240 <Sparkles size={16} className="inline" color={COLORS.goldLight} /></p>
+            <p className="text-[10.5px] mt-1" style={{ color: COLORS.textMuted }}>260 to next reward tier</p>
+          </div>
+          <Award size={32} color={COLORS.goldLight} />
+        </div>
+
+        <p className="text-[12.5px] font-bold mb-2" style={{ color: COLORS.textMuted }}>TRAINING LIBRARY</p>
+        <div className="flex flex-col gap-2">
+          {videos.map((v) => (
+            <div key={v.title} className="rounded-xl p-3.5 flex items-center gap-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: v.done ? "rgba(13,148,136,.15)" : "rgba(200,16,46,.12)" }}>
+                {v.done ? <CheckCircle2 size={16} color={COLORS.tealLight} /> : <Play size={14} color={COLORS.redLight} />}
+              </div>
+              <div className="flex-1">
+                <p className="text-[12px] font-bold leading-tight">{v.title}</p>
+                <p className="text-[10px] mt-0.5" style={{ color: COLORS.textMuted }}>+{v.points} points</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- MEET LEADERSHIP SCREEN ----------
+function LeadershipScreen({ onBack }) {
+  const [selected, setSelected] = useState(null);
+
+  const myChain = [
+    { name: "Aibek", role: "You — Sales Associate", initials: "AI", color: COLORS.gold, reportsTo: "Reports to your Assistant Supervisor", me: true },
+    { name: "Nickson Nireri", role: "Assistant Supervisor", initials: "NN", color: COLORS.teal, reportsTo: "Reports to the Supervisor" },
+    { name: "Anoop Kumar", role: "Supervisor", initials: "AK", color: COLORS.teal, reportsTo: "Reports to the Duty Officer" },
+    { name: "Ciprian Mazilu", role: "Duty Officer", initials: "CM", color: COLORS.gold, reportsTo: "Reports to the Operation Manager" },
+    { name: "Fatima Al Suwaidi", role: "Operation Manager — Terminal 2", initials: "FS", color: COLORS.red, reportsTo: "Reports to Company Leadership" },
+  ];
+
+  const companyLeadership = [
+    {
+      name: "H.H. Sheikh Ahmed bin Saeed Al Maktoum", role: "Chairman", initials: "AM", color: COLORS.red,
+      reportsTo: "President, Dubai Civil Aviation Authority",
+      bio: "Chairman of Dubai Duty Free since its founding, also President of Dubai Civil Aviation Authority.",
+    },
+    {
+      name: "Ramesh Cidambi", role: "Managing Director", initials: "RC", color: COLORS.gold,
+      reportsTo: "Reports to the Chairman",
+      bio: "With DDF since 1987, starting as head of IT. Served 8 years as COO before becoming Managing Director in June 2024.",
+    },
+    {
+      name: "Salah Tahlak", role: "Deputy Managing Director", initials: "ST", color: COLORS.teal,
+      reportsTo: "Reports to the Managing Director",
+      bio: "Joined DDF in 1992 — one of the first Emiratis on the team. Previously led Marketing and served as Joint COO.",
+    },
+    {
+      name: "Mona Al Ali", role: "Senior VP — Human Resources", initials: "MA", color: COLORS.gold,
+      reportsTo: "Reports to the Managing Director",
+      bio: "Leads the HR division overseeing all people functions across DDF's retail and leisure operations.",
+    },
+    {
+      name: "Yasa Tahir", role: "Vice President — Human Resources", initials: "YT", color: COLORS.teal,
+      reportsTo: "Reports to the Senior VP, HR",
+      bio: "UAE national with an MBA, focused on HR strategy and operational excellence.",
+    },
+  ];
+
+  if (selected) {
+    const p = selected;
+    return (
+      <div className="pb-28">
+        <StatusBar />
+        <TopBar title="Profile" onBack={() => setSelected(null)} />
+        <div className="px-5 flex flex-col items-center text-center mt-4">
+          <div className="w-24 h-24 rounded-full flex items-center justify-center text-[28px] font-extrabold mb-4" style={{ background: `${p.color}22`, color: p.color, border: `2px solid ${p.color}55` }}>
+            {p.initials}
+          </div>
+          <p className="text-[18px] font-extrabold">{p.name}</p>
+          <p className="text-[13px] mt-1" style={{ color: COLORS.textMuted }}>{p.role}</p>
+          {p.bio && (
+            <p className="text-[12px] leading-relaxed mt-4" style={{ color: COLORS.text }}>{p.bio}</p>
+          )}
+          <div className="w-full rounded-2xl p-4 mt-6 text-left" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+            <p className="text-[11px] font-bold mb-1" style={{ color: p.color }}>REPORTING LINE</p>
+            <p className="text-[13px]">{p.reportsTo}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Meet Leadership" onBack={onBack} />
+      <div className="px-5">
+        <p className="text-[12.5px] mb-2" style={{ color: COLORS.textMuted }}>
+          Know who's who — starting with your own chain of command, then the wider company.
+        </p>
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-5" style={{ background: "rgba(201,162,39,.12)" }}>
+          <span className="text-[10.5px] font-bold" style={{ color: COLORS.goldLight }}>Terminal 2 · Shift B</span>
+        </div>
+
+        <p className="text-[11.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>YOUR CHAIN OF COMMAND</p>
+        <div className="relative pl-6 mb-8">
+          <div className="absolute left-2 top-2 bottom-2 w-0.5" style={{ background: `linear-gradient(180deg, ${COLORS.gold}, ${COLORS.red})` }} />
+          {myChain.map((p, i) => (
+            <button key={p.name} onClick={() => setSelected(p)} className="relative w-full mb-3 last:mb-0 text-left">
+              <div className="absolute -left-6 top-3 w-3.5 h-3.5 rounded-full" style={{ background: COLORS.bg, border: `2px solid ${p.color}` }} />
+              <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: p.me ? `${COLORS.gold}14` : COLORS.card, border: `1px solid ${p.me ? COLORS.gold + "55" : COLORS.border}` }}>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-extrabold flex-shrink-0" style={{ background: `${p.color}22`, color: p.color }}>
+                  {p.initials}
+                </div>
+                <div className="flex-1">
+                  <p className="text-[12.5px] font-bold leading-tight">{p.name}</p>
+                  <p className="text-[10.5px] mt-0.5" style={{ color: COLORS.textMuted }}>{p.role}</p>
+                </div>
+                {!p.me && <ChevronRight size={14} color={COLORS.textDim} />}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <p className="text-[11.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>COMPANY LEADERSHIP</p>
+        <div className="grid grid-cols-2 gap-3">
+          {companyLeadership.map((p) => (
+            <button key={p.name} onClick={() => setSelected(p)} className="rounded-2xl p-4 flex flex-col items-center text-center gap-3 active:scale-95 transition-transform" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center text-[18px] font-extrabold" style={{ background: `${p.color}22`, color: p.color, border: `2px solid ${p.color}55` }}>
+                {p.initials}
+              </div>
+              <div>
+                <p className="text-[11.5px] font-bold leading-tight">{p.name}</p>
+                <p className="text-[9.5px] mt-1" style={{ color: COLORS.textMuted }}>{p.role}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- MY POINTS SCREEN ----------
+function PointsScreen({ onBack }) {
+  const [claimed, setClaimed] = useState(null);
+  const rewards = [
+    { id: 1, title: "15% off at Chocolate Lane", cost: 500, detail: "Valid 30 days · up to AED 100", icon: Gift },
+    { id: 2, title: "Free coffee at Staff Lounge", cost: 200, detail: "Valid 30 days · 1 redemption", icon: Gift },
+    { id: 3, title: "20% off Perfume Bar", cost: 800, detail: "Valid 30 days · up to AED 200", icon: Gift },
+  ];
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="My Points" onBack={onBack} />
+      <div className="px-5">
+        <div className="rounded-2xl p-5 mb-4 text-center" style={{ background: `linear-gradient(145deg, ${COLORS.cardAlt}, #241313)`, border: `1px solid ${COLORS.gold}55` }}>
+          <Sparkles size={26} color={COLORS.goldLight} className="mx-auto mb-2" />
+          <p className="text-[34px] font-extrabold">1,240</p>
+          <p className="text-[11px]" style={{ color: COLORS.textMuted }}>points available</p>
+        </div>
+
+        <div className="rounded-xl p-3.5 mb-5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <p className="text-[11px] font-bold mb-2" style={{ color: COLORS.textMuted }}>HOW YOU EARN POINTS</p>
+          <div className="flex items-center gap-2 mb-1.5">
+            <TrendingUp size={13} color={COLORS.tealLight} />
+            <p className="text-[11.5px]" style={{ color: COLORS.text }}>Every confirmed sale</p>
+          </div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <GraduationCap size={13} color={COLORS.goldLight} />
+            <p className="text-[11.5px]" style={{ color: COLORS.text }}>Completing training videos & quizzes</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Star size={13} color={COLORS.redLight} />
+            <p className="text-[11.5px]" style={{ color: COLORS.text }}>A shoutout from your manager</p>
+          </div>
+        </div>
+
+        <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>RECENT SHOUTOUTS</p>
+        <div className="flex flex-col gap-2.5 mb-6">
+          <div className="rounded-xl p-4" style={{ background: "rgba(200,16,46,.07)", border: `1px solid ${COLORS.red}40` }}>
+            <div className="flex items-center gap-2 mb-2">
+              <Star size={13} color={COLORS.redLight} />
+              <span className="text-[10.5px] font-bold" style={{ color: COLORS.redLight }}>From Anoop Kumar, Supervisor</span>
+            </div>
+            <p className="text-[12px] leading-relaxed">"Aisha closed 3 big sales today and helped a stressed passenger make their gate on time. Great work today!" <span style={{ color: COLORS.goldLight, fontWeight: 700 }}>+50 pts</span></p>
+          </div>
+        </div>
+
+        <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>SURPRISE REWARDS</p>
+        <div className="flex flex-col gap-2.5">
+          {rewards.map((r) => {
+            const Icon = r.icon;
+            const isClaimed = claimed === r.id;
+            const canAfford = 1240 >= r.cost;
+            return (
+              <div key={r.id} className="rounded-xl p-4" style={{ background: COLORS.card, border: `1px solid ${isClaimed ? COLORS.teal : COLORS.border}` }}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(201,162,39,.15)" }}>
+                    <Icon size={16} color={COLORS.goldLight} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[12.5px] font-bold">{r.title}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: COLORS.textMuted }}>{r.detail}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => canAfford && setClaimed(r.id)}
+                  disabled={!canAfford}
+                  className="w-full py-2 rounded-lg text-[11.5px] font-bold"
+                  style={{
+                    background: isClaimed ? "rgba(13,148,136,.15)" : canAfford ? COLORS.red : COLORS.border,
+                    color: isClaimed ? COLORS.tealLight : canAfford ? "#fff" : COLORS.textDim,
+                  }}
+                >
+                  {isClaimed ? "Unlocked ✓" : `Unlock for ${r.cost} pts`}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- STAFF DISCOUNTS SCREEN ----------
+function DiscountsScreen({ onBack }) {
+  const excluded = ["Electronics", "Gold & Jewellery"];
+  const bonusDiscounts = [
+    { points: 500, product: "Lindt Pistachio Kunafa Box", was: "AED 45", now: "AED 36", off: "-20%", expires: "7 days", limit: "One per staff", color: COLORS.gold },
+    { points: 1000, product: "Chanel Coco Mademoiselle 100ml", was: "AED 520", now: "AED 416", off: "-20%", expires: "14 days", limit: "One per staff", color: COLORS.red },
+    { points: 1500, product: "Godiva Gift Box, 24pc", was: "AED 180", now: "AED 135", off: "-25%", expires: "14 days", limit: "One per staff", color: COLORS.gold },
+  ];
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Staff Discounts" onBack={onBack} />
+      <div className="px-5">
+
+        <div className="rounded-2xl p-4 mb-3" style={{ background: `linear-gradient(135deg, ${COLORS.cardAlt}, #1f1413)`, border: `1px solid ${COLORS.border}` }}>
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold" style={{ color: COLORS.goldLight }}>STANDARD STAFF DISCOUNT</p>
+            <Percent size={16} color={COLORS.goldLight} />
+          </div>
+          <p className="text-[30px] font-extrabold mt-1" style={{ color: COLORS.goldLight }}>10%</p>
+          <p className="text-[11px] mt-1" style={{ color: COLORS.textMuted }}>Across the board, every day — show your staff ID at checkout.</p>
+        </div>
+
+        <div className="rounded-xl p-3.5 mb-6 flex items-start gap-2.5" style={{ background: "rgba(200,16,46,.07)", border: `1px solid ${COLORS.red}40` }}>
+          <X size={13} color={COLORS.redLight} className="mt-0.5 flex-shrink-0" />
+          <p className="text-[11px] leading-relaxed" style={{ color: COLORS.textMuted }}>
+            <span style={{ color: COLORS.redLight, fontWeight: 700 }}>Never included:</span> {excluded.join(" and ")} — no staff discount applies here, points or otherwise.
+          </p>
+        </div>
+
+        <p className="text-[12.5px] font-bold mb-1" style={{ color: COLORS.textMuted }}>EARN MORE WITH POINTS</p>
+        <p className="text-[11px] mb-4" style={{ color: COLORS.textMuted }}>Reach a points milestone and unlock a deeper discount on one specific product — a single purchase, for a limited time.</p>
+
+        <div className="flex flex-col gap-2.5">
+          {bonusDiscounts.map((d) => (
+            <div key={d.product} className="rounded-xl p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={13} color={d.color} />
+                  <span className="text-[10px] font-bold" style={{ color: d.color }}>{d.points.toLocaleString()} points</span>
+                </div>
+                <span className="text-[13px] font-extrabold" style={{ color: d.color }}>{d.off}</span>
+              </div>
+              <p className="text-[13px] font-bold">{d.product}</p>
+              <p className="text-[11px] mt-1" style={{ color: COLORS.textMuted }}><span style={{ textDecoration: "line-through" }}>{d.was}</span> → <span style={{ color: d.color, fontWeight: 700 }}>{d.now}</span></p>
+              <div className="flex items-center gap-3 mt-2 pt-2" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+                <span className="text-[10px]" style={{ color: COLORS.textDim }}>{d.limit}</span>
+                <span className="text-[10px]" style={{ color: COLORS.textDim }}>· Valid {d.expires} once unlocked</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- MYSTERY SHOPPER SCREEN ----------
+function MysteryShopperScreen({ onBack }) {
+  const visited = true;
+  const status = "exceeded"; // exceeded | met | needsWork
+  const statusMeta = {
+    exceeded: { label: "Exceeded Expectations", color: COLORS.tealLight, bg: "rgba(13,148,136,.08)", border: COLORS.teal + "55" },
+    met: { label: "Met Expectations", color: COLORS.goldLight, bg: "rgba(201,162,39,.08)", border: COLORS.gold + "55" },
+    needsWork: { label: "Room to Improve", color: COLORS.redLight, bg: "rgba(200,16,46,.08)", border: COLORS.red + "55" },
+  };
+  const sm = statusMeta[status];
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Mystery Shopper" onBack={onBack} />
+      <div className="px-5">
+        <div className="rounded-2xl p-5 mb-5 text-center" style={{ background: visited ? sm.bg : COLORS.card, border: `1px solid ${visited ? sm.border : COLORS.border}` }}>
+          {visited ? (
+            <>
+              <CheckCircle2 size={28} color={sm.color} className="mx-auto mb-2" />
+              <p className="text-[15px] font-extrabold" style={{ color: sm.color }}>{sm.label}</p>
+              <p className="text-[11px] mt-1.5" style={{ color: COLORS.textMuted }}>Visited 14 June · Aibek Electronics</p>
+            </>
+          ) : (
+            <>
+              <Eye size={28} color={COLORS.textMuted} className="mx-auto mb-2" />
+              <p className="text-[14px] font-bold">Not visited yet this month</p>
+            </>
+          )}
+        </div>
+
+        {visited && (
+          <>
+            <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>WHAT WENT WELL</p>
+            <div className="rounded-xl p-4 mb-3 flex items-start gap-3" style={{ background: "rgba(13,148,136,.07)", border: `1px solid ${COLORS.teal}40` }}>
+              <CheckCircle2 size={14} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+              <p className="text-[12px] leading-relaxed">Warm, genuine greeting — made the customer feel welcome right away.</p>
+            </div>
+            <div className="rounded-xl p-4 mb-5 flex items-start gap-3" style={{ background: "rgba(13,148,136,.07)", border: `1px solid ${COLORS.teal}40` }}>
+              <CheckCircle2 size={14} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+              <p className="text-[12px] leading-relaxed">Strong product knowledge — answered every question confidently.</p>
+            </div>
+
+            <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>WHAT TO WORK ON</p>
+            <div className="rounded-xl p-4 mb-5 flex items-start gap-3" style={{ background: "rgba(201,162,39,.07)", border: `1px solid ${COLORS.gold}40` }}>
+              <Lightbulb size={14} color={COLORS.goldLight} className="mt-0.5 flex-shrink-0" />
+              <p className="text-[12px] leading-relaxed">Try suggesting one related add-on item before closing the sale — a small upsell habit goes a long way.</p>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------- DUBAI TALENTS (IDEAS) SCREEN ----------
+function TalentsIdeasScreen({ onBack }) {
+  const [visibility, setVisibility] = useState("public"); // public | hr
+  const [filterCat, setFilterCat] = useState("all");
+  const [submitted, setSubmitted] = useState(false);
+
+  const categories = [
+    { id: "idea", label: "Idea", icon: Lightbulb },
+    { id: "song", label: "Songwriting", icon: Music },
+    { id: "writing", label: "Writing", icon: PenTool },
+    { id: "art", label: "Drawing & Art", icon: Palette },
+    { id: "singing", label: "Singing", icon: Mic2 },
+    { id: "aivideo", label: "AI Video / Ads", icon: Video },
+  ];
+
+  const posts = [
+    { name: "Fatima R.", cat: "idea", text: "Add a 'last call' reminder screen for boarding-soon flights near our zone.", votes: 24 },
+    { name: "Anonymous", cat: "song", text: "Wrote an original song about the Terminal 3 night shift crew — happy to share the recording.", votes: 31 },
+    { name: "Anonymous", cat: "aivideo", text: "Made a 15-second AI ad concept for the new perfume launch using Midjourney + Kling.", votes: 19 },
+    { name: "Omar K.", cat: "art", text: "Sketch series of daily life at the DDF counter — thinking of a small gallery wall in the staff lounge.", votes: 12 },
+  ];
+
+  const filtered = filterCat === "all" ? posts : posts.filter((p) => p.cat === filterCat);
+  const catMeta = (id) => categories.find((c) => c.id === id) || categories[0];
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Dubai Talents" onBack={onBack} />
+      <div className="px-5">
+        <p className="text-[12.5px] mb-4" style={{ color: COLORS.textMuted }}>
+          A song, a sketch, a poem, an AI-made ad, a sales idea — whatever you've got, share it. No pressure, no judgement.
+        </p>
+
+        <div className="rounded-2xl p-4 mb-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar">
+            {categories.map((c) => {
+              const Icon = c.icon;
+              return (
+                <span key={c.id} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10.5px] font-bold flex-shrink-0" style={{ background: "rgba(201,162,39,.12)", color: COLORS.goldLight }}>
+                  <Icon size={11} /> {c.label}
+                </span>
+              );
+            })}
+          </div>
+          <textarea placeholder="Describe your idea, or attach a photo / video / audio clip..." className="w-full h-20 text-[12.5px] bg-transparent outline-none resize-none" style={{ color: COLORS.text }} />
+
+          <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+            <p className="text-[10.5px] font-bold mb-2" style={{ color: COLORS.textMuted }}>WHO CAN SEE THIS?</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setVisibility("public")}
+                className="flex-1 py-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5"
+                style={{ background: visibility === "public" ? COLORS.red : "transparent", color: visibility === "public" ? "#fff" : COLORS.textMuted, border: `1px solid ${visibility === "public" ? COLORS.red : COLORS.border}` }}
+              >
+                <Eye size={12} /> Everyone
+              </button>
+              <button
+                onClick={() => setVisibility("hr")}
+                className="flex-1 py-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5"
+                style={{ background: visibility === "hr" ? COLORS.teal : "transparent", color: visibility === "hr" ? "#fff" : COLORS.textMuted, border: `1px solid ${visibility === "hr" ? COLORS.teal : COLORS.border}` }}
+              >
+                <Lock size={12} /> HR Only
+              </button>
+            </div>
+            <div className="flex items-center gap-2 mt-2.5">
+              <EyeOff size={12} color={COLORS.textDim} />
+              <span className="text-[10.5px]" style={{ color: COLORS.textMuted }}>Your name is hidden by default — you can choose to show it instead.</span>
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={() => setSubmitted(true)}
+          className="w-full py-3 rounded-xl font-bold text-[13.5px] mb-6 flex items-center justify-center gap-2"
+          style={{ background: submitted ? "rgba(13,148,136,.15)" : COLORS.red, color: submitted ? COLORS.tealLight : "#fff" }}
+        >
+          {submitted ? <><CheckCircle2 size={15} /> Submitted ✓</> : "Submit"}
+        </button>
+
+        <div className="flex gap-2 mb-4 overflow-x-auto no-scrollbar">
+          <button onClick={() => setFilterCat("all")} className="px-3 py-1.5 rounded-lg text-[10.5px] font-bold flex-shrink-0" style={{ background: filterCat === "all" ? COLORS.red : COLORS.card, color: filterCat === "all" ? "#fff" : COLORS.textMuted, border: `1px solid ${filterCat === "all" ? COLORS.red : COLORS.border}` }}>All</button>
+          {categories.map((c) => (
+            <button key={c.id} onClick={() => setFilterCat(c.id)} className="px-3 py-1.5 rounded-lg text-[10.5px] font-bold flex-shrink-0" style={{ background: filterCat === c.id ? COLORS.red : COLORS.card, color: filterCat === c.id ? "#fff" : COLORS.textMuted, border: `1px solid ${filterCat === c.id ? COLORS.red : COLORS.border}` }}>{c.label}</button>
+          ))}
+        </div>
+
+        <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>FROM THE TEAM</p>
+        <div className="flex flex-col gap-2.5">
+          {filtered.map((post, i) => {
+            const meta = catMeta(post.cat);
+            const Icon = meta.icon;
+            return (
+              <div key={i} className="rounded-xl p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Icon size={12} color={COLORS.goldLight} />
+                  <span className="text-[10px] font-bold" style={{ color: COLORS.goldLight }}>{meta.label}</span>
+                </div>
+                <p className="text-[12px] leading-relaxed mb-2">{post.text}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10.5px] font-bold" style={{ color: COLORS.textMuted }}>{post.name}</span>
+                  <span className="text-[10.5px]" style={{ color: COLORS.textMuted }}>▲ {post.votes}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- DDF TALENTS CUP (COMPETITION) SCREEN ----------
+function TalentsCupScreen({ onBack }) {
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="DDF Talents Cup" onBack={onBack} />
+      <div className="px-5">
+        <div className="rounded-2xl p-5 mb-5 text-center" style={{ background: `linear-gradient(145deg, ${COLORS.cardAlt}, #241313)`, border: `1px solid ${COLORS.red}55` }}>
+          <Trophy size={28} color={COLORS.goldLight} className="mx-auto mb-2" />
+          <p className="text-[15px] font-extrabold">Annual Shift & Terminal Competition</p>
+          <p className="text-[11px] mt-1" style={{ color: COLORS.textMuted }}>Teams compete by terminal and shift — bring your own creative theme</p>
+        </div>
+
+        <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>THE CHALLENGES</p>
+        <div className="flex flex-col gap-2 mb-6">
+          {[
+            { t: "Performance", d: "Music, comedy, or a short skit — team's choice" },
+            { t: "Creative Showcase", d: "Costume or visual theme the team designs together" },
+            { t: "Team Routine", d: "A short choreographed or coordinated act" },
+            { t: "DDF Knowledge", d: "5 quick questions about Duty Free" },
+          ].map((c, i) => (
+            <div key={i} className="rounded-xl p-3.5 flex items-center gap-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{ background: "rgba(200,16,46,.15)", color: COLORS.redLight }}>{i + 1}</div>
+              <div>
+                <p className="text-[12px] font-bold">{c.t}</p>
+                <p className="text-[10.5px]" style={{ color: COLORS.textMuted }}>{c.d}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-xl p-4 mb-4 flex items-start gap-3" style={{ background: "rgba(13,148,136,.07)", border: `1px solid ${COLORS.teal}40` }}>
+          <Sparkles size={15} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+          <p className="text-[11px] leading-relaxed" style={{ color: COLORS.textMuted }}>Each team picks its own theme — open to any idea, with no set or required format.</p>
+        </div>
+
+        <div className="rounded-xl p-4 mb-4 flex items-center gap-3" style={{ background: "rgba(201,162,39,.08)", border: `1px solid ${COLORS.gold}40` }}>
+          <Award size={16} color={COLORS.goldLight} />
+          <p className="text-[11.5px]" style={{ color: COLORS.text }}>Prize pool announced at the finale · once a year</p>
+        </div>
+        <button className="w-full py-3.5 rounded-xl font-bold text-[14px]" style={{ background: COLORS.red, color: "#fff" }}>Register Your Team</button>
+      </div>
+    </div>
+  );
+}
+
+// ---------- OUR STORY SCREEN ----------
+function StoryScreen({ onBack }) {
+  const [view, setView] = useState("ddf"); // ddf | uae
+
+  const ddfMilestones = [
+    { y: "20 Dec 1983", t: "Dubai Duty Free opens at Dubai International Airport, starting with 100 staff and US$20 million in first-year sales" },
+    { y: "2000", t: "Sheikh Rashid Terminal opens — staff count rises to 900" },
+    { y: "2008–2013", t: "Named the world's single largest airport retailer by revenue" },
+    { y: "2025", t: "Best year in company history — AED 8.68 billion in sales, with 25 of the original 1983 team still on board" },
+    { y: "2026", t: "Staff app launches — built by the team, for the team" },
+  ];
+
+  const uaeMilestones = [
+    { y: "Pre-1971", t: "The region was known as the Trucial States — sheikhdoms along the Gulf coast under British protection" },
+    { y: "1968", t: "Sheikh Zayed of Abu Dhabi and Sheikh Rashid of Dubai agree to form a union" },
+    { y: "2 Dec 1971", t: "The United Arab Emirates is founded — six emirates unite, with Sheikh Zayed as first President" },
+    { y: "10 Feb 1972", t: "Ras Al Khaimah joins, completing the seven emirates" },
+    { y: "Today", t: "Home to over 200 nationalities, one of the world's safest and fastest-growing countries" },
+  ];
+
+  const milestones = view === "ddf" ? ddfMilestones : uaeMilestones;
+  const accent = view === "ddf" ? COLORS.red : COLORS.teal;
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Our Story" onBack={onBack} />
+      <div className="px-5">
+        <div className="flex gap-2 mb-5">
+          <button onClick={() => setView("ddf")} className="flex-1 py-2.5 rounded-xl text-[12px] font-bold"
+            style={{ background: view === "ddf" ? COLORS.red : COLORS.card, color: view === "ddf" ? "#fff" : COLORS.textMuted, border: `1px solid ${view === "ddf" ? COLORS.red : COLORS.border}` }}>
+            DDF History
+          </button>
+          <button onClick={() => setView("uae")} className="flex-1 py-2.5 rounded-xl text-[12px] font-bold"
+            style={{ background: view === "uae" ? COLORS.teal : COLORS.card, color: view === "uae" ? "#fff" : COLORS.textMuted, border: `1px solid ${view === "uae" ? COLORS.teal : COLORS.border}` }}>
+            UAE History
+          </button>
+        </div>
+
+        {view === "uae" && (
+          <div className="rounded-xl p-4 mb-5 flex items-start gap-3" style={{ background: "rgba(13,148,136,.07)", border: `1px solid ${COLORS.teal}40` }}>
+            <Globe size={15} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+            <p className="text-[11.5px] leading-relaxed italic" style={{ color: COLORS.text }}>Know the country where you work and live.</p>
+          </div>
+        )}
+
+        <p className="text-[12.5px] mb-5" style={{ color: COLORS.textMuted }}>
+          {view === "ddf"
+            ? "A few key moments in DDF's journey — so every member of the team knows where we come from."
+            : "The short version of how the UAE came to be — seven emirates, one union."}
+        </p>
+        <div className="relative pl-6">
+          <div className="absolute left-2 top-1 bottom-1 w-0.5" style={{ background: `linear-gradient(180deg, ${accent}, transparent)` }} />
+          {milestones.map((m, i) => (
+            <div key={i} className="relative mb-6 last:mb-0">
+              <div className="absolute -left-6 top-1 w-3.5 h-3.5 rounded-full" style={{ background: COLORS.bg, border: `2px solid ${accent}` }} />
+              <p className="text-[11px] font-bold" style={{ color: view === "ddf" ? COLORS.redLight : COLORS.tealLight }}>{m.y}</p>
+              <p className="text-[12.5px] mt-1 leading-relaxed">{m.t}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- EMPLOYEE OF THE MONTH SCREEN ----------
+function EOMScreen({ onBack }) {
+  const tips = [
+    "Consistently hit or beat your monthly sales target",
+    "Complete all assigned training modules on time",
+    "Score 9+ on Mystery Shopper visits",
+    "Positive feedback from supervisor reviews",
+    "Active participation — ideas, teamwork, attendance",
+  ];
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Employee of the Month" onBack={onBack} />
+      <div className="px-5">
+        <div className="rounded-2xl p-5 mb-5 text-center" style={{ background: `linear-gradient(145deg, ${COLORS.cardAlt}, #241313)`, border: `1px solid ${COLORS.gold}55` }}>
+          <Star size={28} color={COLORS.goldLight} className="mx-auto mb-2" />
+          <p className="text-[15px] font-extrabold">This Month: Fatima R.</p>
+          <p className="text-[11px] mt-1" style={{ color: COLORS.textMuted }}>Perfume & Cosmetics · Terminal 1</p>
+        </div>
+        <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>HOW TO GET THERE</p>
+        <div className="flex flex-col gap-2">
+          {tips.map((t, i) => (
+            <div key={i} className="rounded-xl p-3.5 flex items-start gap-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <CheckCircle2 size={15} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+              <p className="text-[12px] leading-relaxed">{t}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- PRODUCT KNOWLEDGE SCREEN ----------
+// ---------- QUICK HELP SCREEN (Products + Customer FAQ + Phrases + Equipment) ----------
+function QuickHelpScreen({ onBack }) {
+  const [section, setSection] = useState("products");
+  const [open, setOpen] = useState(0);
+
+  const sections = [
+    { id: "products", label: "Products" },
+    { id: "customer", label: "Customer FAQ" },
+    { id: "phrases", label: "Phrases" },
+    { id: "equipment", label: "Equipment" },
+  ];
+
+  // --- Products data ---
+  const prodCategories = ["Whisky", "Perfume", "Electronics"];
+  const [prodCat, setProdCat] = useState(0);
+  const prodQA = {
+    0: [
+      { q: "Single malt vs blended whisky — what's the difference?", a: "Single malt comes from one distillery, made only from malted barley. Blended mixes whiskies from multiple distilleries for a smoother, more consistent taste." },
+      { q: "What does 'cask strength' mean?", a: "Bottled straight from the cask without dilution — stronger and more intense than standard bottlings." },
+    ],
+    1: [
+      { q: "EDT vs EDP — what's the difference?", a: "EDP (Eau de Parfum) has a higher concentration of fragrance oils and lasts longer than EDT (Eau de Toilette)." },
+    ],
+    2: [
+      { q: "Why are noise-cancelling headphones worth the upsell?", a: "They actively block ambient sound using microphones — ideal for long-haul flights, which is exactly our customer base." },
+    ],
+  };
+
+  // --- Customer FAQ data ---
+  const custFAQ = [
+    { q: "Why is this more expensive than Amazon / in the city?", a: "We guarantee 100% authenticity, full manufacturer warranty, and duty-free pricing on top — online sellers can't always guarantee the first two." },
+    { q: "Why isn't this item available online?", a: "Many products here are travel-retail exclusives — limited editions only sold in airport duty-free stores." },
+    { q: "Can I return this in my home country?", a: "Yes, with the receipt — but it's faster and easier to handle it directly with us in Dubai." },
+  ];
+
+  // --- Phrases data ---
+  const langs = ["Russian", "Arabic", "Chinese", "Hindi"];
+  const [lang, setLang] = useState(0);
+  const phrases = {
+    0: [
+      { en: "Hello, welcome!", local: "Здравствуйте!", say: "Zdrah-stvooy-tye" },
+      { en: "May I see your boarding pass?", local: "Можно ваш посадочный талон?", say: "Mozh-no vash pa-sa-doch-niy ta-lon?" },
+      { en: "Where are you flying to?", local: "Куда вы летите?", say: "Koo-dah vy le-tee-tye?" },
+    ],
+    1: [
+      { en: "Hello, welcome!", local: "أهلاً وسهلاً", say: "Ahlan wa sahlan" },
+      { en: "May I see your boarding pass?", local: "هل يمكنني رؤية بطاقة الصعود؟", say: "Hal yumkinuni ru'yat bitaqat as-su'ood?" },
+    ],
+    2: [
+      { en: "Hello, welcome!", local: "您好，欢迎光临", say: "Nín hǎo, huānyíng guānglín" },
+      { en: "Where are you flying to?", local: "您要飞往哪里？", say: "Nín yào fēiwǎng nǎlǐ?" },
+    ],
+    3: [
+      { en: "Hello, welcome!", local: "नमस्ते, स्वागत है", say: "Namaste, swaagat hai" },
+      { en: "Is this your final flight today?", local: "क्या यह आज आपकी आखिरी उड़ान है?", say: "Kya yeh aaj aapki aakhiri udaan hai?" },
+    ],
+  };
+
+  // --- Equipment data ---
+  const videos = [
+    { title: "Receiving a Delivery", desc: "How to check, scan & sign for incoming stock", length: "4:12" },
+    { title: "Using the Price Gun", desc: "Printing and applying price labels correctly", length: "3:05" },
+    { title: "Changing the Price Gun Label Roll", desc: "Step-by-step roll replacement", length: "1:48" },
+  ];
+
+  // --- Global search across all Q&A content ---
+  const [query, setQuery] = useState("");
+  const allQA = [
+    ...Object.values(prodQA).flat().map((x) => ({ ...x, tag: "Product" })),
+    ...custFAQ.map((x) => ({ ...x, tag: "Customer FAQ" })),
+  ];
+  const searchResults = query.trim()
+    ? allQA.filter((x) => x.q.toLowerCase().includes(query.toLowerCase()) || x.a.toLowerCase().includes(query.toLowerCase()))
+    : [];
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Quick Help" onBack={onBack} />
+      <div className="px-5">
+        <div className="rounded-xl px-3.5 py-2.5 flex items-center gap-2.5 mb-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <Search size={14} color={COLORS.textDim} />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search whisky, EDT, returns..."
+            className="flex-1 bg-transparent outline-none text-[12.5px]"
+            style={{ color: COLORS.text }}
+          />
+          {query && <button onClick={() => setQuery("")}><X size={13} color={COLORS.textDim} /></button>}
+        </div>
+
+        {query.trim() ? (
+          <div className="flex flex-col gap-2.5">
+            {searchResults.length === 0 ? (
+              <p className="text-[11.5px]" style={{ color: COLORS.textMuted }}>No matches for "{query}"</p>
+            ) : (
+              searchResults.map((item, i) => (
+                <div key={i} className="rounded-xl p-3.5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                  <span className="text-[9.5px] font-bold" style={{ color: COLORS.goldLight }}>{item.tag}</span>
+                  <p className="text-[12.5px] font-bold mt-1">{item.q}</p>
+                  <p className="text-[11.5px] leading-relaxed mt-1.5" style={{ color: COLORS.textMuted }}>{item.a}</p>
+                </div>
+              ))
+            )}
+          </div>
+        ) : (
+        <>
+        <div className="flex gap-2 mb-5 overflow-x-auto no-scrollbar">
+          {sections.map((s) => (
+            <button key={s.id} onClick={() => { setSection(s.id); setOpen(0); }} className="px-3.5 py-2 rounded-lg text-[11.5px] font-bold flex-shrink-0"
+              style={{ background: section === s.id ? COLORS.red : COLORS.card, color: section === s.id ? "#fff" : COLORS.textMuted, border: `1px solid ${section === s.id ? COLORS.red : COLORS.border}` }}>
+              {s.label}
+            </button>
+          ))}
+        </div>
+
+        {section === "products" && (
+          <>
+            <div className="flex gap-2 mb-4">
+              {prodCategories.map((c, i) => (
+                <button key={c} onClick={() => { setProdCat(i); setOpen(0); }} className="px-3 py-1.5 rounded-lg text-[11px] font-bold"
+                  style={{ background: prodCat === i ? COLORS.gold : COLORS.card, color: prodCat === i ? "#1a1410" : COLORS.textMuted, border: `1px solid ${prodCat === i ? COLORS.gold : COLORS.border}` }}>
+                  {c}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {prodQA[prodCat].map((item, i) => (
+                <div key={i} className="rounded-xl overflow-hidden" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                  <button onClick={() => setOpen(open === i ? -1 : i)} className="w-full p-3.5 flex items-center justify-between text-left">
+                    <p className="text-[12.5px] font-bold pr-3">{item.q}</p>
+                    <ChevronRight size={14} color={COLORS.textMuted} style={{ transform: open === i ? "rotate(90deg)" : "none", flexShrink: 0 }} />
+                  </button>
+                  {open === i && <p className="text-[11.5px] leading-relaxed px-3.5 pb-3.5" style={{ color: COLORS.textMuted }}>{item.a}</p>}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {section === "customer" && (
+          <>
+            <p className="text-[12px] mb-4" style={{ color: COLORS.textMuted }}>Common questions from customers — and simple, confident answers.</p>
+            <div className="flex flex-col gap-2.5">
+              {custFAQ.map((item, i) => (
+                <div key={i} className="rounded-xl overflow-hidden" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                  <button onClick={() => setOpen(open === i ? -1 : i)} className="w-full p-3.5 flex items-center justify-between text-left">
+                    <p className="text-[12.5px] font-bold pr-3">{item.q}</p>
+                    <ChevronRight size={14} color={COLORS.textMuted} style={{ transform: open === i ? "rotate(90deg)" : "none", flexShrink: 0 }} />
+                  </button>
+                  {open === i && <p className="text-[11.5px] leading-relaxed px-3.5 pb-3.5" style={{ color: COLORS.textMuted }}>{item.a}</p>}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {section === "phrases" && (
+          <>
+            <p className="text-[10.5px] mb-3" style={{ color: COLORS.textDim }}>Based on official DDF phrase cards for our highest-traffic passenger nationalities.</p>
+            <div className="flex gap-2 mb-4 overflow-x-auto no-scrollbar">
+              {langs.map((l, i) => (
+                <button key={l} onClick={() => setLang(i)} className="px-3 py-1.5 rounded-lg text-[11px] font-bold flex-shrink-0"
+                  style={{ background: lang === i ? COLORS.teal : COLORS.card, color: lang === i ? "#fff" : COLORS.textMuted, border: `1px solid ${lang === i ? COLORS.teal : COLORS.border}` }}>
+                  {l}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {phrases[lang].map((p, i) => (
+                <div key={i} className="rounded-xl p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                  <p className="text-[11px]" style={{ color: COLORS.textMuted }}>{p.en}</p>
+                  <p className="text-[15px] font-bold mt-1.5">{p.local}</p>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <Volume2 size={11} color={COLORS.goldLight} />
+                    <p className="text-[11px] italic" style={{ color: COLORS.goldLight }}>{p.say}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {section === "equipment" && (
+          <>
+            <p className="text-[12px] mb-4" style={{ color: COLORS.textMuted }}>Short how-to videos for the equipment you use every shift.</p>
+            <div className="flex flex-col gap-2.5">
+              {videos.map((v) => (
+                <div key={v.title} className="rounded-xl p-3.5 flex items-center gap-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(200,16,46,.12)" }}>
+                    <Play size={18} color={COLORS.redLight} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[12.5px] font-bold leading-tight">{v.title}</p>
+                    <p className="text-[10.5px] mt-1" style={{ color: COLORS.textMuted }}>{v.desc}</p>
+                  </div>
+                  <span className="text-[10px] font-bold" style={{ color: COLORS.goldLight }}>{v.length}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------- SKYWARD MILES SCREEN ----------
+function MilesScreen({ onBack }) {
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Skyward Miles" onBack={onBack} />
+      <div className="px-5">
+        <div className="rounded-2xl p-5 mb-5" style={{ background: `linear-gradient(135deg, ${COLORS.cardAlt}, #1f1413)`, border: `1px solid ${COLORS.border}` }}>
+          <p className="text-[10.5px] font-bold tracking-wide" style={{ color: COLORS.goldLight }}>EXCHANGE RATE</p>
+          <p className="text-[22px] font-extrabold mt-1">1 Mile = AED 0.04</p>
+          <p className="text-[11px] mt-1" style={{ color: COLORS.textMuted }}>Approx. 25 miles = AED 1</p>
+        </div>
+        <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>RULES</p>
+        <div className="flex flex-col gap-2">
+          {[
+            "Minimum redemption: 2,000 miles per transaction",
+            "Customer must present a valid Skywards membership card or app",
+            "Miles can be combined with cash, but not with other promotions",
+            "Maximum 50% of total bill can be paid using miles",
+          ].map((r, i) => (
+            <div key={i} className="rounded-xl p-3.5 flex items-start gap-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <CheckCircle2 size={14} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+              <p className="text-[12px] leading-relaxed">{r}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- TRANSPORT SCREEN ----------
+function TransportScreen({ onBack }) {
+  const buses = [
+    { num: "DDF-12", route: "Al Qusais ↔ Terminal 1 & 3", time: "Every 20 min" },
+    { num: "DDF-07", route: "Deira ↔ Terminal 1 & 3", time: "Every 30 min" },
+    { num: "DDF-21", route: "Sharjah ↔ Terminal 3", time: "Every 45 min" },
+    { num: "DDF-04", route: "Jebel Ali ↔ Terminal 1 & 3", time: "Every 40 min" },
+  ];
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Transport" onBack={onBack} />
+      <div className="px-5">
+        <p className="text-[12.5px] mb-4" style={{ color: COLORS.textMuted }}>Staff shuttle routes and approximate frequency.</p>
+        <div className="flex flex-col gap-2.5">
+          {buses.map((b) => (
+            <div key={b.num} className="rounded-xl p-4 flex items-center gap-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <div className="w-12 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,162,39,.15)" }}>
+                <span className="text-[11px] font-extrabold" style={{ color: COLORS.goldLight }}>{b.num}</span>
+              </div>
+              <div>
+                <p className="text-[12.5px] font-bold">{b.route}</p>
+                <p className="text-[10.5px] mt-0.5" style={{ color: COLORS.textMuted }}>{b.time}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- CAREERS SCREEN ----------
+function CareersScreen({ onBack }) {
+  const jobs = [
+    { title: "Senior Sales Associate — Perfume", area: "Terminal 1", type: "Internal Transfer" },
+    { title: "Team Leader — Electronics", area: "Terminal 3", type: "Promotion" },
+    { title: "Visual Merchandiser", area: "Head Office", type: "Internal Transfer" },
+  ];
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Careers" onBack={onBack} />
+      <div className="px-5">
+        <p className="text-[12.5px] mb-4" style={{ color: COLORS.textMuted }}>Open positions within DDF — grow without leaving the family.</p>
+        <div className="flex flex-col gap-2.5">
+          {jobs.map((j, i) => (
+            <div key={i} className="rounded-xl p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <p className="text-[13px] font-bold mb-1.5">{j.title}</p>
+              <div className="flex gap-2">
+                <span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: "rgba(201,162,39,.15)", color: COLORS.goldLight }}>{j.area}</span>
+                <span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: "rgba(13,148,136,.15)", color: COLORS.tealLight }}>{j.type}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- MY CERTIFICATES SCREEN ----------
+function CertificatesScreen({ onBack }) {
+  const certs = [
+    { title: "Product Knowledge — Whisky", date: "Mar 2026", icon: Wine },
+    { title: "Customer Service Excellence", date: "Jan 2026", icon: Award },
+    { title: "Upselling Fragrances", date: "Dec 2025", icon: GraduationCap },
+  ];
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="My Certificates" onBack={onBack} />
+      <div className="px-5">
+        <div className="flex flex-col gap-2.5">
+          {certs.map((c, i) => {
+            const Icon = c.icon;
+            return (
+              <div key={i} className="rounded-xl p-4 flex items-center gap-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,162,39,.15)" }}>
+                  <Icon size={17} color={COLORS.goldLight} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[12.5px] font-bold">{c.title}</p>
+                  <p className="text-[10.5px] mt-0.5" style={{ color: COLORS.textMuted }}>Earned {c.date}</p>
+                </div>
+                <CheckCircle2 size={16} color={COLORS.tealLight} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- COMMENDATION LETTERS SCREEN ----------
+function CommendationsScreen({ onBack }) {
+  const letters = [
+    { text: "Aisha went out of her way to help us find the perfect gift before our flight. Truly outstanding service.", from: "Customer, London", date: "Apr 2026" },
+    { text: "Patient, knowledgeable, and friendly — made our last-minute shopping stress-free.", from: "Customer, Mumbai", date: "Feb 2026" },
+  ];
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Commendation Letters" onBack={onBack} />
+      <div className="px-5">
+        <p className="text-[12.5px] mb-4" style={{ color: COLORS.textMuted }}>What customers have said about you.</p>
+        <div className="flex flex-col gap-3">
+          {letters.map((l, i) => (
+            <div key={i} className="rounded-xl p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <Award size={16} color={COLORS.goldLight} className="mb-2" />
+              <p className="text-[12.5px] leading-relaxed italic" style={{ color: COLORS.text }}>"{l.text}"</p>
+              <div className="flex justify-between mt-3 pt-2" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+                <span className="text-[10.5px] font-bold" style={{ color: COLORS.goldLight }}>{l.from}</span>
+                <span className="text-[10.5px]" style={{ color: COLORS.textMuted }}>{l.date}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- AUTISM-FRIENDLY SERVICE SCREEN ----------
+function AutismScreen({ onBack }) {
+  const tips = [
+    { do: true, text: "Speak in a calm, clear, and even tone" },
+    { do: true, text: "Give them extra time to process and respond" },
+    { do: true, text: "Use simple, direct language and short sentences" },
+    { do: false, text: "Don't touch them without asking first" },
+    { do: false, text: "Don't stand too close or block their personal space" },
+    { do: false, text: "Don't pressure for quick decisions" },
+  ];
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Autism-Friendly Service" onBack={onBack} />
+      <div className="px-5">
+        <p className="text-[12.5px] mb-4" style={{ color: COLORS.textMuted }}>Simple guidance for assisting customers with autism, with care and respect.</p>
+        <div className="flex flex-col gap-2">
+          {tips.map((t, i) => (
+            <div key={i} className="rounded-xl p-3.5 flex items-start gap-3" style={{ background: t.do ? "rgba(13,148,136,.07)" : "rgba(200,16,46,.07)", border: `1px solid ${t.do ? COLORS.teal + "40" : COLORS.red + "40"}` }}>
+              <span className="text-[13px] font-extrabold flex-shrink-0" style={{ color: t.do ? COLORS.tealLight : COLORS.redLight }}>{t.do ? "✓" : "✕"}</span>
+              <p className="text-[12px] leading-relaxed">{t.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- BODY LANGUAGE SCREEN ----------
+function BodyLanguageScreen({ onBack }) {
+  const tips = [
+    { do: true, text: "Open posture, relaxed shoulders, genuine smile" },
+    { do: true, text: "Maintain natural eye contact while listening" },
+    { do: false, text: "Crossed arms — reads as closed off or impatient" },
+    { do: false, text: "Checking your phone or watch while assisting" },
+  ];
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Body Language" onBack={onBack} />
+      <div className="px-5">
+        <p className="text-[12.5px] mb-4" style={{ color: COLORS.textMuted }}>How you carry yourself matters as much as what you say.</p>
+        <div className="flex flex-col gap-2">
+          {tips.map((t, i) => (
+            <div key={i} className="rounded-xl p-3.5 flex items-start gap-3" style={{ background: t.do ? "rgba(13,148,136,.07)" : "rgba(200,16,46,.07)", border: `1px solid ${t.do ? COLORS.teal + "40" : COLORS.red + "40"}` }}>
+              <span className="text-[13px] font-extrabold flex-shrink-0" style={{ color: t.do ? COLORS.tealLight : COLORS.redLight }}>{t.do ? "✓" : "✕"}</span>
+              <p className="text-[12px] leading-relaxed">{t.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- PROFILE SCREEN ----------
+function ProfileScreen({ onNav }) {
+  const [appLang, setAppLang] = useState("English");
+  const [langQuery, setLangQuery] = useState("");
+  const allLanguages = [
+    "English", "Hindi", "Urdu", "Tagalog", "Russian", "Bengali", "Nepali", "Sinhala",
+    "Malayalam", "Tamil", "Telugu", "Punjabi", "Indonesian", "Amharic", "Tigrinya",
+    "Swahili", "French", "Spanish", "Portuguese", "Chinese", "Korean", "Vietnamese",
+    "Persian (Farsi)", "Turkish", "Romanian", "Ukrainian", "Polish", "German", "Italian",
+  ];
+  const filteredLangs = langQuery.trim()
+    ? allLanguages.filter((l) => l.toLowerCase().includes(langQuery.toLowerCase()))
+    : allLanguages;
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <div className="px-5 pt-3 pb-5">
+        <h1 className="text-[17px] font-bold mb-5">Profile</h1>
+        <div className="flex flex-col items-center text-center mb-6">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center text-[22px] font-extrabold mb-3" style={{ background: "rgba(200,16,46,.18)", color: COLORS.redLight, border: `2px solid ${COLORS.red}55` }}>A</div>
+          <p className="text-[16px] font-extrabold">Aibek</p>
+          <p className="text-[11.5px] mt-1" style={{ color: COLORS.textMuted }}>Aibek Electronics #15312 · Terminal 2</p>
+        </div>
+
+        <div className="rounded-2xl p-4 mb-3 grid grid-cols-2 gap-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <div>
+            <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>WITH DDF SINCE</p>
+            <p className="text-[13px] font-bold mt-1">March 2022</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>STAFF ID</p>
+            <p className="text-[13px] font-bold mt-1">DDF-44210</p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl p-4 mb-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <div className="flex items-center justify-between mb-2.5">
+            <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>APP LANGUAGE</p>
+            <span className="text-[8.5px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(201,162,39,.15)", color: COLORS.goldLight }}>Arabic & English live · more coming soon</span>
+          </div>
+
+          <button
+            onClick={() => setAppLang("Arabic")}
+            className="w-full rounded-xl p-3 mb-3 flex items-center justify-between"
+            style={{ background: appLang === "Arabic" ? COLORS.red : "rgba(201,162,39,.08)", border: `1px solid ${appLang === "Arabic" ? COLORS.red : COLORS.gold + "40"}` }}
+          >
+            <div className="flex items-center gap-2">
+              <Globe size={14} color={appLang === "Arabic" ? "#fff" : COLORS.goldLight} />
+              <span className="text-[12px] font-bold" style={{ color: appLang === "Arabic" ? "#fff" : COLORS.text }}>العربية — Arabic</span>
+            </div>
+            <span className="text-[9.5px] font-bold" style={{ color: appLang === "Arabic" ? "rgba(255,255,255,.8)" : COLORS.goldLight }}>Language of the UAE</span>
+          </button>
+
+          <p className="text-[9.5px] mb-2" style={{ color: COLORS.textDim }}>Our team speaks 50+ languages. Full UI translation is rolling out gradually — search to tell us which language to prioritize next.</p>
+          <div className="rounded-lg px-3 py-2 flex items-center gap-2 mb-2.5" style={{ background: "rgba(255,255,255,.04)", border: `1px solid ${COLORS.border}` }}>
+            <Search size={12} color={COLORS.textDim} />
+            <input
+              value={langQuery}
+              onChange={(e) => setLangQuery(e.target.value)}
+              placeholder="Search any language..."
+              className="flex-1 bg-transparent outline-none text-[11.5px]"
+              style={{ color: COLORS.text }}
+            />
+          </div>
+          <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+            {filteredLangs.map((l) => (
+              <button key={l} onClick={() => setAppLang(l)} className="text-[10.5px] font-bold px-2.5 py-1.5 rounded-full"
+                style={{ background: appLang === l ? COLORS.red : "rgba(255,255,255,.04)", color: appLang === l ? "#fff" : COLORS.textMuted, border: `1px solid ${appLang === l ? COLORS.red : COLORS.border}` }}>
+                {l}
+              </button>
+            ))}
+            {filteredLangs.length === 0 && (
+              <p className="text-[10.5px]" style={{ color: COLORS.textDim }}>Not listed? Request it from HR — we're adding more.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-2xl p-4 mb-5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <p className="text-[10px] font-bold mb-2" style={{ color: COLORS.textMuted }}>LANGUAGES SPOKEN</p>
+          <div className="flex flex-wrap gap-1.5">
+            {["English", "Arabic", "Hindi", "Urdu"].map((l) => (
+              <span key={l} className="text-[10.5px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(201,162,39,.15)", color: COLORS.goldLight }}>{l}</span>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl p-4 mb-5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <p className="text-[10px] font-bold mb-3" style={{ color: COLORS.textMuted }}>ATTENDANCE RECORD — THIS YEAR</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg p-3" style={{ background: "rgba(13,148,136,.08)", border: `1px solid ${COLORS.teal}40` }}>
+              <p className="text-[10px] font-bold" style={{ color: COLORS.tealLight }}>LATENESS</p>
+              <p className="text-[20px] font-extrabold mt-1">0</p>
+              <p className="text-[9.5px] mt-0.5" style={{ color: COLORS.textMuted }}>incidents</p>
+            </div>
+            <div className="rounded-lg p-3" style={{ background: "rgba(13,148,136,.08)", border: `1px solid ${COLORS.teal}40` }}>
+              <p className="text-[10px] font-bold" style={{ color: COLORS.tealLight }}>ABSENTEEISM</p>
+              <p className="text-[20px] font-extrabold mt-1">1</p>
+              <p className="text-[9.5px] mt-0.5" style={{ color: COLORS.textMuted }}>unplanned absence</p>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-[12px] font-bold mb-3" style={{ color: COLORS.textMuted }}>MY RECORDS</p>
+        <div className="flex flex-col gap-2 mb-2">
+          {[
+            { id: "certificates", icon: Award, label: "My Certificates" },
+            { id: "commendations", icon: Star, label: "Commendation Letters" },
+            { id: "points", icon: Sparkles, label: "My Points" },
+            { id: "mystery", icon: Eye, label: "Mystery Shopper Results" },
+          ].map((r) => {
+            const Icon = r.icon;
+            return (
+              <button key={r.id} onClick={() => onNav(r.id)} className="rounded-xl p-3.5 flex items-center justify-between" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                <div className="flex items-center gap-3">
+                  <Icon size={15} color={COLORS.goldLight} />
+                  <span className="text-[12.5px] font-bold">{r.label}</span>
+                </div>
+                <ChevronRight size={14} color={COLORS.textDim} />
+              </button>
+            );
+          })}
+        </div>
+
+        <button onClick={() => onNav("admin")} className="w-full rounded-xl p-3.5 mt-4 flex items-center justify-between" style={{ background: "rgba(201,162,39,.08)", border: `1px solid ${COLORS.gold}40` }}>
+          <div className="flex items-center gap-2.5">
+            <ClipboardList size={15} color={COLORS.goldLight} />
+            <div className="text-left">
+              <p className="text-[12px] font-bold">Admin Panel</p>
+              <p className="text-[9px]" style={{ color: COLORS.goldLight }}>Managers only</p>
+            </div>
+          </div>
+          <ChevronRight size={13} color={COLORS.textDim} />
+        </button>
+
+        <button onClick={() => onNav("about")} className="w-full flex items-center justify-between py-3 mt-2" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+          <span className="text-[11.5px] font-bold" style={{ color: COLORS.textMuted }}>About & Privacy Policy</span>
+          <ChevronRight size={13} color={COLORS.textDim} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------- ABOUT & PRIVACY SCREEN ----------
+// ---------- ADMIN PANEL SCREEN (Managers only) ----------
+function AdminPanelScreen({ onBack }) {
+  const tools = [
+    { icon: CheckCircle2, label: "Approve Leave Requests", sub: "3 pending", color: COLORS.teal },
+    { icon: Star, label: "Send a Shoutout", sub: "Recognize someone today", color: COLORS.gold },
+    { icon: Users, label: "Team Overview", sub: "Attendance, sales & points", color: COLORS.red },
+    { icon: FileText, label: "Review Mystery Shopper Reports", sub: "2 new this week", color: COLORS.gold },
+    { icon: Lightbulb, label: "Ideas & Polls Inbox", sub: "View anonymous submissions", color: COLORS.teal },
+  ];
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Admin Panel" onBack={onBack} />
+      <div className="px-5">
+        <div className="rounded-xl p-3 mb-5 flex items-start gap-2" style={{ background: "rgba(201,162,39,.08)", border: `1px solid ${COLORS.gold}40` }}>
+          <ClipboardList size={13} color={COLORS.goldLight} className="mt-0.5 flex-shrink-0" />
+          <p className="text-[10.5px] leading-relaxed" style={{ color: COLORS.textMuted }}>Visible to Supervisors, Duty Officers and Operation Managers only.</p>
+        </div>
+        <div className="flex flex-col gap-2.5">
+          {tools.map((t) => {
+            const Icon = t.icon;
+            return (
+              <button key={t.label} className="w-full rounded-xl p-3.5 flex items-center gap-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${t.color}22` }}>
+                  <Icon size={16} color={t.color} />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-[12.5px] font-bold">{t.label}</p>
+                  <p className="text-[10.5px] mt-0.5" style={{ color: COLORS.textMuted }}>{t.sub}</p>
+                </div>
+                <ChevronRight size={14} color={COLORS.textDim} />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AboutScreen({ onBack }) {
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="About & Privacy" onBack={onBack} />
+      <div className="px-5">
+        <div className="flex flex-col items-center text-center mb-6">
+          <img src={LOGO_SRC} alt="logo" className="w-14 h-14 rounded-full mb-3" />
+          <p className="text-[13px] font-bold">DDF Staff App</p>
+          <p className="text-[10.5px] mt-1" style={{ color: COLORS.textMuted }}>Version 1.0 · Internal use only</p>
+        </div>
+
+        <div className="rounded-2xl p-4 mb-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <p className="text-[11px] font-bold mb-2" style={{ color: COLORS.goldLight }}>WHAT THIS APP IS FOR</p>
+          <p className="text-[12px] leading-relaxed" style={{ color: COLORS.text }}>
+            A daily tool for DDF staff — shifts, leave, training, points and team communication. It is not a replacement for myddf.ae or Oracle Fusion for official HR records.
+          </p>
+        </div>
+
+        <div className="rounded-2xl p-4 mb-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <p className="text-[11px] font-bold mb-2" style={{ color: COLORS.tealLight }}>YOUR PRIVACY</p>
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-start gap-2.5">
+              <CheckCircle2 size={13} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+              <p className="text-[11.5px] leading-relaxed" style={{ color: COLORS.text }}>Your data is used only for app functions — shifts, leave, points and related records.</p>
+            </div>
+            <div className="flex items-start gap-2.5">
+              <Lock size={13} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+              <p className="text-[11.5px] leading-relaxed" style={{ color: COLORS.text }}>Your information is never sold or shared with third parties outside DDF.</p>
+            </div>
+            <div className="flex items-start gap-2.5">
+              <EyeOff size={13} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+              <p className="text-[11.5px] leading-relaxed" style={{ color: COLORS.text }}>Anonymous channels (Feedback, Ideas, Polls) are designed so your identity isn't visible to supervisors or HR unless you choose to share it.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl p-4 mb-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <p className="text-[11px] font-bold mb-2" style={{ color: COLORS.redLight }}>SIGNING IN</p>
+          <p className="text-[12px] leading-relaxed" style={{ color: COLORS.text }}>
+            Access is strictly by personal login and password — your DDF staff credentials. Never share your password with anyone, including colleagues or supervisors.
+          </p>
+        </div>
+
+        <p className="text-[10px] text-center mt-4" style={{ color: COLORS.textDim }}>Questions about your data? Contact HR at any time.</p>
+      </div>
+    </div>
+  );
+}
+
+// ---------- QUICK REFERENCE SCREEN ----------
+function ReferenceScreen({ onBack }) {
+  const [tab, setTab] = useState("holidays");
+  const tabs = [
+    { id: "holidays", label: "Holidays" },
+    { id: "hours", label: "Office Hours" },
+    { id: "currencies", label: "Currencies" },
+    { id: "emergency", label: "Emergency" },
+    { id: "directory", label: "Directory" },
+  ];
+
+  const holidays = [
+    { name: "Eid al-Fitr", date: "20–22 Mar 2027 (approx.)" },
+    { name: "Arafat Day & Eid al-Adha", date: "26–29 May 2027 (approx.)" },
+    { name: "Islamic New Year", date: "16 Jun 2027 (approx.)" },
+    { name: "Commemoration Day", date: "1 Dec 2026" },
+    { name: "UAE National Day", date: "2–3 Dec 2026" },
+  ];
+
+  const directory = [
+    { name: "HR Office", num: "04-601-9351" },
+    { name: "Terminal 1 Duty Office", num: "04-601-9100" },
+    { name: "Terminal 2 Duty Office", num: "04-601-9200" },
+    { name: "Terminal 3 Duty Office", num: "04-601-9300" },
+  ];
+
+  const emergency = [
+    { name: "Police", num: "999" },
+    { name: "Ambulance", num: "998" },
+    { name: "Airport Security", num: "04-601-9911" },
+    { name: "DDF Internal Emergency", num: "04-601-9000" },
+  ];
+
+  const currencies = [
+    { code: "USD", name: "US Dollar", rate: "1 USD ≈ 3.67 AED" },
+    { code: "EUR", name: "Euro", rate: "1 EUR ≈ 3.98 AED" },
+    { code: "GBP", name: "British Pound", rate: "1 GBP ≈ 4.65 AED" },
+    { code: "INR", name: "Indian Rupee", rate: "100 INR ≈ 4.40 AED" },
+    { code: "CNY", name: "Chinese Yuan", rate: "1 CNY ≈ 0.51 AED" },
+    { code: "RUB", name: "Russian Ruble", rate: "100 RUB ≈ 4.10 AED" },
+  ];
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Quick Reference" onBack={onBack} />
+      <div className="px-5">
+        <div className="rounded-xl p-3 mb-4 flex items-start gap-2" style={{ background: "rgba(201,162,39,.08)", border: `1px solid ${COLORS.gold}35` }}>
+          <Sparkles size={12} color={COLORS.goldLight} className="mt-0.5 flex-shrink-0" />
+          <p className="text-[10px] leading-relaxed" style={{ color: COLORS.textMuted }}>Sample data for this demo — real holiday dates, phone numbers and office hours would be pulled from official DDF/HR sources.</p>
+        </div>
+        <div className="flex gap-2 mb-5 overflow-x-auto no-scrollbar">
+          {tabs.map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id)} className="px-3.5 py-2 rounded-lg text-[11.5px] font-bold flex-shrink-0"
+              style={{ background: tab === t.id ? COLORS.red : COLORS.card, color: tab === t.id ? "#fff" : COLORS.textMuted, border: `1px solid ${tab === t.id ? COLORS.red : COLORS.border}` }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === "holidays" && (
+          <div className="flex flex-col gap-2">
+            {holidays.map((h) => (
+              <div key={h.name} className="rounded-xl p-3.5 flex items-center justify-between" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                <p className="text-[12.5px] font-bold">{h.name}</p>
+                <p className="text-[11px]" style={{ color: COLORS.goldLight }}>{h.date}</p>
+              </div>
+            ))}
+            <p className="text-[10.5px] mt-1" style={{ color: COLORS.textDim }}>Islamic dates are approximate, confirmed closer to the time.</p>
+          </div>
+        )}
+
+        {tab === "hours" && (
+          <div className="rounded-2xl p-5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+            <p className="text-[11px] font-bold mb-3" style={{ color: COLORS.goldLight }}>HEAD OFFICE — SUN TO THU</p>
+            <p className="text-[20px] font-extrabold">8:30 AM – 5:30 PM</p>
+            <p className="text-[11.5px] mt-3" style={{ color: COLORS.textMuted }}>Closed Friday & Saturday. Terminal duty offices operate 24/7.</p>
+          </div>
+        )}
+
+        {tab === "currencies" && (
+          <div>
+            <p className="text-[11px] mb-3" style={{ color: COLORS.textMuted }}>Accepted currencies at checkout, with today's approximate rate to AED.</p>
+            <div className="flex flex-col gap-2">
+              {currencies.map((c) => (
+                <div key={c.code} className="rounded-xl p-3.5 flex items-center gap-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,162,39,.15)" }}>
+                    <span className="text-[10.5px] font-extrabold" style={{ color: COLORS.goldLight }}>{c.code}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[12.5px] font-bold">{c.name}</p>
+                    <p className="text-[10.5px] mt-0.5" style={{ color: COLORS.textMuted }}>{c.rate}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-[10.5px] mt-3" style={{ color: COLORS.textDim }}>Rates update daily — always confirm the live rate at the till before charging.</p>
+          </div>
+        )}
+
+        {tab === "emergency" && (
+          <div className="flex flex-col gap-2">
+            {emergency.map((e) => (
+              <div key={e.name} className="rounded-xl p-3.5 flex items-center justify-between" style={{ background: "rgba(200,16,46,.07)", border: `1px solid ${COLORS.red}40` }}>
+                <p className="text-[12.5px] font-bold">{e.name}</p>
+                <p className="text-[13px] font-extrabold" style={{ color: COLORS.redLight }}>{e.num}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab === "directory" && (
+          <div className="flex flex-col gap-2">
+            {directory.map((d) => (
+              <div key={d.name} className="rounded-xl p-3.5 flex items-center justify-between" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                <p className="text-[12.5px] font-bold">{d.name}</p>
+                <p className="text-[12px] font-bold" style={{ color: COLORS.goldLight }}>{d.num}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------- IDEAS & SUGGESTIONS SCREEN ----------
+// ---------- PRIVATE FEEDBACK SCREEN ----------
+function FeedbackScreen({ onBack }) {
+  const [sent, setSent] = useState(false);
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Private Feedback" onBack={onBack} />
+      <div className="px-5">
+        <div className="rounded-2xl p-5 mb-4 flex items-start gap-3" style={{ background: "rgba(13,148,136,.08)", border: `1px solid ${COLORS.teal}55` }}>
+          <Lock size={18} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+          <p className="text-[12px]" style={{ color: COLORS.text }}>
+            This channel is confidential. Your identity is not shown to supervisors unless you choose to share it.
+          </p>
+        </div>
+        <textarea
+          placeholder="Share what's on your mind..."
+          className="w-full h-32 rounded-xl p-4 text-[13px] resize-none outline-none"
+          style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+        />
+        <button
+          onClick={() => setSent(true)}
+          className="w-full py-3.5 rounded-xl font-bold text-[14px] mt-4 flex items-center justify-center gap-2"
+          style={{ background: sent ? "rgba(13,148,136,.15)" : COLORS.red, color: sent ? COLORS.tealLight : "#fff" }}
+        >
+          {sent ? <><CheckCircle2 size={16} /> Sent ✓</> : "Send Anonymously"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function IdeasScreen({ onBack }) {
+  const [votes, setVotes] = useState({});
+  const [sentCompany, setSentCompany] = useState(false);
+  const [sentApp, setSentApp] = useState(false);
+  const [companyVisibility, setCompanyVisibility] = useState("hr"); // hr | public
+  const [appVisibility, setAppVisibility] = useState("hr");
+  const polls = [
+    { id: "p1", q: "Would you use an offline mode for Quick Help when Wi-Fi is weak?" },
+    { id: "p2", q: "Would a Shift Swap feature (trade shifts with a teammate, with supervisor approval) be useful?" },
+    { id: "p3", q: "Would you like push reminders before your Wellness Leave days expire?" },
+  ];
+  const vote = (id, val) => setVotes((v) => ({ ...v, [id]: val }));
+
+  const VisibilityToggle = ({ value, onChange, accent }) => (
+    <div className="flex gap-2 mb-3">
+      <button
+        onClick={() => onChange("hr")}
+        className="flex-1 py-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5"
+        style={{ background: value === "hr" ? accent : "transparent", color: value === "hr" ? "#fff" : COLORS.textMuted, border: `1px solid ${value === "hr" ? accent : COLORS.border}` }}
+      >
+        <Lock size={11} /> Send to HR only
+      </button>
+      <button
+        onClick={() => onChange("public")}
+        className="flex-1 py-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5"
+        style={{ background: value === "public" ? COLORS.gold : "transparent", color: value === "public" ? "#1a1410" : COLORS.textMuted, border: `1px solid ${value === "public" ? COLORS.gold : COLORS.border}` }}
+      >
+        <Eye size={11} /> Post Publicly
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="Ideas & Suggestions" onBack={onBack} />
+      <div className="px-5">
+
+        <div className="rounded-xl p-3 mb-6 flex items-start gap-2" style={{ background: "rgba(13,148,136,.08)", border: `1px solid ${COLORS.teal}40` }}>
+          <Lock size={13} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+          <p className="text-[10.5px] leading-relaxed" style={{ color: COLORS.textMuted }}>Your name is never shown — whether it goes to HR only or gets posted for everyone to see, it stays anonymous.</p>
+        </div>
+
+        <p className="text-[11.5px] font-bold mb-1" style={{ color: COLORS.goldLight }}>IDEAS FOR THE COMPANY</p>
+        <p className="text-[11px] mb-3" style={{ color: COLORS.textMuted }}>Got a thought on sales, service, or how we could do things better? Share it.</p>
+        <div className="rounded-2xl p-4 mb-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <textarea placeholder={'e.g. "What if we put a small sample station near the entrance of AS1 — I think it would pull more walk-ins toward Finest."'} className="w-full h-24 text-[12.5px] bg-transparent outline-none resize-none" style={{ color: COLORS.text }} />
+        </div>
+        <VisibilityToggle value={companyVisibility} onChange={setCompanyVisibility} accent={COLORS.red} />
+        <button
+          onClick={() => setSentCompany(true)}
+          className="w-full py-3 rounded-xl font-bold text-[13.5px] mb-8 flex items-center justify-center gap-2"
+          style={{ background: sentCompany ? "rgba(13,148,136,.15)" : COLORS.red, color: sentCompany ? COLORS.tealLight : "#fff" }}
+        >
+          {sentCompany ? <><CheckCircle2 size={15} /> {companyVisibility === "public" ? "Posted ✓" : "Sent to HR ✓"}</> : companyVisibility === "public" ? "Post Publicly (Anonymous)" : "Send to HR Anonymously"}
+        </button>
+
+        <p className="text-[11.5px] font-bold mb-1" style={{ color: COLORS.tealLight }}>SUGGESTIONS FOR THIS APP</p>
+        <p className="text-[11px] mb-3" style={{ color: COLORS.textMuted }}>Something missing, confusing, or that you wish worked differently here?</p>
+        <div className="rounded-2xl p-4 mb-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <textarea placeholder={'e.g. "I\'m good at video editing — I could make a short promo clip for new arrivals if there was a place to upload it here."'} className="w-full h-24 text-[12.5px] bg-transparent outline-none resize-none" style={{ color: COLORS.text }} />
+        </div>
+        <VisibilityToggle value={appVisibility} onChange={setAppVisibility} accent={COLORS.teal} />
+        <button
+          onClick={() => setSentApp(true)}
+          className="w-full py-3 rounded-xl font-bold text-[13.5px] mb-8 flex items-center justify-center gap-2"
+          style={{ background: sentApp ? "rgba(13,148,136,.15)" : COLORS.teal, color: sentApp ? COLORS.tealLight : "#fff" }}
+        >
+          {sentApp ? <><CheckCircle2 size={15} /> {appVisibility === "public" ? "Posted ✓" : "Sent to HR ✓"}</> : appVisibility === "public" ? "Post Publicly (Anonymous)" : "Send to HR Anonymously"}
+        </button>
+
+        <p className="text-[11.5px] font-bold mb-2" style={{ color: COLORS.textMuted }}>RECENT PUBLIC POSTS</p>
+        <div className="flex flex-col gap-2.5 mb-8">
+          <div className="rounded-xl p-3.5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+            <p className="text-[12px] leading-relaxed">"For improving sales, what if we tried a buy-2-get-10%-off on chocolate at the gate area? I see a lot of last-minute gift buyers."</p>
+            <p className="text-[10px] mt-2" style={{ color: COLORS.textDim }}>Anonymous · 2 days ago</p>
+          </div>
+          <div className="rounded-xl p-3.5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+            <p className="text-[12px] leading-relaxed">"I'm decent with Photoshop — happy to help design posters for the next promo if someone wants to coordinate."</p>
+            <p className="text-[10px] mt-2" style={{ color: COLORS.textDim }}>Anonymous · 4 days ago</p>
+          </div>
+        </div>
+
+        <p className="text-[11.5px] font-bold mb-1" style={{ color: COLORS.text }}>QUICK POLLS</p>
+        <p className="text-[11px] mb-4" style={{ color: COLORS.textMuted }}>Help us prioritize what to build next — answers are anonymous.</p>
+        <div className="flex flex-col gap-3">
+          {polls.map((p) => (
+            <div key={p.id} className="rounded-xl p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <p className="text-[12px] font-bold leading-relaxed mb-3">{p.q}</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => vote(p.id, "yes")}
+                  className="flex-1 py-2 rounded-lg text-[11.5px] font-bold"
+                  style={{ background: votes[p.id] === "yes" ? COLORS.teal : "rgba(255,255,255,.04)", color: votes[p.id] === "yes" ? "#fff" : COLORS.textMuted, border: `1px solid ${votes[p.id] === "yes" ? COLORS.teal : COLORS.border}` }}
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => vote(p.id, "no")}
+                  className="flex-1 py-2 rounded-lg text-[11.5px] font-bold"
+                  style={{ background: votes[p.id] === "no" ? COLORS.red : "rgba(255,255,255,.04)", color: votes[p.id] === "no" ? "#fff" : COLORS.textMuted, border: `1px solid ${votes[p.id] === "no" ? COLORS.red : COLORS.border}` }}
+                >
+                  No
+                </button>
+              </div>
+              {votes[p.id] && <p className="text-[10px] mt-2 text-center" style={{ color: COLORS.textDim }}>Thanks — your answer was recorded anonymously.</p>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- WHAT'S NEW SCREEN ----------
+function WhatsNewScreen({ onBack }) {
+  const updates = [
+    { date: "June 2026", title: "Quick Help launched", desc: "Product knowledge, customer FAQs, phrases & equipment guides — now in one place." },
+    { date: "May 2026", title: "Mystery Shopper feedback", desc: "See specific comments on what went well and what to work on after each visit." },
+    { date: "May 2026", title: "Dubai Talents expanded", desc: "Now supports music, art, writing & AI video — not just sales ideas." },
+    { date: "April 2026", title: "Wellness Leave added", desc: "Request your 4 yearly wellness days with no certificate required." },
+  ];
+  return (
+    <div className="pb-28">
+      <StatusBar />
+      <TopBar title="What's New" onBack={onBack} />
+      <div className="px-5">
+        <div className="relative pl-6">
+          <div className="absolute left-2 top-1 bottom-1 w-0.5" style={{ background: `linear-gradient(180deg, ${COLORS.gold}, transparent)` }} />
+          {updates.map((u, i) => (
+            <div key={i} className="relative mb-6 last:mb-0">
+              <div className="absolute -left-6 top-1 w-3.5 h-3.5 rounded-full" style={{ background: COLORS.bg, border: `2px solid ${COLORS.gold}` }} />
+              <p className="text-[10.5px] font-bold" style={{ color: COLORS.goldLight }}>{u.date}</p>
+              <p className="text-[13px] font-bold mt-1">{u.title}</p>
+              <p className="text-[11.5px] mt-1 leading-relaxed" style={{ color: COLORS.textMuted }}>{u.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- ONBOARDING FLOW ----------
+function Onboarding({ onDone }) {
+  const [step, setStep] = useState(0);
+
+  const screens = [
+    {
+      kind: "hr",
+    },
+    {
+      kind: "features",
+    },
+    {
+      kind: "wheretolook",
+    },
+  ];
+
+  const HRWelcome = () => (
+    <div className="flex flex-col items-center text-center px-8 pt-16">
+      <img src={LOGO_SRC} alt="logo" className="w-16 h-16 rounded-full mb-6" />
+      <p className="text-[11px] font-bold tracking-wide mb-3" style={{ color: COLORS.goldLight }}>A MESSAGE FROM HR</p>
+      <p className="text-[15px] leading-relaxed" style={{ color: COLORS.text }}>
+        "Welcome to the DDF family. We built this app to make your everyday work life a little easier — from your first shift to your hundredth. We hope it helps."
+      </p>
+      <div className="flex items-center gap-2 mt-6">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: "rgba(201,162,39,.18)", color: COLORS.goldLight }}>YT</div>
+        <div className="text-left">
+          <p className="text-[11.5px] font-bold">Yasa Tahir</p>
+          <p className="text-[9.5px]" style={{ color: COLORS.textMuted }}>Vice President — Human Resources</p>
+        </div>
+      </div>
+      <div className="rounded-xl px-3.5 py-2.5 mt-8 flex items-start gap-2" style={{ background: "rgba(13,148,136,.08)", border: `1px solid ${COLORS.teal}40` }}>
+        <Globe size={12} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0" />
+        <p className="text-[10.5px] leading-relaxed text-left" style={{ color: COLORS.textMuted }}>This app is for your day-to-day — it doesn't replace myddf.ae or Oracle Fusion for official HR records.</p>
+      </div>
+    </div>
+  );
+
+  const Features = () => (
+    <div className="flex flex-col px-7 pt-14">
+      <p className="text-[20px] font-extrabold text-center mb-2">What's inside</p>
+      <p className="text-[12.5px] text-center mb-8" style={{ color: COLORS.textMuted }}>Everything you need for daily work, in one place.</p>
+      <div className="flex flex-col gap-3">
+        {[
+          { icon: Calendar, t: "Shifts, leave & documents", color: COLORS.gold },
+          { icon: GraduationCap, t: "Training & product knowledge", color: COLORS.red },
+          { icon: Sparkles, t: "Points, rewards & recognition", color: COLORS.teal },
+          { icon: Lightbulb, t: "Talents, ideas & community", color: COLORS.gold },
+          { icon: Bell, t: "Notified the moment something changes", color: COLORS.red },
+        ].map((f, i) => {
+          const Icon = f.icon;
+          return (
+            <div key={i} className="flex items-center gap-3 rounded-xl p-3.5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${f.color}22` }}>
+                <Icon size={16} color={f.color} />
+              </div>
+              <p className="text-[12.5px] font-bold">{f.t}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const WhereToLook = () => (
+    <div className="flex flex-col px-7 pt-14">
+      <p className="text-[20px] font-extrabold text-center mb-2">Where to find what</p>
+      <p className="text-[12.5px] text-center mb-8" style={{ color: COLORS.textMuted }}>So you never have to wonder where to look.</p>
+      <div className="flex flex-col gap-3">
+        <div className="rounded-xl p-4" style={{ background: "rgba(200,16,46,.07)", border: `1px solid ${COLORS.red}40` }}>
+          <p className="text-[11px] font-bold mb-1" style={{ color: COLORS.redLight }}>THIS APP</p>
+          <p className="text-[12px]" style={{ color: COLORS.text }}>Shifts, training, points, ideas — your daily work life</p>
+        </div>
+        <div className="rounded-xl p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <p className="text-[11px] font-bold mb-1" style={{ color: COLORS.goldLight }}>MYDDF.AE / ORACLE</p>
+          <p className="text-[12px]" style={{ color: COLORS.text }}>Official certificates, formal HR requests & records</p>
+        </div>
+        <div className="rounded-xl p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <p className="text-[11px] font-bold mb-1" style={{ color: COLORS.tealLight }}>WHATSAPP GROUPS</p>
+          <p className="text-[12px]" style={{ color: COLORS.text }}>Quick chats with your team — same as before, unchanged</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="h-full flex flex-col" style={{ background: COLORS.bg }}>
+      <StatusBar />
+      <div className="flex-1">
+        {step === 0 && <HRWelcome />}
+        {step === 1 && <Features />}
+        {step === 2 && <WhereToLook />}
+      </div>
+      <div className="px-7 pb-8">
+        <div className="flex justify-center gap-1.5 mb-5">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-1.5 rounded-full transition-all" style={{ width: i === step ? 20 : 6, background: i === step ? COLORS.red : COLORS.border }} />
+          ))}
+        </div>
+        <button
+          onClick={() => (step < 2 ? setStep(step + 1) : onDone())}
+          className="w-full py-3.5 rounded-xl font-bold text-[14px]"
+          style={{ background: COLORS.red, color: "#fff" }}
+        >
+          {step < 2 ? "Next" : "Get Started"}
+        </button>
+        {step < 2 && (
+          <button onClick={onDone} className="w-full py-3 text-[12px] font-bold mt-1" style={{ color: COLORS.textMuted }}>
+            Skip
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------- APP ROOT ----------
+function StaffApp() {
+  const [onboarded, setOnboarded] = useState(false);
+  const [screen, setScreenRaw] = useState("home");
+  const scrollRef = React.useRef(null);
+  const scrollPositions = React.useRef({});
+  const currentScreenRef = React.useRef("home");
+
+  // Keep a continuously-updated record of scroll position for whichever screen is
+  // currently mounted. This is more reliable than trying to capture scrollTop at the
+  // exact moment of navigating away, which can race with React's render/commit timing.
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      scrollPositions.current[currentScreenRef.current] = scrollRef.current.scrollTop;
+    }
+  };
+
+  const setScreen = (next) => {
+    setScreenRaw(next);
+  };
+
+  // After the new screen has fully painted, jump to its remembered position (or top, on first visit).
+  // useLayoutEffect alone fires before the browser finishes laying out long screens (e.g. Home with
+  // 30+ cards) — scrollHeight isn't final yet, so the position gets clamped back near 0. Wrapping the
+  // actual scroll-jump in requestAnimationFrame guarantees layout is complete first.
+  React.useLayoutEffect(() => {
+    currentScreenRef.current = screen;
+    const raf = requestAnimationFrame(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollPositions.current[screen] || 0;
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [screen]);
+
+  const handleNav = (id) => {
+    setScreen(id);
+  };
+
+  let content;
+  let activeTab = "home";
+  if (screen === "home") { content = <HomeScreen onNav={setScreen} />; activeTab = "home"; }
+  else if (screen === "leave") { content = <LeaveScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "shifts") { content = <ShiftsScreen onBack={() => setScreen("home")} onNavCalendar={() => setScreen("calendar")} onNavMySales={() => setScreen("mysales")} />; activeTab = "shifts"; }
+  else if (screen === "calendar") { content = <CalendarScreen onBack={() => setScreen("home")} />; activeTab = "shifts"; }
+  else if (screen === "mysales") { content = <MySalesScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "training") { content = <TrainingScreen onBack={() => setScreen("home")} />; activeTab = "training"; }
+  else if (screen === "team") { content = <LeadershipScreen onBack={() => setScreen("home")} />; activeTab = "team"; }
+  else if (screen === "profile") { content = <ProfileScreen onNav={setScreen} />; activeTab = "profile"; }
+  else if (screen === "docs") {
+    content = (
+      <div className="pb-28">
+        <StatusBar />
+        <TopBar title="Documents" onBack={() => setScreen("home")} />
+        <div className="px-5 flex flex-col gap-2">
+          {["Employment Certificate", "Salary Certificate", "Uniform Reissue Request"].map((d) => (
+            <button key={d} className="rounded-xl p-4 flex items-center gap-3 text-left" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(201,162,39,.15)" }}>
+                <ClipboardList size={16} color={COLORS.goldLight} />
+              </div>
+              <p className="text-[12.5px] font-bold">{d}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+    activeTab = "home";
+  } else if (screen === "feedback") { content = <FeedbackScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "ideas") { content = <IdeasScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "about") { content = <AboutScreen onBack={() => setScreen("profile")} />; activeTab = "profile"; }
+  else if (screen === "admin") { content = <AdminPanelScreen onBack={() => setScreen("profile")} />; activeTab = "profile"; }
+  else if (screen === "points") { content = <PointsScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "discounts") { content = <DiscountsScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "mystery") { content = <MysteryShopperScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "talents") { content = <TalentsIdeasScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "competition") { content = <TalentsCupScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "story") { content = <StoryScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "eom") { content = <EOMScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "quickhelp") { content = <QuickHelpScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "whatsnew") { content = <WhatsNewScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "miles") { content = <MilesScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "transport") { content = <TransportScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "careers") { content = <CareersScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "certificates") { content = <CertificatesScreen onBack={() => setScreen("profile")} />; activeTab = "profile"; }
+  else if (screen === "commendations") { content = <CommendationsScreen onBack={() => setScreen("profile")} />; activeTab = "profile"; }
+  else if (screen === "autism") { content = <AutismScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "bodylanguage") { content = <BodyLanguageScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+  else if (screen === "reference") { content = <ReferenceScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
+
+
+  return (
+    <PhoneFrame ref={scrollRef} onScroll={handleScroll}>
+      {!onboarded ? (
+        <Onboarding onDone={() => setOnboarded(true)} />
+      ) : (
+        <div className="relative h-full">
+          {content}
+          <BottomNav active={activeTab} onNav={handleNav} />
+        </div>
+      )}
+    </PhoneFrame>
+  );
+}
+
+</script>
+
+<script>
+function showError(title, detail) {
+  var box = document.getElementById('error-display');
+  box.style.display = 'block';
+  box.textContent = title + '\n\n' + detail;
+}
+
+function setStatus(msg) {
+  var el = document.getElementById('status');
+  if (el) el.textContent = msg;
+}
+
+window.addEventListener('load', function () {
+  var attempts = 0;
+  function tryInit() {
+    attempts++;
+    if (typeof React === "undefined" || typeof ReactDOM === "undefined" || typeof Babel === "undefined") {
+      if (attempts < 20) {
+        setStatus("Step 1: checking libraries… (attempt " + attempts + ")");
+        setTimeout(tryInit, 250);
+        return;
+      }
+      var missing = [];
+      if (typeof React === "undefined") missing.push("React");
+      if (typeof ReactDOM === "undefined") missing.push("ReactDOM");
+      if (typeof Babel === "undefined") missing.push("Babel");
+      showError("LOAD ERROR", "These libraries did not load after 5 seconds: " + missing.join(", ") + ".\n\nThis usually means the device has no internet access right now, or this specific network is blocking unpkg.com.\n\nTry: open this file while connected to Wi-Fi or mobile data, not while offline.");
+      return;
+    }
+    runApp();
+  }
+  tryInit();
+});
+
+function runApp() {
+  try {
+    setStatus("Step 2: reading source…");
+    var source = document.getElementById('jsx-source').textContent;
+
+    setStatus("Step 3: compiling JSX (this can take a few seconds on mobile)…");
+    var compiled;
+    try {
+      compiled = Babel.transform(source, {
+        presets: [["react", { runtime: "classic" }]]
+      }).code;
+    } catch (compileErr) {
+      showError("COMPILE ERROR (Babel could not parse the code)", compileErr.message + (compileErr.stack ? "\n\n" + compileErr.stack : ""));
+      return;
+    }
+
+    setStatus("Step 4: running app…");
+    try {
+      var runner = new Function("React", "ReactDOM", "useState",
+        compiled + "\n;window.__StaffAppComponent = StaffApp;"
+      );
+      runner(React, ReactDOM, React.useState);
+    } catch (runErr) {
+      showError("RUNTIME ERROR (code ran but threw an exception)", runErr.message + (runErr.stack ? "\n\n" + runErr.stack : ""));
+      return;
+    }
+
+    if (typeof window.__StaffAppComponent !== "function") {
+      showError("SETUP ERROR", "StaffApp component was not found after running the code.");
+      return;
+    }
+
+    var root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(React.createElement(window.__StaffAppComponent));
+  } catch (outer) {
+    showError("UNEXPECTED ERROR", outer.message + (outer.stack ? "\n\n" + outer.stack : ""));
+  }
+}
+</script>
+</body>
+</html>
