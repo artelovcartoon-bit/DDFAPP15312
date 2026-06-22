@@ -622,7 +622,7 @@ function LeaveScreen({ onBack }) {
 }
 
 // ---------- SHIFTS SCREEN ----------
-function ShiftsScreen({ onBack, onNavCalendar, onNavMySales, onNavReports }) {
+function ShiftsScreen({ onBack, onNavCalendar, onNavMySales }) {
   // 4-team rotation: A/B/C/D, each cycling Day/Day/Off/Off/Night/Night/Off/Off (8-day cycle), offset by 2 days per team
   const myTeam = "B";
 
@@ -804,11 +804,6 @@ function ShiftsScreen({ onBack, onNavCalendar, onNavMySales, onNavReports }) {
           <TrendingUp size={16} color={COLORS.redLight} className="flex-shrink-0" />
           <span className="text-[12px] font-bold flex-1 text-left">Looking for your personal sales & area? Check My Sales</span>
           <ChevronRight size={14} color={COLORS.redLight} />
-        </button>
-        <button onClick={() => onNavReports && onNavReports()} className="w-full rounded-xl p-3.5 mb-6 flex items-center gap-3" style={{ background: "rgba(201,162,39,.07)", border: `1px solid ${COLORS.gold}40` }}>
-          <FileText size={16} color={COLORS.goldLight} className="flex-shrink-0" />
-          <span className="text-[12px] font-bold flex-1 text-left">Daily Reports — BPASS Shift & MTD</span>
-          <ChevronRight size={14} color={COLORS.goldLight} />
         </button>
 
         <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>AREA SALE vs BUDGET — TODAY</p>
@@ -2385,171 +2380,6 @@ function ProfileScreen({ onNav }) {
 
 // ---------- ABOUT & PRIVACY SCREEN ----------
 // ---------- ADMIN PANEL SCREEN (Managers only) ----------
-function AdminReportsTab() {
-  const reportTypes = ["Shift Report", "MTD Summary", "Area Breakdown", "Other"];
-  const [type, setType] = useState("Shift Report");
-  const [note, setNote] = useState("");
-  const [preview, setPreview] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [published, setPublished] = useState(false);
-
-  const loadExisting = () => {
-    try {
-      const stored = JSON.parse(localStorage.getItem("ddf_reports") || "[]");
-      return stored;
-    } catch { return []; }
-  };
-  const [reports, setReports] = useState(loadExisting);
-
-  const handleFile = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploading(true);
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setPreview(ev.target.result);
-      setUploading(false);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const publish = () => {
-    if (!preview) return;
-    const now = new Date();
-    const entry = {
-      id: Date.now(),
-      type,
-      note: note.trim(),
-      image: preview,
-      date: now.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
-      time: now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
-    };
-    const updated = [entry, ...reports].slice(0, 10); // keep last 10
-    setReports(updated);
-    localStorage.setItem("ddf_reports", JSON.stringify(updated));
-    setPreview(null);
-    setNote("");
-    setPublished(true);
-    setTimeout(() => setPublished(false), 2500);
-  };
-
-  const remove = (id) => {
-    const updated = reports.filter(r => r.id !== id);
-    setReports(updated);
-    localStorage.setItem("ddf_reports", JSON.stringify(updated));
-  };
-
-  const inputStyle = { width: "100%", background: "rgba(255,255,255,.04)", border: `1px solid #261e19`, borderRadius: 10, padding: "10px 12px", fontSize: 13, color: "#f2efec", outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
-
-  return (
-    <div>
-      {/* Upload new report */}
-      <div style={{ background: "#161210", border: "1px solid #261e19", borderRadius: 16, padding: 16, marginBottom: 14 }}>
-        <p style={{ fontSize: 11, fontWeight: 700, color: "#a89e98", letterSpacing: ".04em", marginBottom: 12 }}>📊 UPLOAD DAILY REPORT</p>
-        <p style={{ fontSize: 10.5, color: "#a89e98", marginBottom: 10 }}>Upload a screenshot or photo of the BPASS report — staff will see it instantly in the app.</p>
-
-        {/* Type selector */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-          {reportTypes.map(t => (
-            <button key={t} onClick={() => setType(t)} style={{ padding: "6px 12px", borderRadius: 20, fontSize: 10.5, fontWeight: 700, background: type === t ? "#c8102e" : "rgba(255,255,255,.04)", color: type === t ? "#fff" : "#a89e98", border: `1px solid ${type === t ? "#c8102e" : "#261e19"}`, cursor: "pointer" }}>{t}</button>
-          ))}
-        </div>
-
-        {/* Note */}
-        <input value={note} onChange={e => setNote(e.target.value)} placeholder="Optional note (e.g. Shift 3 · 7PM–12AM)" style={{ ...inputStyle, marginBottom: 12 }} />
-
-        {/* File upload */}
-        <label style={{ display: "block", background: "rgba(200,16,46,.08)", border: "1px dashed rgba(200,16,46,.4)", borderRadius: 12, padding: "20px 16px", textAlign: "center", cursor: "pointer", marginBottom: 12 }}>
-          <input type="file" accept="image/*" onChange={handleFile} style={{ display: "none" }} />
-          {uploading ? (
-            <p style={{ fontSize: 12, color: "#a89e98" }}>Loading…</p>
-          ) : preview ? (
-            <div>
-              <img src={preview} alt="preview" style={{ width: "100%", borderRadius: 8, marginBottom: 8 }} />
-              <p style={{ fontSize: 10.5, color: "#e8485f" }}>Tap to change photo</p>
-            </div>
-          ) : (
-            <div>
-              <p style={{ fontSize: 24, marginBottom: 6 }}>📸</p>
-              <p style={{ fontSize: 12.5, fontWeight: 700, color: "#f2efec" }}>Tap to upload photo</p>
-              <p style={{ fontSize: 10.5, color: "#a89e98", marginTop: 4 }}>Screenshot from BPASS or camera photo</p>
-            </div>
-          )}
-        </label>
-
-        <button onClick={publish} disabled={!preview} style={{ width: "100%", padding: "13px 0", borderRadius: 12, background: published ? "rgba(13,148,136,.15)" : preview ? "#c8102e" : "rgba(255,255,255,.04)", color: published ? "#5eead4" : preview ? "#fff" : "#6b615a", border: "none", fontWeight: 700, fontSize: 13, cursor: preview ? "pointer" : "not-allowed" }}>
-          {published ? "✓ Published to all staff" : "Publish to Staff"}
-        </button>
-      </div>
-
-      {/* Published reports */}
-      {reports.length > 0 && (
-        <div>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#a89e98", letterSpacing: ".04em", marginBottom: 10 }}>PUBLISHED REPORTS</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {reports.map(r => (
-              <div key={r.id} style={{ background: "#161210", border: "1px solid #261e19", borderRadius: 14, overflow: "hidden" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderBottom: "1px solid #261e19" }}>
-                  <div>
-                    <p style={{ fontSize: 11.5, fontWeight: 700, color: "#f2efec" }}>{r.type}</p>
-                    <p style={{ fontSize: 10, color: "#a89e98", marginTop: 2 }}>{r.date} · {r.time}{r.note ? ` · ${r.note}` : ""}</p>
-                  </div>
-                  <button onClick={() => remove(r.id)} style={{ background: "none", border: "none", color: "#e8485f", fontSize: 18, cursor: "pointer", padding: "0 2px" }}>✕</button>
-                </div>
-                <img src={r.image} alt={r.type} style={{ width: "100%", display: "block" }} />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function DailyReportScreen({ onBack }) {
-  const [reports, setReports] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("ddf_reports") || "[]"); } catch { return []; }
-  });
-  const [selected, setSelected] = useState(null);
-
-  return (
-    <div style={{ paddingBottom: 112, background: "#0c0c0c", minHeight: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", padding: "14px 24px 4px", fontSize: 11, fontWeight: 600, color: "#f2efec" }}><span>9:41</span><span>●●● Wi-Fi 🔋</span></div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 20px 16px" }}>
-        <button onClick={selected ? () => setSelected(null) : onBack} style={{ width: 32, height: 32, borderRadius: "50%", background: "#161210", border: "none", cursor: "pointer", color: "#f2efec", fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
-        <h1 style={{ fontSize: 17, fontWeight: 700, flex: 1, color: "#f2efec", margin: 0 }}>{selected ? selected.type : "Daily Reports"}</h1>
-      </div>
-
-      {selected ? (
-        <div style={{ padding: "0 20px" }}>
-          <div style={{ background: "#161210", border: "1px solid #261e19", borderRadius: 12, padding: "10px 14px", marginBottom: 12 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "#e0c267" }}>{selected.type}</p>
-            <p style={{ fontSize: 10.5, color: "#a89e98", marginTop: 3 }}>{selected.date} · {selected.time}{selected.note ? ` · ${selected.note}` : ""}</p>
-          </div>
-          <img src={selected.image} alt={selected.type} style={{ width: "100%", borderRadius: 12 }} />
-        </div>
-      ) : reports.length === 0 ? (
-        <div style={{ padding: "60px 20px", textAlign: "center" }}>
-          <p style={{ fontSize: 32, marginBottom: 12 }}>📊</p>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "#f2efec" }}>No reports yet</p>
-          <p style={{ fontSize: 11.5, color: "#a89e98", marginTop: 6 }}>Your supervisor will publish shift reports here.</p>
-        </div>
-      ) : (
-        <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: 12 }}>
-          {reports.map(r => (
-            <button key={r.id} onClick={() => setSelected(r)} style={{ background: "#161210", border: "1px solid #261e19", borderRadius: 14, overflow: "hidden", cursor: "pointer", textAlign: "left", width: "100%" }}>
-              <img src={r.image} alt={r.type} style={{ width: "100%", display: "block", maxHeight: 160, objectFit: "cover", objectPosition: "top" }} />
-              <div style={{ padding: "10px 14px" }}>
-                <p style={{ fontSize: 12.5, fontWeight: 700, color: "#f2efec", margin: 0 }}>{r.type}</p>
-                <p style={{ fontSize: 10, color: "#a89e98", marginTop: 3 }}>{r.date} · {r.time}{r.note ? ` · ${r.note}` : ""}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 function QuickChatScreen({ onBack }) {
   const contacts = [
@@ -2779,14 +2609,12 @@ function AdminPanelScreen({ onBack }) {
 
         {/* Tabs */}
         <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-          {["tools", "reports", "settings"].map(t => (
+          {["tools", "settings"].map(t => (
             <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: "9px 0", borderRadius: 10, fontSize: 11, fontWeight: 700, background: tab === t ? COLORS.red : COLORS.card, color: tab === t ? "#fff" : COLORS.textMuted, border: `1px solid ${tab === t ? COLORS.red : COLORS.border}`, cursor: "pointer" }}>
-              {t === "tools" ? "Tools" : t === "reports" ? "📊 Reports" : "⚙ Settings"}
+              {t === "tools" ? "Tools" : "⚙ Settings"}
             </button>
           ))}
         </div>
-
-        {tab === "reports" && <AdminReportsTab />}
 
         {tab === "tools" && (
           <div className="flex flex-col gap-2.5">
@@ -3393,7 +3221,7 @@ function StaffApp() {
   let activeTab = "home";
   if (screen === "home") { content = <HomeScreen onNav={setScreen} />; activeTab = "home"; }
   else if (screen === "leave") { content = <LeaveScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
-  else if (screen === "shifts") { content = <ShiftsScreen onBack={() => setScreen("home")} onNavCalendar={() => setScreen("calendar")} onNavMySales={() => setScreen("mysales")} onNavReports={() => setScreen("reports")} />; activeTab = "shifts"; }
+  else if (screen === "shifts") { content = <ShiftsScreen onBack={() => setScreen("home")} onNavCalendar={() => setScreen("calendar")} onNavMySales={() => setScreen("mysales")} />; activeTab = "shifts"; }
   else if (screen === "calendar") { content = <CalendarScreen onBack={() => setScreen("home")} />; activeTab = "shifts"; }
   else if (screen === "mysales") { content = <MySalesScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
   else if (screen === "training") { content = <TrainingScreen onBack={() => setScreen("home")} />; activeTab = "training"; }
@@ -3433,7 +3261,6 @@ function StaffApp() {
   else if (screen === "about") { content = <AboutScreen onBack={() => setScreen("profile")} />; activeTab = "profile"; }
   else if (screen === "admin") { content = <AdminPanelScreen onBack={() => setScreen("profile")} />; activeTab = "profile"; }
   else if (screen === "chat") { content = <QuickChatScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
-  else if (screen === "reports") { content = <DailyReportScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
   else if (screen === "points") { content = <PointsScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
   else if (screen === "discounts") { content = <DiscountsScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
   else if (screen === "mystery") { content = <MysteryShopperScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
