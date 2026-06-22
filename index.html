@@ -496,6 +496,16 @@ function LeaveScreen({ onBack }) {
             <div className="w-full h-2 rounded-full mt-3" style={{ background: COLORS.border }}>
               <div className="h-2 rounded-full" style={{ width: "60%", background: COLORS.gold }} />
             </div>
+            <div className="flex justify-between mt-3 pt-3" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+              <div>
+                <p className="text-[9.5px] font-bold" style={{ color: COLORS.textMuted }}>LAST VACATION</p>
+                <p className="text-[11.5px] font-bold mt-0.5">14 Nov – 5 Dec 2024</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[9.5px] font-bold" style={{ color: COLORS.textMuted }}>NEXT DUE</p>
+                <p className="text-[11.5px] font-bold mt-0.5" style={{ color: COLORS.tealLight }}>May 2025</p>
+              </div>
+            </div>
           </div>
           <button className="w-full py-3.5 rounded-xl font-bold text-[14px]" style={{ background: COLORS.red, color: "#fff" }}>
             Request Annual Leave
@@ -2270,17 +2280,6 @@ function BodyLanguageScreen({ onBack }) {
 
 // ---------- PROFILE SCREEN ----------
 function ProfileScreen({ onNav }) {
-  const [appLang, setAppLang] = useState("English");
-  const [langQuery, setLangQuery] = useState("");
-  const allLanguages = [
-    "English", "Hindi", "Urdu", "Tagalog", "Russian", "Bengali", "Nepali", "Sinhala",
-    "Malayalam", "Tamil", "Telugu", "Punjabi", "Indonesian", "Amharic", "Tigrinya",
-    "Swahili", "French", "Spanish", "Portuguese", "Chinese", "Korean", "Vietnamese",
-    "Persian (Farsi)", "Turkish", "Romanian", "Ukrainian", "Polish", "German", "Italian",
-  ];
-  const filteredLangs = langQuery.trim()
-    ? allLanguages.filter((l) => l.toLowerCase().includes(langQuery.toLowerCase()))
-    : allLanguages;
 
   return (
     <div className="pb-28">
@@ -2302,56 +2301,13 @@ function ProfileScreen({ onNav }) {
             <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>STAFF ID</p>
             <p className="text-[13px] font-bold mt-1">DDF-44210</p>
           </div>
-        </div>
-
-        <div className="rounded-2xl p-4 mb-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
-          <div className="flex items-center justify-between mb-2.5">
-            <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>APP LANGUAGE</p>
-            <span className="text-[8.5px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(201,162,39,.15)", color: COLORS.goldLight }}>Arabic & English live · more coming soon</span>
+          <div>
+            <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>LAST ANNUAL LEAVE</p>
+            <p className="text-[13px] font-bold mt-1">14 Nov 2024</p>
           </div>
-
-          <button
-            onClick={() => setAppLang("Arabic")}
-            className="w-full rounded-xl p-3 mb-3 flex items-center justify-between"
-            style={{ background: appLang === "Arabic" ? COLORS.red : "rgba(201,162,39,.08)", border: `1px solid ${appLang === "Arabic" ? COLORS.red : COLORS.gold + "40"}` }}
-          >
-            <div className="flex items-center gap-2">
-              <Globe size={14} color={appLang === "Arabic" ? "#fff" : COLORS.goldLight} />
-              <span className="text-[12px] font-bold" style={{ color: appLang === "Arabic" ? "#fff" : COLORS.text }}>العربية — Arabic</span>
-            </div>
-            <span className="text-[9.5px] font-bold" style={{ color: appLang === "Arabic" ? "rgba(255,255,255,.8)" : COLORS.goldLight }}>Language of the UAE</span>
-          </button>
-
-          <p className="text-[9.5px] mb-2" style={{ color: COLORS.textDim }}>Our team speaks 50+ languages. Full UI translation is rolling out gradually — search to tell us which language to prioritize next.</p>
-          <div className="rounded-lg px-3 py-2 flex items-center gap-2 mb-2.5" style={{ background: "rgba(255,255,255,.04)", border: `1px solid ${COLORS.border}` }}>
-            <Search size={12} color={COLORS.textDim} />
-            <input
-              value={langQuery}
-              onChange={(e) => setLangQuery(e.target.value)}
-              placeholder="Search any language..."
-              className="flex-1 bg-transparent outline-none text-[11.5px]"
-              style={{ color: COLORS.text }}
-            />
-          </div>
-          <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-            {filteredLangs.map((l) => (
-              <button key={l} onClick={() => setAppLang(l)} className="text-[10.5px] font-bold px-2.5 py-1.5 rounded-full"
-                style={{ background: appLang === l ? COLORS.red : "rgba(255,255,255,.04)", color: appLang === l ? "#fff" : COLORS.textMuted, border: `1px solid ${appLang === l ? COLORS.red : COLORS.border}` }}>
-                {l}
-              </button>
-            ))}
-            {filteredLangs.length === 0 && (
-              <p className="text-[10.5px]" style={{ color: COLORS.textDim }}>Not listed? Request it from HR — we're adding more.</p>
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-2xl p-4 mb-5" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
-          <p className="text-[10px] font-bold mb-2" style={{ color: COLORS.textMuted }}>LANGUAGES SPOKEN</p>
-          <div className="flex flex-wrap gap-1.5">
-            {["English", "Arabic", "Hindi", "Urdu"].map((l) => (
-              <span key={l} className="text-[10.5px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(201,162,39,.15)", color: COLORS.goldLight }}>{l}</span>
-            ))}
+          <div>
+            <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>NEXT LEAVE DUE</p>
+            <p className="text-[13px] font-bold mt-1" style={{ color: COLORS.tealLight }}>May 2025</p>
           </div>
         </div>
 
@@ -2402,6 +2358,21 @@ function ProfileScreen({ onNav }) {
           </div>
           <ChevronRight size={13} color={COLORS.textDim} />
         </button>
+
+        <div className="rounded-2xl p-4 mt-4 mb-2" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Globe size={13} color={COLORS.textMuted} />
+              <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>LANGUAGE SETTINGS</p>
+            </div>
+            <span className="text-[8.5px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: "rgba(201,162,39,.15)", color: COLORS.goldLight }}>Coming Soon</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {["🇬🇧 EN", "🇦🇪 AR", "🇮🇳 HI", "🇷🇺 RU", "🇵🇭 TL", "🇨🇳 ZH"].map((l) => (
+              <span key={l} className="text-[11px] px-3 py-1.5 rounded-full" style={{ background: "rgba(255,255,255,.04)", border: `1px solid ${COLORS.border}`, color: COLORS.textDim }}>{l}</span>
+            ))}
+          </div>
+        </div>
 
         <button onClick={() => onNav("about")} className="w-full flex items-center justify-between py-3 mt-2" style={{ borderTop: `1px solid ${COLORS.border}` }}>
           <span className="text-[11.5px] font-bold" style={{ color: COLORS.textMuted }}>About & Privacy Policy</span>
@@ -3434,14 +3405,25 @@ function StaffApp() {
         <StatusBar />
         <TopBar title="Documents" onBack={() => setScreen("home")} />
         <div className="px-5 flex flex-col gap-2">
-          {["Employment Certificate", "Salary Certificate", "Uniform Reissue Request"].map((d) => (
-            <button key={d} className="rounded-xl p-4 flex items-center gap-3 text-left" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(201,162,39,.15)" }}>
-                <ClipboardList size={16} color={COLORS.goldLight} />
-              </div>
-              <p className="text-[12.5px] font-bold">{d}</p>
-            </button>
-          ))}
+          {[
+            { label: "Employment Certificate", icon: ClipboardList },
+            { label: "Salary Certificate", icon: ClipboardList },
+            { label: "Uniform Reissue Request", icon: ClipboardList },
+            { label: "Name Tag Request", icon: Tag, highlight: true },
+          ].map((d) => {
+            const Icon = d.icon;
+            return (
+              <button key={d.label} className="rounded-xl p-4 flex items-center gap-3 text-left" style={{ background: d.highlight ? "rgba(200,16,46,.07)" : COLORS.card, border: `1px solid ${d.highlight ? COLORS.red + "50" : COLORS.border}` }}>
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: d.highlight ? "rgba(200,16,46,.18)" : "rgba(201,162,39,.15)" }}>
+                  <Icon size={16} color={d.highlight ? COLORS.redLight : COLORS.goldLight} />
+                </div>
+                <div>
+                  <p className="text-[12.5px] font-bold">{d.label}</p>
+                  {d.highlight && <p className="text-[10px] mt-0.5" style={{ color: COLORS.redLight }}>Lost or damaged — request replacement</p>}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     );
