@@ -415,6 +415,22 @@ function HomeScreen({ onNav }) {
         </div>
       </button>
 
+      <div className="px-5 mb-2">
+        <button onClick={() => onNav("chat")} className="w-full rounded-2xl p-4 flex items-center gap-3" style={{ background: "rgba(13,148,136,.08)", border: `1px solid ${COLORS.teal}44` }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(13,148,136,.18)" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={COLORS.tealLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div className="flex-1 text-left">
+            <p className="text-[13px] font-bold">Message Supervisor</p>
+            <p className="text-[10.5px] mt-0.5" style={{ color: COLORS.textMuted }}>Anoop Kumar · Terminal 2</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full" style={{ background: COLORS.tealLight }}></span>
+            <ChevronRight size={14} color={COLORS.tealLight} />
+          </div>
+        </button>
+      </div>
+
       <Section title="DAILY ESSENTIALS" items={coreMenu} />
       <Section title="LEARN & SELL BETTER" items={growMenu} />
       <Section title="SERVICE EXCELLENCE" items={serviceMenu} />
@@ -842,28 +858,33 @@ function MySalesScreen({ onBack }) {
 
   const [board, setBoard] = useState("individual");
   const [product, setProduct] = useState("Lindt Pistachio Kunafa");
+  const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
   const leaders = [
-    { name: "You", val: "AED 13,000", rank: 1, me: true },
-    { name: "Fatima R.", val: "AED 3,180", rank: 2 },
-    { name: "Omar K.", val: "AED 2,050", rank: 3 },
+    { name: "You", val: "AED 13,000", raw: 13000, rank: 1, me: true },
+    { name: "Josita", val: "AED 3,180", raw: 3180, rank: 2 },
+    { name: "Amine", val: "AED 2,050", raw: 2050, rank: 3 },
+    { name: "Emmanuel", val: "AED 1,780", raw: 1780, rank: 4 },
+    { name: "Joel", val: "AED 1,240", raw: 1240, rank: 5 },
   ];
+  const teamTotal = leaders.reduce((s, l) => s + l.raw, 0);
+  const teamTarget = 3000 * leaders.length;
   const products = ["Lindt Pistachio Kunafa", "Sony WH-1000XM6", "AirPods Pro 3"];
   const productLeaders = {
     "Lindt Pistachio Kunafa": [
       { name: "A.Sese", val: "12 units", amt: "AED 540", rank: 1 },
       { name: "You", val: "8 units", amt: "AED 360", rank: 2, me: true },
       { name: "Priya N.", val: "5 units", amt: "AED 225", rank: 3 },
-      { name: "Omar K.", val: "3 units", amt: "AED 135", rank: 4 },
+      { name: "Joel", val: "3 units", amt: "AED 135", rank: 4 },
     ],
     "Sony WH-1000XM6": [
       { name: "You", val: "12 units", amt: "AED 14,388", rank: 1, me: true },
-      { name: "Omar K.", val: "9 units", amt: "AED 10,791", rank: 2 },
+      { name: "Amine", val: "9 units", amt: "AED 10,791", rank: 2 },
       { name: "Priya N.", val: "6 units", amt: "AED 7,194", rank: 3 },
     ],
     "AirPods Pro 3": [
       { name: "Priya N.", val: "11 units", amt: "AED 9,339", rank: 1 },
       { name: "You", val: "10 units", amt: "AED 8,490", rank: 2, me: true },
-      { name: "Omar K.", val: "7 units", amt: "AED 5,943", rank: 3 },
+      { name: "Emmanuel", val: "7 units", amt: "AED 5,943", rank: 3 },
     ],
   };
 
@@ -877,7 +898,7 @@ function MySalesScreen({ onBack }) {
     }
   };
 
-  const dailyTarget = 3000;
+  const dailyTarget = parseInt(localStorage.getItem("ddf_daily_target") || "3000");
   const variance = todaySales - dailyTarget;
   const pct = ((variance / dailyTarget) * 100).toFixed(2);
   const positive = variance >= 0;
@@ -1052,10 +1073,10 @@ function MySalesScreen({ onBack }) {
         </div>
 
         <div className="flex items-center justify-between mb-1">
-          <p className="text-[12.5px] font-bold" style={{ color: COLORS.textMuted }}>SALES LEADERBOARD — TODAY</p>
+          <p className="text-[12.5px] font-bold" style={{ color: COLORS.textMuted }}>SALES LEADERBOARD</p>
           <Trophy size={14} color={COLORS.goldLight} />
         </div>
-        <p className="text-[10px] mb-3" style={{ color: COLORS.textDim }}>Aibek Electronics, Terminal 2 · your team only</p>
+        <p className="text-[10px] mb-3" style={{ color: COLORS.textDim }}>Aibek Electronics, Terminal 2 · {today}</p>
 
         <div className="flex gap-2 mb-3">
           {["individual", "team", "by product"].map((b) => (
@@ -1065,6 +1086,42 @@ function MySalesScreen({ onBack }) {
             </button>
           ))}
         </div>
+
+        {board === "individual" && (
+          <div className="flex flex-col gap-2">
+            {leaders.map((l) => (
+              <div key={l.name} className="rounded-xl p-3 flex items-center gap-3" style={{ background: l.me ? "rgba(200,16,46,.08)" : COLORS.card, border: `1px solid ${l.me ? COLORS.red + "55" : COLORS.border}` }}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{ background: l.rank === 1 ? COLORS.gold : COLORS.border, color: l.rank === 1 ? "#1a1410" : COLORS.textMuted }}>
+                  {l.rank}
+                </div>
+                <p className="text-[12.5px] font-bold flex-1">{l.name}</p>
+                <p className="text-[12px] font-bold" style={{ color: COLORS.goldLight }}>{l.val}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {board === "team" && (
+          <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${COLORS.border}` }}>
+            <div className="grid grid-cols-3 px-3 py-2" style={{ background: "rgba(255,255,255,.04)", borderBottom: `1px solid ${COLORS.border}` }}>
+              <p className="text-[10px] font-bold" style={{ color: COLORS.textMuted }}>NAME</p>
+              <p className="text-[10px] font-bold text-center" style={{ color: COLORS.textMuted }}>SALES</p>
+              <p className="text-[10px] font-bold text-right" style={{ color: COLORS.textMuted }}>% TARGET</p>
+            </div>
+            {leaders.map((l) => (
+              <div key={l.name} className="grid grid-cols-3 items-center px-3 py-2.5" style={{ background: l.me ? "rgba(200,16,46,.06)" : "transparent", borderBottom: `1px solid ${COLORS.border}` }}>
+                <p className="text-[12px] font-bold" style={{ color: l.me ? COLORS.redLight : COLORS.text }}>{l.name}</p>
+                <p className="text-[11.5px] font-bold text-center" style={{ color: COLORS.goldLight }}>{l.val}</p>
+                <p className="text-[11.5px] font-bold text-right" style={{ color: l.raw >= 3000 ? COLORS.tealLight : COLORS.redLight }}>{((l.raw / 3000) * 100).toFixed(0)}%</p>
+              </div>
+            ))}
+            <div className="grid grid-cols-3 items-center px-3 py-3" style={{ background: "rgba(201,162,39,.08)", borderTop: `1px solid ${COLORS.gold}40` }}>
+              <p className="text-[11.5px] font-extrabold" style={{ color: COLORS.goldLight }}>TOTAL</p>
+              <p className="text-[12px] font-extrabold text-center" style={{ color: COLORS.goldLight }}>AED {teamTotal.toLocaleString()}</p>
+              <p className="text-[12px] font-extrabold text-right" style={{ color: teamTotal >= teamTarget ? COLORS.tealLight : COLORS.redLight }}>{((teamTotal / teamTarget) * 100).toFixed(0)}%</p>
+            </div>
+          </div>
+        )}
 
         {board === "by product" && (
           <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar">
@@ -1078,23 +1135,21 @@ function MySalesScreen({ onBack }) {
         )}
 
         {board === "by product" && (
-          <p className="text-[10px] mb-3" style={{ color: COLORS.textDim }}>PLU 118221355 · your zone only — see the full terminal list in My Shifts & Area</p>
+          <div className="flex flex-col gap-2">
+            {productLeaders[product].map((l) => (
+              <div key={l.name} className="rounded-xl p-3 flex items-center gap-3" style={{ background: l.me ? "rgba(200,16,46,.08)" : COLORS.card, border: `1px solid ${l.me ? COLORS.red + "55" : COLORS.border}` }}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{ background: l.rank === 1 ? COLORS.gold : COLORS.border, color: l.rank === 1 ? "#1a1410" : COLORS.textMuted }}>
+                  {l.rank}
+                </div>
+                <p className="text-[12.5px] font-bold flex-1">{l.name}</p>
+                <div className="text-right">
+                  <p className="text-[12px] font-bold" style={{ color: COLORS.goldLight }}>{l.val}</p>
+                  {l.amt && <p className="text-[9.5px]" style={{ color: COLORS.textDim }}>{l.amt}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
         )}
-
-        <div className="flex flex-col gap-2">
-          {(board === "by product" ? productLeaders[product] : leaders).map((l) => (
-            <div key={l.name} className="rounded-xl p-3 flex items-center gap-3" style={{ background: l.me ? "rgba(200,16,46,.08)" : COLORS.card, border: `1px solid ${l.me ? COLORS.red + "55" : COLORS.border}` }}>
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{ background: l.rank === 1 ? COLORS.gold : COLORS.border, color: l.rank === 1 ? "#1a1410" : COLORS.textMuted }}>
-                {l.rank}
-              </div>
-              <p className="text-[12.5px] font-bold flex-1">{l.name}</p>
-              <div className="text-right">
-                <p className="text-[12px] font-bold" style={{ color: COLORS.goldLight }}>{l.val}</p>
-                {l.amt && <p className="text-[9.5px]" style={{ color: COLORS.textDim }}>{l.amt}</p>}
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -2351,7 +2406,160 @@ function ProfileScreen({ onNav }) {
 
 // ---------- ABOUT & PRIVACY SCREEN ----------
 // ---------- ADMIN PANEL SCREEN (Managers only) ----------
+function QuickChatScreen({ onBack }) {
+  const initMsgs = [
+    { from: "super", text: "Good morning! Let's have a strong shift today 💪", time: "7:02 AM" },
+    { from: "super", text: "Push AirPods Pro bundle — management is watching numbers closely.", time: "9:15 AM" },
+  ];
+  const [messages, setMessages] = useState(() => {
+    try { const s = localStorage.getItem("ddf_chat"); return s ? JSON.parse(s) : initMsgs; } catch { return initMsgs; }
+  });
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const nowStr = () => new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  const autoReplies = ["Got it, thanks.", "I'll check on that.", "Noted — keep it up! 👍", "Thanks for the update.", "On it."];
+
+  const send = () => {
+    if (!input.trim() || sending) return;
+    const msg = { from: "me", text: input.trim(), time: nowStr() };
+    const updated = [...messages, msg];
+    setMessages(updated);
+    localStorage.setItem("ddf_chat", JSON.stringify(updated));
+    setInput("");
+    setSending(true);
+    setTimeout(() => {
+      const reply = { from: "super", text: autoReplies[Math.floor(Math.random() * autoReplies.length)], time: nowStr() };
+      const final = [...updated, reply];
+      setMessages(final);
+      localStorage.setItem("ddf_chat", JSON.stringify(final));
+      setSending(false);
+    }, 1400);
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: COLORS.bg }}>
+      <StatusBar />
+      <TopBar title="Anoop Kumar" onBack={onBack} />
+      <div style={{ padding: "4px 20px 10px", background: COLORS.cardAlt, borderBottom: `1px solid ${COLORS.border}` }}>
+        <p style={{ fontSize: 10, color: COLORS.textMuted }}>Your Supervisor · Terminal 2 · Shift B</p>
+      </div>
+      <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px 8px", display: "flex", flexDirection: "column", gap: 10 }}>
+        {messages.map((m, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: m.from === "me" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 8 }}>
+            {m.from === "super" && (
+              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(13,148,136,.18)", color: COLORS.tealLight, fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>AK</div>
+            )}
+            <div style={{ maxWidth: "75%", background: m.from === "me" ? COLORS.red : COLORS.card, border: `1px solid ${m.from === "me" ? COLORS.red : COLORS.border}`, borderRadius: m.from === "me" ? "16px 16px 4px 16px" : "4px 16px 16px 16px", padding: "10px 13px" }}>
+              <p style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.5, margin: 0 }}>{m.text}</p>
+              <p style={{ fontSize: 9, color: m.from === "me" ? "rgba(255,255,255,.45)" : COLORS.textDim, marginTop: 4, textAlign: m.from === "me" ? "right" : "left" }}>{m.time}</p>
+            </div>
+          </div>
+        ))}
+        {sending && (
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(13,148,136,.18)", color: COLORS.tealLight, fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>AK</div>
+            <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: "4px 16px 16px 16px", padding: "12px 16px" }}>
+              <p style={{ fontSize: 13, color: COLORS.textDim }}>···</p>
+            </div>
+          </div>
+        )}
+      </div>
+      <div style={{ padding: "10px 16px 32px", background: COLORS.bg, borderTop: `1px solid ${COLORS.border}`, display: "flex", gap: 10, alignItems: "center" }}>
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && send()}
+          placeholder="Message supervisor..."
+          style={{ flex: 1, background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 20, padding: "11px 16px", fontSize: 13, color: COLORS.text, outline: "none", fontFamily: "inherit" }}
+        />
+        <button onClick={send} style={{ width: 40, height: 40, borderRadius: "50%", background: COLORS.red, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AdminPanelScreen({ onBack }) {
+  const [tab, setTab] = useState("tools");
+
+  // — Settings state (localStorage-backed) —
+  const [target, setTarget] = useState(() => localStorage.getItem("ddf_daily_target") || "3000");
+  const [targetInput, setTargetInput] = useState(target);
+  const [targetSaved, setTargetSaved] = useState(false);
+
+  const defaultSpiffs = [
+    { item: "Merlin Wireless Headphones — AED 1,399", bonus: "20" },
+    { item: "SanDisk 2TB Flash Drive — AED 2,000", bonus: "50" },
+    { item: "Sony WH-1000XM6 — AED 1,199", bonus: "35" },
+  ];
+  const [spiffs, setSpiffs] = useState(() => {
+    try { const s = localStorage.getItem("ddf_spiffs"); return s ? JSON.parse(s) : defaultSpiffs; } catch { return defaultSpiffs; }
+  });
+  const [newSpiffItem, setNewSpiffItem] = useState("");
+  const [newSpiffBonus, setNewSpiffBonus] = useState("");
+
+  const defaultPromos = [
+    { name: "Sony WH-1000XM6", was: "AED 1,499", now: "AED 1,199", off: "-20%" },
+    { name: "Apple AirPods Pro 3", was: "AED 999", now: "AED 849", off: "-15%" },
+    { name: "Samsung Galaxy Buds", was: "AED 599", now: "AED 459", off: "-23%" },
+  ];
+  const [promos, setPromos] = useState(() => {
+    try { const s = localStorage.getItem("ddf_promos"); return s ? JSON.parse(s) : defaultPromos; } catch { return defaultPromos; }
+  });
+  const [newPromoName, setNewPromoName] = useState("");
+  const [newPromoWas, setNewPromoWas] = useState("");
+  const [newPromoNow, setNewPromoNow] = useState("");
+
+  const [dutyMsg, setDutyMsg] = useState(() => localStorage.getItem("ddf_duty_msg") || "");
+  const [dutyMsgSaved, setDutyMsgSaved] = useState(false);
+
+  const saveTarget = () => {
+    const v = parseInt(targetInput);
+    if (!isNaN(v) && v > 0) {
+      localStorage.setItem("ddf_daily_target", String(v));
+      setTarget(String(v));
+      setTargetSaved(true);
+      setTimeout(() => setTargetSaved(false), 2000);
+    }
+  };
+
+  const addSpiff = () => {
+    if (!newSpiffItem.trim() || !newSpiffBonus.trim()) return;
+    const updated = [...spiffs, { item: newSpiffItem.trim(), bonus: newSpiffBonus.trim() }];
+    setSpiffs(updated);
+    localStorage.setItem("ddf_spiffs", JSON.stringify(updated));
+    setNewSpiffItem(""); setNewSpiffBonus("");
+  };
+  const removeSpiff = (i) => {
+    const updated = spiffs.filter((_, idx) => idx !== i);
+    setSpiffs(updated);
+    localStorage.setItem("ddf_spiffs", JSON.stringify(updated));
+  };
+
+  const addPromo = () => {
+    if (!newPromoName.trim() || !newPromoNow.trim()) return;
+    const updated = [...promos, { name: newPromoName.trim(), was: newPromoWas.trim() || "—", now: newPromoNow.trim(), off: "" }];
+    setPromos(updated);
+    localStorage.setItem("ddf_promos", JSON.stringify(updated));
+    setNewPromoName(""); setNewPromoWas(""); setNewPromoNow("");
+  };
+  const removePromo = (i) => {
+    const updated = promos.filter((_, idx) => idx !== i);
+    setPromos(updated);
+    localStorage.setItem("ddf_promos", JSON.stringify(updated));
+  };
+
+  const saveDutyMsg = () => {
+    localStorage.setItem("ddf_duty_msg", dutyMsg);
+    setDutyMsgSaved(true);
+    setTimeout(() => setDutyMsgSaved(false), 2000);
+  };
+
+  const inputStyle = { width: "100%", background: "rgba(255,255,255,.04)", border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: "10px 12px", fontSize: 13, color: COLORS.text, outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
+  const labelStyle = { fontSize: 10, fontWeight: 700, color: COLORS.textMuted, letterSpacing: ".04em", marginBottom: 6, display: "block" };
+  const sectionTitle = { fontSize: 11, fontWeight: 700, color: COLORS.textMuted, letterSpacing: ".04em", marginBottom: 10 };
+
   const tools = [
     { icon: CheckCircle2, label: "Approve Leave Requests", sub: "3 pending", color: COLORS.teal },
     { icon: Star, label: "Send a Shoutout", sub: "Recognize someone today", color: COLORS.gold },
@@ -2359,32 +2567,117 @@ function AdminPanelScreen({ onBack }) {
     { icon: FileText, label: "Review Mystery Shopper Reports", sub: "2 new this week", color: COLORS.gold },
     { icon: Lightbulb, label: "Ideas & Polls Inbox", sub: "View anonymous submissions", color: COLORS.teal },
   ];
+
   return (
     <div className="pb-28">
       <StatusBar />
       <TopBar title="Admin Panel" onBack={onBack} />
       <div className="px-5">
-        <div className="rounded-xl p-3 mb-5 flex items-start gap-2" style={{ background: "rgba(201,162,39,.08)", border: `1px solid ${COLORS.gold}40` }}>
+        <div className="rounded-xl p-3 mb-4 flex items-start gap-2" style={{ background: "rgba(201,162,39,.08)", border: `1px solid ${COLORS.gold}40` }}>
           <ClipboardList size={13} color={COLORS.goldLight} className="mt-0.5 flex-shrink-0" />
           <p className="text-[10.5px] leading-relaxed" style={{ color: COLORS.textMuted }}>Visible to Supervisors, Duty Officers and Operation Managers only.</p>
         </div>
-        <div className="flex flex-col gap-2.5">
-          {tools.map((t) => {
-            const Icon = t.icon;
-            return (
-              <button key={t.label} className="w-full rounded-xl p-3.5 flex items-center gap-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${t.color}22` }}>
-                  <Icon size={16} color={t.color} />
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="text-[12.5px] font-bold">{t.label}</p>
-                  <p className="text-[10.5px] mt-0.5" style={{ color: COLORS.textMuted }}>{t.sub}</p>
-                </div>
-                <ChevronRight size={14} color={COLORS.textDim} />
-              </button>
-            );
-          })}
+
+        {/* Tabs */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+          {["tools", "settings"].map(t => (
+            <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: "9px 0", borderRadius: 10, fontSize: 12, fontWeight: 700, textTransform: "capitalize", background: tab === t ? COLORS.red : COLORS.card, color: tab === t ? "#fff" : COLORS.textMuted, border: `1px solid ${tab === t ? COLORS.red : COLORS.border}`, cursor: "pointer" }}>
+              {t === "tools" ? "Tools" : "⚙ Settings"}
+            </button>
+          ))}
         </div>
+
+        {tab === "tools" && (
+          <div className="flex flex-col gap-2.5">
+            {tools.map((t) => {
+              const Icon = t.icon;
+              return (
+                <button key={t.label} className="w-full rounded-xl p-3.5 flex items-center gap-3" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${t.color}22` }}>
+                    <Icon size={16} color={t.color} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-[12.5px] font-bold">{t.label}</p>
+                    <p className="text-[10.5px] mt-0.5" style={{ color: COLORS.textMuted }}>{t.sub}</p>
+                  </div>
+                  <ChevronRight size={14} color={COLORS.textDim} />
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {tab === "settings" && (
+          <div>
+            {/* Daily Target */}
+            <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 16, marginBottom: 14 }}>
+              <p style={sectionTitle}>📊 DAILY SALES TARGET PER PERSON</p>
+              <p style={{ fontSize: 10.5, color: COLORS.textMuted, marginBottom: 12 }}>Currently: <strong style={{ color: COLORS.goldLight }}>AED {target}</strong></p>
+              <label style={labelStyle}>NEW TARGET (AED)</label>
+              <input value={targetInput} onChange={e => setTargetInput(e.target.value.replace(/\D/g, ""))} style={inputStyle} placeholder="e.g. 3500" inputMode="numeric" />
+              <button onClick={saveTarget} style={{ marginTop: 10, width: "100%", padding: "11px 0", borderRadius: 10, background: targetSaved ? "rgba(13,148,136,.15)" : COLORS.red, color: targetSaved ? COLORS.tealLight : "#fff", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                {targetSaved ? "✓ Saved" : "Save Target"}
+              </button>
+            </div>
+
+            {/* Duty Officer Message */}
+            <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 16, marginBottom: 14 }}>
+              <p style={sectionTitle}>📢 DUTY OFFICER MESSAGE</p>
+              <textarea value={dutyMsg} onChange={e => setDutyMsg(e.target.value)} placeholder='e.g. "Great push today team — close strong before shift change."' rows={3} style={{ ...inputStyle, resize: "none" }} />
+              <button onClick={saveDutyMsg} style={{ marginTop: 10, width: "100%", padding: "11px 0", borderRadius: 10, background: dutyMsgSaved ? "rgba(13,148,136,.15)" : COLORS.red, color: dutyMsgSaved ? COLORS.tealLight : "#fff", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                {dutyMsgSaved ? "✓ Saved" : "Post Message"}
+              </button>
+            </div>
+
+            {/* Spiffs */}
+            <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 16, marginBottom: 14 }}>
+              <p style={sectionTitle}>⭐ SPIFFS — BONUS ITEMS</p>
+              {spiffs.map((s, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, background: "rgba(201,162,39,.07)", border: `1px solid ${COLORS.gold}33`, borderRadius: 10, padding: "8px 12px" }}>
+                  <p style={{ flex: 1, fontSize: 11.5, color: COLORS.text }}>{s.item}</p>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: COLORS.goldLight, flexShrink: 0 }}>+AED {s.bonus}</p>
+                  <button onClick={() => removeSpiff(i)} style={{ background: "none", border: "none", color: COLORS.redLight, cursor: "pointer", fontSize: 16, padding: "0 2px", flexShrink: 0 }}>✕</button>
+                </div>
+              ))}
+              <div style={{ marginTop: 10 }}>
+                <label style={labelStyle}>ITEM NAME</label>
+                <input value={newSpiffItem} onChange={e => setNewSpiffItem(e.target.value)} style={{ ...inputStyle, marginBottom: 8 }} placeholder='e.g. "Sony WH-1000XM6 — AED 1,199"' />
+                <label style={labelStyle}>BONUS (AED)</label>
+                <input value={newSpiffBonus} onChange={e => setNewSpiffBonus(e.target.value.replace(/\D/g, ""))} style={{ ...inputStyle, marginBottom: 10 }} placeholder="e.g. 35" inputMode="numeric" />
+                <button onClick={addSpiff} style={{ width: "100%", padding: "10px 0", borderRadius: 10, background: "rgba(201,162,39,.15)", color: COLORS.goldLight, border: `1px solid ${COLORS.gold}44`, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>+ Add Spiff</button>
+              </div>
+            </div>
+
+            {/* Promotions */}
+            <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 16, marginBottom: 14 }}>
+              <p style={sectionTitle}>🏷 PROMOTIONS THIS MONTH</p>
+              {promos.map((p, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, background: "rgba(200,16,46,.06)", border: `1px solid ${COLORS.red}33`, borderRadius: 10, padding: "8px 12px" }}>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>{p.name}</p>
+                    <p style={{ fontSize: 10, color: COLORS.textMuted, marginTop: 2 }}>{p.was} → {p.now}</p>
+                  </div>
+                  <button onClick={() => removePromo(i)} style={{ background: "none", border: "none", color: COLORS.redLight, cursor: "pointer", fontSize: 16, padding: "0 2px", flexShrink: 0 }}>✕</button>
+                </div>
+              ))}
+              <div style={{ marginTop: 10 }}>
+                <label style={labelStyle}>PRODUCT NAME</label>
+                <input value={newPromoName} onChange={e => setNewPromoName(e.target.value)} style={{ ...inputStyle, marginBottom: 8 }} placeholder='e.g. "Apple AirPods Pro 3"' />
+                <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={labelStyle}>WAS (AED)</label>
+                    <input value={newPromoWas} onChange={e => setNewPromoWas(e.target.value)} style={inputStyle} placeholder="999" />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={labelStyle}>NOW (AED)</label>
+                    <input value={newPromoNow} onChange={e => setNewPromoNow(e.target.value)} style={inputStyle} placeholder="849" />
+                  </div>
+                </div>
+                <button onClick={addPromo} style={{ width: "100%", padding: "10px 0", borderRadius: 10, background: "rgba(200,16,46,.12)", color: COLORS.redLight, border: `1px solid ${COLORS.red}44`, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>+ Add Promotion</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -2927,6 +3220,7 @@ function StaffApp() {
   else if (screen === "ideas") { content = <IdeasScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
   else if (screen === "about") { content = <AboutScreen onBack={() => setScreen("profile")} />; activeTab = "profile"; }
   else if (screen === "admin") { content = <AdminPanelScreen onBack={() => setScreen("profile")} />; activeTab = "profile"; }
+  else if (screen === "chat") { content = <QuickChatScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
   else if (screen === "points") { content = <PointsScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
   else if (screen === "discounts") { content = <DiscountsScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
   else if (screen === "mystery") { content = <MysteryShopperScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
