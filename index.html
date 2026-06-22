@@ -19,6 +19,14 @@
     padding:20px; font-family: ui-monospace, monospace; font-size:11px; line-height:1.6;
     white-space:pre-wrap; overflow:auto; z-index:9999;
   }
+  /* Mobile: remove phone frame, go full screen */
+  @media (max-width: 500px) {
+    #phone-outer { background: #0c0c0c !important; padding: 0 !important; display: block !important; min-height: 100dvh !important; }
+    #phone-inner { width: 100% !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; }
+    #phone-notch { display: none !important; }
+    #phone-scroll { height: 100dvh !important; }
+    #phone-scroll > div { height: 100% !important; }
+  }
 </style>
 </head>
 <body>
@@ -109,14 +117,15 @@ const COLORS = {
 // ---------- Shared shell ----------
 const PhoneFrame = React.forwardRef(({ children, onScroll }, ref) => {
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-neutral-900 py-6 px-3">
+    <div id="phone-outer" className="w-full min-h-screen flex items-center justify-center bg-neutral-900 py-6 px-3">
       <div
+        id="phone-inner"
         className="relative w-[375px] h-[780px] rounded-[44px] overflow-hidden shadow-2xl border-[6px]"
         style={{ borderColor: "#1c1c1c", backgroundColor: COLORS.bg }}
       >
         {/* notch */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-50" />
-        <div ref={ref} onScroll={onScroll} className="w-full h-full overflow-y-auto no-scrollbar" style={{ color: COLORS.text }}>
+        <div id="phone-notch" className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-50" />
+        <div id="phone-scroll" ref={ref} onScroll={onScroll} className="w-full h-full overflow-y-auto no-scrollbar" style={{ color: COLORS.text }}>
           {children}
         </div>
       </div>
