@@ -244,6 +244,7 @@ function HomeScreen({ onNav }) {
     { id: "bodylanguage", icon: Eye, label: "Body Language", sub: "Do's and don'ts, in photos", color: COLORS.gold },
     { id: "miles", icon: Plane, label: "Skyward Miles", sub: "Payment rules & rates", color: COLORS.teal },
     { id: "transport", icon: Bell, label: "Transport", sub: "Bus numbers & routes", color: COLORS.gold },
+    { id: "chat", icon: MessageSquareQuote, label: "Messages", sub: "Supervisor, Asst & Duty Manager", color: COLORS.teal },
     { id: "feedback", icon: Lock, label: "Private Feedback", sub: "Confidential channel", color: COLORS.red },
     { id: "reference", icon: ClipboardList, label: "Quick Reference", sub: "Holidays, currencies & contacts", color: COLORS.red },
     { id: "docs", icon: FileText, label: "Documents", sub: "Certificates & forms", color: COLORS.gold },
@@ -415,30 +416,21 @@ function HomeScreen({ onNav }) {
         </div>
       </button>
 
-      <div className="px-5 mb-2 flex flex-col gap-2">
-        <button onClick={() => onNav("chat")} className="w-full rounded-2xl p-4 flex items-center gap-3" style={{ background: "rgba(13,148,136,.08)", border: `1px solid ${COLORS.teal}44` }}>
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(13,148,136,.18)" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={COLORS.tealLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          </div>
-          <div className="flex-1 text-left">
-            <p className="text-[13px] font-bold">Message Supervisor</p>
-            <p className="text-[10.5px] mt-0.5" style={{ color: COLORS.textMuted }}>Anoop Kumar · Terminal 2</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full" style={{ background: COLORS.tealLight }}></span>
-            <ChevronRight size={14} color={COLORS.tealLight} />
-          </div>
-        </button>
-        <button onClick={() => onNav("reports")} className="w-full rounded-2xl p-4 flex items-center gap-3" style={{ background: "rgba(201,162,39,.08)", border: `1px solid ${COLORS.gold}44` }}>
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,162,39,.18)" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={COLORS.goldLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-          </div>
-          <div className="flex-1 text-left">
-            <p className="text-[13px] font-bold">Daily Reports</p>
-            <p className="text-[10.5px] mt-0.5" style={{ color: COLORS.textMuted }}>BPASS shift & MTD reports</p>
-          </div>
-          <ChevronRight size={14} color={COLORS.goldLight} />
-        </button>
+      <div className="px-5 mb-2">
+        {(() => {
+          const msg = localStorage.getItem("ddf_duty_msg") || "Let's make today count — strong approach, great attitude, and every customer leaves happy. You've got this! 💪";
+          return (
+            <div className="rounded-2xl p-4" style={{ background: "linear-gradient(135deg, rgba(201,162,39,.1), rgba(201,162,39,.04))", border: `1px solid ${COLORS.gold}44` }}>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ background: "rgba(201,162,39,.2)", color: COLORS.goldLight }}>CM</div>
+                <div>
+                  <p className="text-[10.5px] font-bold" style={{ color: COLORS.goldLight }}>Ciprian Mazilu · Duty Officer</p>
+                </div>
+              </div>
+              <p className="text-[12.5px] leading-relaxed" style={{ color: COLORS.text }}>"{msg}"</p>
+            </div>
+          );
+        })()}
       </div>
 
       <Section title="DAILY ESSENTIALS" items={coreMenu} />
@@ -620,13 +612,15 @@ function LeaveScreen({ onBack }) {
 }
 
 // ---------- SHIFTS SCREEN ----------
-function ShiftsScreen({ onBack, onNavCalendar, onNavMySales }) {
+function ShiftsScreen({ onBack, onNavCalendar, onNavMySales, onNavReports }) {
   // 4-team rotation: A/B/C/D, each cycling Day/Day/Off/Off/Night/Night/Off/Off (8-day cycle), offset by 2 days per team
   const myTeam = "B";
 
   const [showAllPLU, setShowAllPLU] = useState(false);
 
+  const adminDutyMsg = localStorage.getItem("ddf_duty_msg");
   const dutyOfficerUpdates = [
+    ...(adminDutyMsg ? [{ msg: adminDutyMsg, time: "Latest · from Admin Panel" }] : []),
     { msg: "Great push today, team — let's close strong before shift change. Double-check your sale is logged before you leave.", time: "Today · 2:15 PM" },
     { msg: "Tomorrow we're running a push on AirPods Pro — every team member, please prioritize the bundle offer.", time: "Today · 9:00 AM" },
     { msg: "Reminder: Lindt Kunafa stock running low in AS1 — flag to stockroom if you're running out.", time: "Yesterday · 6:40 PM" },
@@ -796,10 +790,15 @@ function ShiftsScreen({ onBack, onNavCalendar, onNavMySales }) {
           ))}
         </div>
 
-        <button onClick={() => onNavMySales && onNavMySales()} className="w-full rounded-xl p-3.5 mb-6 flex items-center gap-3" style={{ background: "rgba(200,16,46,.07)", border: `1px solid ${COLORS.red}40` }}>
+        <button onClick={() => onNavMySales && onNavMySales()} className="w-full rounded-xl p-3.5 mb-2 flex items-center gap-3" style={{ background: "rgba(200,16,46,.07)", border: `1px solid ${COLORS.red}40` }}>
           <TrendingUp size={16} color={COLORS.redLight} className="flex-shrink-0" />
           <span className="text-[12px] font-bold flex-1 text-left">Looking for your personal sales & area? Check My Sales</span>
           <ChevronRight size={14} color={COLORS.redLight} />
+        </button>
+        <button onClick={() => onNavReports && onNavReports()} className="w-full rounded-xl p-3.5 mb-6 flex items-center gap-3" style={{ background: "rgba(201,162,39,.07)", border: `1px solid ${COLORS.gold}40` }}>
+          <FileText size={16} color={COLORS.goldLight} className="flex-shrink-0" />
+          <span className="text-[12px] font-bold flex-1 text-left">Daily Reports — BPASS Shift & MTD</span>
+          <ChevronRight size={14} color={COLORS.goldLight} />
         </button>
 
         <p className="text-[12.5px] font-bold mb-3" style={{ color: COLORS.textMuted }}>AREA SALE vs BUDGET — TODAY</p>
@@ -913,17 +912,19 @@ function MySalesScreen({ onBack }) {
   const pct = ((variance / dailyTarget) * 100).toFixed(2);
   const positive = variance >= 0;
 
-  const spiffs = [
-    { item: "Merlin Wireless Headphones — AED 1,399", bonus: "AED 20", icon: Music },
-    { item: "SanDisk 2TB Flash Drive — AED 2,000", bonus: "AED 50", icon: ClipboardList },
-    { item: "Sony WH-1000XM6 — AED 1,199", bonus: "AED 35", icon: Music },
+  const defaultSpiffs = [
+    { item: "Merlin Wireless Headphones — AED 1,399", bonus: "20" },
+    { item: "SanDisk 2TB Flash Drive — AED 2,000", bonus: "50" },
+    { item: "Sony WH-1000XM6 — AED 1,199", bonus: "35" },
   ];
+  const spiffs = (() => { try { const s = localStorage.getItem("ddf_spiffs"); return s ? JSON.parse(s) : defaultSpiffs; } catch { return defaultSpiffs; } })();
 
-  const zoneProducts = [
+  const defaultZoneProducts = [
     { name: "Sony WH-1000XM6", was: "AED 1,499", now: "AED 1,199", off: "-20%" },
     { name: "Apple AirPods Pro 3", was: "AED 999", now: "AED 849", off: "-15%" },
     { name: "Samsung Galaxy Buds", was: "AED 599", now: "AED 459", off: "-23%" },
   ];
+  const zoneProducts = (() => { try { const s = localStorage.getItem("ddf_promos"); return s ? JSON.parse(s) : defaultZoneProducts; } catch { return defaultZoneProducts; } })();
 
   const bonusTiers = [
     { pct: "100%", amount: "AED 1,500" },
@@ -1028,18 +1029,15 @@ function MySalesScreen({ onBack }) {
         <p className="text-[12.5px] font-bold mb-2" style={{ color: COLORS.textMuted }}>SPIFFS — BONUS ON THESE ITEMS</p>
         <p className="text-[10.5px] mb-3" style={{ color: COLORS.textDim }}>Updated monthly · sell these, get paid extra on top of your salary</p>
         <div className="flex flex-col gap-2 mb-6">
-          {spiffs.map((s) => {
-            const Icon = s.icon;
-            return (
-              <div key={s.item} className="rounded-xl p-3.5 flex items-center gap-3" style={{ background: "rgba(201,162,39,.07)", border: `1px solid ${COLORS.gold}40` }}>
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,162,39,.15)" }}>
-                  <Icon size={15} color={COLORS.goldLight} />
-                </div>
-                <p className="text-[11.5px] font-bold flex-1">{s.item}</p>
-                <span className="text-[12.5px] font-extrabold" style={{ color: COLORS.goldLight }}>+{s.bonus}</span>
+          {spiffs.map((s) => (
+            <div key={s.item} className="rounded-xl p-3.5 flex items-center gap-3" style={{ background: "rgba(201,162,39,.07)", border: `1px solid ${COLORS.gold}40` }}>
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,162,39,.15)" }}>
+                <Music size={15} color={COLORS.goldLight} />
               </div>
-            );
-          })}
+              <p className="text-[11.5px] font-bold flex-1">{s.item}</p>
+              <span className="text-[12.5px] font-extrabold" style={{ color: COLORS.goldLight }}>+AED {s.bonus}</span>
+            </div>
+          ))}
         </div>
 
         <div className="rounded-2xl p-4 mb-6" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
@@ -2583,74 +2581,128 @@ function DailyReportScreen({ onBack }) {
 }
 
 function QuickChatScreen({ onBack }) {
-  const initMsgs = [
-    { from: "super", text: "Good morning! Let's have a strong shift today 💪", time: "7:02 AM" },
-    { from: "super", text: "Push AirPods Pro bundle — management is watching numbers closely.", time: "9:15 AM" },
+  const contacts = [
+    { id: "AK", name: "Anoop Kumar", role: "Supervisor", color: "rgba(13,148,136,.18)", textColor: "#5eead4",
+      initMsgs: [
+        { from: "them", text: "Good morning! Strong shift today — push the AirPods Pro bundle. 💪", time: "7:02 AM" },
+        { from: "them", text: "Double-check your sales are logged before shift ends.", time: "9:15 AM" },
+      ]},
+    { id: "NN", name: "Nickson Nireri", role: "Assistant Supervisor", color: "rgba(201,162,39,.18)", textColor: "#e0c267",
+      initMsgs: [
+        { from: "them", text: "Hey team — stock check at AS1 before 10 AM please.", time: "8:30 AM" },
+      ]},
+    { id: "CM", name: "Ciprian Mazilu", role: "Duty Manager", color: "rgba(200,16,46,.18)", textColor: "#e8485f",
+      initMsgs: [
+        { from: "them", text: "Great numbers from Shift B last night — keep it up! Let's beat it today.", time: "Yesterday" },
+      ]},
   ];
-  const [messages, setMessages] = useState(() => {
-    try { const s = localStorage.getItem("ddf_chat"); return s ? JSON.parse(s) : initMsgs; } catch { return initMsgs; }
-  });
-  const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
-  const nowStr = () => new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-  const autoReplies = ["Got it, thanks.", "I'll check on that.", "Noted — keep it up! 👍", "Thanks for the update.", "On it."];
 
-  const send = () => {
-    if (!input.trim() || sending) return;
-    const msg = { from: "me", text: input.trim(), time: nowStr() };
-    const updated = [...messages, msg];
-    setMessages(updated);
-    localStorage.setItem("ddf_chat", JSON.stringify(updated));
-    setInput("");
-    setSending(true);
+  const [active, setActive] = useState(null);
+  const [inputs, setInputs] = useState({});
+  const [sending, setSending] = useState(null);
+
+  const getMessages = (id) => {
+    try { const s = localStorage.getItem("ddf_chat_" + id); return s ? JSON.parse(s) : contacts.find(c => c.id === id).initMsgs; } catch { return []; }
+  };
+  const [allMessages, setAllMessages] = useState(() => {
+    const obj = {};
+    contacts.forEach(c => { obj[c.id] = getMessages(c.id); });
+    return obj;
+  });
+
+  const nowStr = () => new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  const autoReplies = ["Got it, thanks.", "I'll check on that.", "Noted — keep it up! 👍", "Thanks for the update.", "On it.", "Copy that."];
+
+  const send = (contactId) => {
+    const text = (inputs[contactId] || "").trim();
+    if (!text || sending) return;
+    const msg = { from: "me", text, time: nowStr() };
+    const updated = [...(allMessages[contactId] || []), msg];
+    const newAll = { ...allMessages, [contactId]: updated };
+    setAllMessages(newAll);
+    localStorage.setItem("ddf_chat_" + contactId, JSON.stringify(updated));
+    setInputs(prev => ({ ...prev, [contactId]: "" }));
+    setSending(contactId);
     setTimeout(() => {
-      const reply = { from: "super", text: autoReplies[Math.floor(Math.random() * autoReplies.length)], time: nowStr() };
+      const reply = { from: "them", text: autoReplies[Math.floor(Math.random() * autoReplies.length)], time: nowStr() };
       const final = [...updated, reply];
-      setMessages(final);
-      localStorage.setItem("ddf_chat", JSON.stringify(final));
-      setSending(false);
+      const finalAll = { ...newAll, [contactId]: final };
+      setAllMessages(finalAll);
+      localStorage.setItem("ddf_chat_" + contactId, JSON.stringify(final));
+      setSending(null);
     }, 1400);
   };
 
+  const contact = active ? contacts.find(c => c.id === active) : null;
+
+  if (active && contact) {
+    const messages = allMessages[active] || [];
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: COLORS.bg }}>
+        <StatusBar />
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 20px 12px" }}>
+          <button onClick={() => setActive(null)} style={{ width: 32, height: 32, borderRadius: "50%", background: COLORS.card, border: "none", cursor: "pointer", color: COLORS.text, fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
+          <div style={{ width: 36, height: 36, borderRadius: "50%", background: contact.color, color: contact.textColor, fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{contact.id}</div>
+          <div>
+            <p style={{ fontSize: 14, fontWeight: 700, color: COLORS.text, margin: 0 }}>{contact.name}</p>
+            <p style={{ fontSize: 10, color: COLORS.textMuted, margin: 0 }}>{contact.role} · Terminal 2</p>
+          </div>
+        </div>
+        <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px 8px", display: "flex", flexDirection: "column", gap: 10 }}>
+          {messages.map((m, i) => (
+            <div key={i} style={{ display: "flex", justifyContent: m.from === "me" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 8 }}>
+              {m.from === "them" && (
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: contact.color, color: contact.textColor, fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{contact.id}</div>
+              )}
+              <div style={{ maxWidth: "75%", background: m.from === "me" ? COLORS.red : COLORS.card, border: `1px solid ${m.from === "me" ? COLORS.red : COLORS.border}`, borderRadius: m.from === "me" ? "16px 16px 4px 16px" : "4px 16px 16px 16px", padding: "10px 13px" }}>
+                <p style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.5, margin: 0 }}>{m.text}</p>
+                <p style={{ fontSize: 9, color: m.from === "me" ? "rgba(255,255,255,.45)" : COLORS.textDim, marginTop: 4, textAlign: m.from === "me" ? "right" : "left" }}>{m.time}</p>
+              </div>
+            </div>
+          ))}
+          {sending === active && (
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: "50%", background: contact.color, color: contact.textColor, fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{contact.id}</div>
+              <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: "4px 16px 16px 16px", padding: "12px 16px" }}>
+                <p style={{ fontSize: 13, color: COLORS.textDim, margin: 0 }}>···</p>
+              </div>
+            </div>
+          )}
+        </div>
+        <div style={{ padding: "10px 16px 32px", background: COLORS.bg, borderTop: `1px solid ${COLORS.border}`, display: "flex", gap: 10, alignItems: "center" }}>
+          <input value={inputs[active] || ""} onChange={e => setInputs(p => ({ ...p, [active]: e.target.value }))} onKeyDown={e => e.key === "Enter" && send(active)} placeholder={`Message ${contact.name.split(" ")[0]}...`} style={{ flex: 1, background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 20, padding: "11px 16px", fontSize: 13, color: COLORS.text, outline: "none", fontFamily: "inherit" }} />
+          <button onClick={() => send(active)} style={{ width: 40, height: 40, borderRadius: "50%", background: COLORS.red, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Contact list
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: COLORS.bg }}>
+    <div style={{ paddingBottom: 112, background: COLORS.bg, minHeight: "100%" }}>
       <StatusBar />
-      <TopBar title="Anoop Kumar" onBack={onBack} />
-      <div style={{ padding: "4px 20px 10px", background: COLORS.cardAlt, borderBottom: `1px solid ${COLORS.border}` }}>
-        <p style={{ fontSize: 10, color: COLORS.textMuted }}>Your Supervisor · Terminal 2 · Shift B</p>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 20px 16px" }}>
+        <button onClick={onBack} style={{ width: 32, height: 32, borderRadius: "50%", background: COLORS.card, border: "none", cursor: "pointer", color: COLORS.text, fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
+        <h1 style={{ fontSize: 17, fontWeight: 700, color: COLORS.text, margin: 0, flex: 1 }}>Messages</h1>
       </div>
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px 8px", display: "flex", flexDirection: "column", gap: 10 }}>
-        {messages.map((m, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: m.from === "me" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 8 }}>
-            {m.from === "super" && (
-              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(13,148,136,.18)", color: COLORS.tealLight, fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>AK</div>
-            )}
-            <div style={{ maxWidth: "75%", background: m.from === "me" ? COLORS.red : COLORS.card, border: `1px solid ${m.from === "me" ? COLORS.red : COLORS.border}`, borderRadius: m.from === "me" ? "16px 16px 4px 16px" : "4px 16px 16px 16px", padding: "10px 13px" }}>
-              <p style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.5, margin: 0 }}>{m.text}</p>
-              <p style={{ fontSize: 9, color: m.from === "me" ? "rgba(255,255,255,.45)" : COLORS.textDim, marginTop: 4, textAlign: m.from === "me" ? "right" : "left" }}>{m.time}</p>
-            </div>
-          </div>
-        ))}
-        {sending && (
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(13,148,136,.18)", color: COLORS.tealLight, fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>AK</div>
-            <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: "4px 16px 16px 16px", padding: "12px 16px" }}>
-              <p style={{ fontSize: 13, color: COLORS.textDim }}>···</p>
-            </div>
-          </div>
-        )}
-      </div>
-      <div style={{ padding: "10px 16px 32px", background: COLORS.bg, borderTop: `1px solid ${COLORS.border}`, display: "flex", gap: 10, alignItems: "center" }}>
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && send()}
-          placeholder="Message supervisor..."
-          style={{ flex: 1, background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 20, padding: "11px 16px", fontSize: 13, color: COLORS.text, outline: "none", fontFamily: "inherit" }}
-        />
-        <button onClick={send} style={{ width: 40, height: 40, borderRadius: "50%", background: COLORS.red, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
+      <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+        {contacts.map(c => {
+          const msgs = allMessages[c.id] || [];
+          const last = msgs[msgs.length - 1];
+          return (
+            <button key={c.id} onClick={() => setActive(c.id)} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12, cursor: "pointer", width: "100%", textAlign: "left" }}>
+              <div style={{ width: 44, height: 44, borderRadius: "50%", background: c.color, color: c.textColor, fontSize: 12, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{c.id}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: COLORS.text, margin: 0 }}>{c.name}</p>
+                <p style={{ fontSize: 10.5, color: COLORS.textMuted, margin: "2px 0 0", fontWeight: 600 }}>{c.role}</p>
+                {last && <p style={{ fontSize: 11, color: COLORS.textDim, margin: "4px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{last.from === "me" ? "You: " : ""}{last.text}</p>}
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={COLORS.textDim} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -3370,7 +3422,7 @@ function StaffApp() {
   let activeTab = "home";
   if (screen === "home") { content = <HomeScreen onNav={setScreen} />; activeTab = "home"; }
   else if (screen === "leave") { content = <LeaveScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
-  else if (screen === "shifts") { content = <ShiftsScreen onBack={() => setScreen("home")} onNavCalendar={() => setScreen("calendar")} onNavMySales={() => setScreen("mysales")} />; activeTab = "shifts"; }
+  else if (screen === "shifts") { content = <ShiftsScreen onBack={() => setScreen("home")} onNavCalendar={() => setScreen("calendar")} onNavMySales={() => setScreen("mysales")} onNavReports={() => setScreen("reports")} />; activeTab = "shifts"; }
   else if (screen === "calendar") { content = <CalendarScreen onBack={() => setScreen("home")} />; activeTab = "shifts"; }
   else if (screen === "mysales") { content = <MySalesScreen onBack={() => setScreen("home")} />; activeTab = "home"; }
   else if (screen === "training") { content = <TrainingScreen onBack={() => setScreen("home")} />; activeTab = "training"; }
