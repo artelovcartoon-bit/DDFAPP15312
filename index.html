@@ -9,8 +9,8 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-* { -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: #0a0a0a; overscroll-behavior: none; }
+* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden !important; background: #171717; touch-action: none; overscroll-behavior: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 #status { color:#fff; font-family:-apple-system,sans-serif; padding:24px; text-align:center; font-size:13px; opacity:.6; }
@@ -68,7 +68,7 @@ const DEMO_PASSWORD="ddf2026";
 const PhoneFrame=React.forwardRef(({children,onScroll},ref)=>(<div style={{position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:"#171717",overflow:"hidden"}}><div style={{position:"relative",width:"min(375px, 100vw)",height:"min(780px, 100vh)",borderRadius:"44px",overflow:"hidden",boxShadow:"0 25px 60px rgba(0,0,0,.8)",border:"6px solid #1c1c1c",backgroundColor:COLORS.bg,flexShrink:0}}><div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-50"/><div ref={ref} onScroll={onScroll} style={{width:"100%",height:"100%",overflowY:"auto",overflowX:"hidden",WebkitOverflowScrolling:"touch",color:COLORS.text}} className="no-scrollbar">{children}</div></div></div>));
 function StatusBar(){return(<div className="flex justify-between items-center px-6 pt-3 pb-1 text-[11px] font-semibold" style={{color:COLORS.text}}><span>9:41</span><div className="flex items-center gap-1"><span>●●●●</span><span>Wi-Fi</span><span>🔋</span></div></div>);}
 function TopBar({title,onBack,onCalendar}){const [sn,setSn]=useState(false);const ns=[{from:"Anoop Kumar",msg:"Great work today — 3 big sales! 👏",t:"2h ago",red:true},{from:"Yasa Tahir",msg:"New Wellness Leave policy is live.",t:"1d ago",red:true},{from:"DDF Staff App",msg:"July schedule published.",t:"2d ago",red:false}];return(<div className="px-5 pt-2 pb-4 relative"><div className="flex items-center gap-3">{onBack?(<button onClick={onBack} className="w-8 h-8 rounded-full flex items-center justify-center" style={{background:COLORS.card}}><ChevronLeft size={18} color={COLORS.text}/></button>):(<img src={LOGO_SRC} alt="" className="w-8 h-8 rounded-full"/>)}<h1 className="text-[17px] font-bold flex-1">{title}</h1>{onCalendar&&(<button onClick={onCalendar} className="w-8 h-8 rounded-full flex items-center justify-center" style={{background:COLORS.card}}><Calendar size={15} color={COLORS.text}/></button>)}<button onClick={()=>setSn(!sn)} className="w-8 h-8 rounded-full flex items-center justify-center relative" style={{background:COLORS.card}}><Bell size={15} color={COLORS.text}/><span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{background:COLORS.red,color:"#fff"}}>2</span></button></div>{sn&&(<div className="absolute right-5 top-12 w-72 rounded-2xl overflow-hidden z-50 shadow-2xl" style={{background:COLORS.cardAlt,border:`1px solid ${COLORS.border}`}}><div className="px-4 py-3" style={{borderBottom:`1px solid ${COLORS.border}`}}><p className="text-[11px] font-bold" style={{color:COLORS.textMuted}}>NOTIFICATIONS</p></div>{ns.map((n,i)=>(<div key={i} className="px-4 py-3 flex gap-3" style={{borderBottom:i<ns.length-1?`1px solid ${COLORS.border}`:"none",background:n.red?"rgba(200,16,46,.05)":"transparent"}}><div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{background:n.red?"rgba(200,16,46,.18)":"rgba(255,255,255,.06)"}}>{n.red?<Star size={12} color={COLORS.redLight}/>:<Bell size={12} color={COLORS.textMuted}/>}</div><div className="flex-1"><p className="text-[11px] font-bold">{n.from}</p><p className="text-[11px] mt-0.5" style={{color:COLORS.text}}>{n.msg}</p><p className="text-[9.5px] mt-1" style={{color:COLORS.textDim}}>{n.t}</p></div></div>))}</div>)}</div>);}
-function BottomNav({active,onNav}){const items=[{id:"home",icon:Home,label:"Home"},{id:"shifts",icon:Calendar,label:"Shifts"},{id:"training",icon:GraduationCap,label:"Training"},{id:"team",icon:Users,label:"Leadership"},{id:"profile",icon:User,label:"Profile"}];return(<div style={{position:"absolute",bottom:0,left:0,right:0,display:"flex",justifyContent:"space-around",alignItems:"center",paddingTop:"8px",paddingBottom:"24px",background:"#0e0c0c",borderTop:`1px solid ${COLORS.border}`,zIndex:50}}>{items.map(it=>{const Icon=it.icon;const a=active===it.id;return(<button key={it.id} onClick={()=>onNav(it.id)} className="flex flex-col items-center gap-1 px-1"><Icon size={20} color={a?COLORS.red:COLORS.textDim} strokeWidth={a?2.4:1.8}/><span className="text-[9.5px] font-medium" style={{color:a?COLORS.red:COLORS.textDim}}>{it.label}</span></button>);})}</div>);}
+function BottomNav({active,onNav}){const items=[{id:"home",icon:Home,label:"Home"},{id:"shifts",icon:Calendar,label:"Shifts"},{id:"training",icon:GraduationCap,label:"Training"},{id:"team",icon:Users,label:"Leadership"},{id:"profile",icon:User,label:"Profile"}];return(<div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:50,display:"flex",justifyContent:"space-around",alignItems:"center",paddingTop:"8px",paddingBottom:"24px",background:"#0e0c0c",borderTop:`1px solid ${COLORS.border}`}}>{items.map(it=>{const Icon=it.icon;const a=active===it.id;return(<button key={it.id} onClick={()=>onNav(it.id)} className="flex flex-col items-center gap-1 px-1"><Icon size={20} color={a?COLORS.red:COLORS.textDim} strokeWidth={a?2.4:1.8}/><span className="text-[9.5px] font-medium" style={{color:a?COLORS.red:COLORS.textDim}}>{it.label}</span></button>);})}</div>);}
 
 function LoginScreen({onLogin}){
   const [num,setNum]=useState("");const [pass,setPass]=useState("");const [sp,setSp]=useState(false);const [err,setErr]=useState("");const [loading,setLoading]=useState(false);
@@ -82,25 +82,111 @@ function Onboarding({onDone}){
 }
 
 function HomeScreen({onNav,staffNum}){
-  const portals=[{id:"myddf",label:"My DDF",sub:"Community & Culture",icon:Globe,color:COLORS.gold,bg:"rgba(201,162,39,.13)",bd:"rgba(201,162,39,.30)",act:()=>onNav("myddf")},{id:"oracle",label:"Oracle Fusion",sub:"HR & Operations",icon:Database,color:COLORS.teal,bg:"rgba(13,148,136,.13)",bd:"rgba(13,148,136,.30)",act:()=>onNav("oracle")},{id:"isr",label:"ISR",sub:"Individual Sales Report",icon:Shield,color:"#a78bfa",bg:"rgba(167,139,250,.13)",bd:"rgba(167,139,250,.30)",act:()=>onNav("isr")},{id:"admin",label:"Manager Panel",sub:"Supervisors only",icon:BarChart2,color:COLORS.red,bg:"rgba(200,16,46,.13)",bd:"rgba(200,16,46,.30)",act:()=>onNav("admin")}];
-  const core=[{id:"leave",icon:Plane,label:"Leave & Wellness",sub:"Annual + sick + wellness",color:COLORS.teal},{id:"shifts",icon:Calendar,label:"My Shifts & Area",sub:"Schedule, zone & supervisor",color:COLORS.gold},{id:"ideas",icon:Lightbulb,label:"Ideas & Suggestions",sub:"Company growth + app feedback",color:COLORS.gold},{id:"quickhelp",icon:BookOpen,label:"Quick Help",sub:"Products, FAQs, phrases & gear",color:COLORS.gold},{id:"points",icon:Sparkles,label:"My Points",sub:"Earn & unlock rewards",color:COLORS.gold},{id:"discounts",icon:Percent,label:"Staff Discounts",sub:"For everyone",color:COLORS.teal},{id:"eom",icon:Star,label:"Employee of the Month",sub:"How to get there",color:COLORS.gold},{id:"bodylanguage",icon:Eye,label:"Body Language",sub:"Do's and don'ts",color:COLORS.gold},{id:"miles",icon:Plane,label:"Skyward Miles",sub:"Payment rules & rates",color:COLORS.teal},{id:"transport",icon:Bell,label:"Transport",sub:"Bus numbers & routes",color:COLORS.gold},{id:"feedback",icon:Lock,label:"Private Feedback",sub:"Confidential channel",color:COLORS.red},{id:"reference",icon:ClipboardList,label:"Quick Reference",sub:"Holidays, currencies & contacts",color:COLORS.red},{id:"docs",icon:FileText,label:"Documents",sub:"Certificates & forms",color:COLORS.gold}];
-  const grow=[{id:"training",icon:GraduationCap,label:"Training",sub:"Videos & leaderboard",color:COLORS.red}];
-  const svc=[{id:"autism",icon:Sparkles,label:"Autism-Friendly Service",sub:"How to assist with care",color:COLORS.teal},{id:"commendations",icon:Award,label:"Commendation Letters",sub:"What customers said about you",color:COLORS.red}];
-  const rewards=[{id:"mystery",icon:Eye,label:"Mystery Shopper",sub:"Your visit results",color:COLORS.red}];
-  const community=[{id:"team",icon:Users,label:"Meet Leadership",sub:"Know your managers",color:COLORS.teal},{id:"talents",icon:Lightbulb,label:"Dubai Talents",sub:"Ideas, art, music & more",color:COLORS.gold},{id:"competition",icon:Trophy,label:"DDF Talents Cup",sub:"Annual team competition",color:COLORS.red},{id:"story",icon:History,label:"Our Story",sub:"DDF history & milestones",color:COLORS.teal},{id:"careers",icon:ClipboardList,label:"Careers",sub:"Internal open positions",color:COLORS.gold}];
-  const all=[...core,...grow,...svc,...rewards,...community];
-  const [q,setQ]=useState("");const [sn,setSn]=useState(false);
-  const res=q.trim()?all.filter(m=>m.label.toLowerCase().includes(q.toLowerCase())||m.sub.toLowerCase().includes(q.toLowerCase())):[];
-  const Sec=({title,items})=>(<><div className="px-5 mb-3 mt-6"><p className="text-[11px] font-bold tracking-widest" style={{color:COLORS.textDim}}>{title}</p></div><div className="px-5 grid grid-cols-2 gap-3">{items.map(m=>{const Icon=m.icon;return(<button key={m.id} onClick={()=>onNav(m.id)} className="rounded-2xl p-4 text-left flex flex-col gap-3 active:scale-95 transition-transform" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background:`${m.color}22`}}><Icon size={17} color={m.color}/></div><div><p className="text-[12.5px] font-bold leading-tight">{m.label}</p><p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{m.sub}</p></div></button>);})}</div></>);
-  return(<div className="pb-28"><StatusBar/><div className="px-5 pt-3 pb-4 flex items-center gap-3 relative"><img src={LOGO_SRC} alt="" className="w-11 h-11 rounded-full"/><div className="flex-1"><p className="text-[11px]" style={{color:COLORS.textMuted}}>Good evening</p><p className="text-[16px] font-bold">#{staffNum} · Terminal 2</p></div><button onClick={()=>setSn(!sn)} className="w-9 h-9 rounded-full flex items-center justify-center relative flex-shrink-0" style={{background:COLORS.card}}><Bell size={16} color={COLORS.text}/><span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{background:COLORS.red,color:"#fff"}}>2</span></button>{sn&&(<div className="absolute right-5 top-16 w-72 rounded-2xl overflow-hidden z-50 shadow-2xl" style={{background:COLORS.cardAlt,border:`1px solid ${COLORS.border}`}}><div className="px-4 py-3" style={{borderBottom:`1px solid ${COLORS.border}`}}><p className="text-[11px] font-bold" style={{color:COLORS.textMuted}}>NOTIFICATIONS</p></div>{[{from:"Anoop Kumar",msg:"Great work — 3 big sales! 👏",t:"2h ago",red:true},{from:"Yasa Tahir",msg:"Wellness Leave policy is live.",t:"1d ago",red:true},{from:"DDF App",msg:"July schedule published.",t:"2d ago",red:false}].map((n,i,a)=>(<div key={i} className="px-4 py-3 flex gap-3" style={{borderBottom:i<a.length-1?`1px solid ${COLORS.border}`:"none",background:n.red?"rgba(200,16,46,.05)":"transparent"}}><div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{background:n.red?"rgba(200,16,46,.18)":"rgba(255,255,255,.06)"}}>{n.red?<Star size={12} color={COLORS.redLight}/>:<Bell size={12} color={COLORS.textMuted}/>}</div><div className="flex-1"><p className="text-[11px] font-bold">{n.from}</p><p className="text-[11px] mt-0.5" style={{color:COLORS.text}}>{n.msg}</p><p className="text-[9.5px] mt-1" style={{color:COLORS.textDim}}>{n.t}</p></div></div>))}</div>)}</div>
-  <div className="px-5 mb-4"><div className="rounded-xl px-3.5 py-2.5 flex items-center gap-2.5" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><Search size={15} color={COLORS.textDim}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search leave, training, discounts…" className="flex-1 bg-transparent outline-none text-[12.5px]" style={{color:COLORS.text}}/>{q&&<button onClick={()=>setQ("")}><X size={14} color={COLORS.textDim}/></button>}</div>{q.trim()&&(<div className="mt-2 rounded-xl overflow-hidden" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>{res.length===0?<p className="text-[11.5px] p-3.5" style={{color:COLORS.textMuted}}>No matches for "{q}"</p>:res.map((m,i)=>{const Icon=m.icon;return(<button key={m.id} onClick={()=>onNav(m.id)} className="w-full flex items-center gap-3 p-3 text-left" style={{borderTop:i>0?`1px solid ${COLORS.border}`:"none"}}><Icon size={14} color={m.color}/><div><p className="text-[12px] font-bold">{m.label}</p><p className="text-[10px]" style={{color:COLORS.textMuted}}>{m.sub}</p></div></button>);})}</div>)}</div>
-  <div className="px-5 mb-1"><p className="text-[11px] font-bold tracking-widest mb-3" style={{color:COLORS.textDim}}>QUICK ACCESS</p><div className="grid grid-cols-2 gap-2.5">{portals.map(t=>{const Icon=t.icon;return(<button key={t.id} onClick={t.act} className="rounded-2xl p-4 text-left flex flex-col gap-2.5 active:scale-95 transition-transform" style={{background:t.bg,border:`1px solid ${t.bd}`}}><div className="flex items-center justify-between"><div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{background:`${t.color}25`}}><Icon size={18} color={t.color}/></div><ExternalLink size={11} color={t.color} style={{opacity:.55}}/></div><div><p className="text-[13px] font-extrabold" style={{color:t.color}}>{t.label}</p><p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{t.sub}</p></div></button>);})}</div></div>
-  
-  <button onClick={()=>onNav("calendar")} className="w-full px-5"><div className="rounded-2xl p-4 mb-2 flex items-center justify-between" style={{background:`linear-gradient(135deg, ${COLORS.cardAlt}, #1f1413)`,border:`1px solid ${COLORS.border}`}}><div className="text-left"><p className="text-[10.5px] font-bold tracking-wide" style={{color:COLORS.goldLight}}>NEXT SHIFT</p><p className="text-[15px] font-bold mt-0.5">Tomorrow · Day · 7:00 AM</p><p className="text-[11.5px] mt-1" style={{color:COLORS.textMuted}}>2 days on, then 2 off</p></div><div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:"rgba(201,162,39,.15)"}}><Calendar size={20} color={COLORS.goldLight}/></div></div></button>
-  <Sec title="DAILY ESSENTIALS" items={core}/><Sec title="LEARN & SELL BETTER" items={grow}/><Sec title="SERVICE EXCELLENCE" items={svc}/><Sec title="REWARDS & RECOGNITION" items={rewards}/><Sec title="COMMUNITY" items={community}/>
-  <div className="px-5 mt-6"><button onClick={()=>onNav("whatsnew")} className="w-full rounded-xl p-3.5 flex items-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><Clock size={15} color={COLORS.goldLight}/><span className="text-[12px] font-bold flex-1 text-left">What's New in the App</span><ChevronRight size={14} color={COLORS.textDim}/></button></div>
-  <div className="px-5 mt-6 pt-5" style={{borderTop:`1px solid ${COLORS.border}`}}><p className="text-[11px] font-bold text-center mb-3" style={{color:COLORS.textMuted}}>FOLLOW DUBAI DUTY FREE</p><div className="flex justify-center gap-3 mb-5">{["IG","X","FB","IN"].map(s=><div key={s} className="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`,color:COLORS.goldLight}}>{s}</div>)}</div></div>
-  </div>);
+  const portals=[
+    {id:"myddf",label:"My DDF",sub:"Community & Culture",icon:Globe,color:COLORS.gold,bg:"rgba(201,162,39,.13)",bd:"rgba(201,162,39,.30)",act:()=>onNav("myddf")},
+    {id:"oracle",label:"Oracle Fusion",sub:"HR & Operations",icon:Database,color:COLORS.teal,bg:"rgba(13,148,136,.13)",bd:"rgba(13,148,136,.30)",act:()=>onNav("oracle")},
+    {id:"isr",label:"ISR",sub:"Individual Sales Report",icon:Shield,color:"#a78bfa",bg:"rgba(167,139,250,.13)",bd:"rgba(167,139,250,.30)",act:()=>onNav("isr")},
+    {id:"admin",label:"Manager Panel",sub:"Supervisors only",icon:BarChart2,color:COLORS.red,bg:"rgba(200,16,46,.13)",bd:"rgba(200,16,46,.30)",act:()=>onNav("admin")},
+  ];
+  const allItems=[
+    {id:"leave",label:"Leave & Wellness"},{id:"shifts",label:"My Shifts & Area"},{id:"ideas",label:"Ideas & Suggestions"},
+    {id:"quickhelp",label:"Quick Help"},{id:"points",label:"My Points"},{id:"discounts",label:"Staff Discounts"},
+    {id:"eom",label:"Employee of the Month"},{id:"bodylanguage",label:"Body Language"},{id:"miles",label:"Skyward Miles"},
+    {id:"transport",label:"Transport"},{id:"feedback",label:"Private Feedback"},{id:"reference",label:"Quick Reference"},
+    {id:"docs",label:"Documents"},{id:"training",label:"Training"},{id:"autism",label:"Autism-Friendly Service"},
+    {id:"commendations",label:"Commendation Letters"},{id:"mystery",label:"Mystery Shopper"},{id:"team",label:"Meet Leadership"},
+    {id:"talents",label:"Dubai Talents"},{id:"competition",label:"DDF Talents Cup"},{id:"story",label:"Our Story"},
+    {id:"careers",label:"Careers"},{id:"mysales",label:"My Sales"},{id:"payslip",label:"Payslip"},
+  ];
+  const [q,setQ]=useState("");
+  const [sn,setSn]=useState(false);
+  const res=q.trim()?allItems.filter(m=>m.label.toLowerCase().includes(q.toLowerCase())):[];
+  return(
+    <div className="pb-28">
+      <StatusBar/>
+      {/* Greeting */}
+      <div className="px-5 pt-3 pb-4 flex items-center gap-3 relative">
+        <img src={LOGO_SRC} alt="" className="w-11 h-11 rounded-full"/>
+        <div className="flex-1">
+          <p className="text-[11px]" style={{color:COLORS.textMuted}}>Good evening</p>
+          <p className="text-[16px] font-bold">#{staffNum} · Terminal 2</p>
+        </div>
+        <button onClick={()=>setSn(!sn)} className="w-9 h-9 rounded-full flex items-center justify-center relative flex-shrink-0" style={{background:COLORS.card}}>
+          <Bell size={16} color={COLORS.text}/>
+          <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{background:COLORS.red,color:"#fff"}}>2</span>
+        </button>
+        {sn&&(
+          <div className="absolute right-5 top-16 w-72 rounded-2xl overflow-hidden z-50 shadow-2xl" style={{background:COLORS.cardAlt,border:`1px solid ${COLORS.border}`}}>
+            <div className="px-4 py-3" style={{borderBottom:`1px solid ${COLORS.border}`}}><p className="text-[11px] font-bold" style={{color:COLORS.textMuted}}>NOTIFICATIONS</p></div>
+            {[{from:"Anoop Kumar",msg:"Great work — 3 big sales! 👏",t:"2h ago",red:true},{from:"Yasa Tahir",msg:"Wellness Leave policy is live.",t:"1d ago",red:true},{from:"DDF App",msg:"July schedule published.",t:"2d ago",red:false}].map((n,i,a)=>(
+              <div key={i} className="px-4 py-3 flex gap-3" style={{borderBottom:i<a.length-1?`1px solid ${COLORS.border}`:"none",background:n.red?"rgba(200,16,46,.05)":"transparent"}}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{background:n.red?"rgba(200,16,46,.18)":"rgba(255,255,255,.06)"}}>{n.red?<Star size={12} color={COLORS.redLight}/>:<Bell size={12} color={COLORS.textMuted}/>}</div>
+                <div className="flex-1"><p className="text-[11px] font-bold">{n.from}</p><p className="text-[11px] mt-0.5" style={{color:COLORS.text}}>{n.msg}</p><p className="text-[9.5px] mt-1" style={{color:COLORS.textDim}}>{n.t}</p></div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Search */}
+      <div className="px-5 mb-4">
+        <div className="rounded-xl px-3.5 py-2.5 flex items-center gap-2.5" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
+          <Search size={15} color={COLORS.textDim}/>
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search anything…" className="flex-1 bg-transparent outline-none text-[12.5px]" style={{color:COLORS.text}}/>
+          {q&&<button onClick={()=>setQ("")}><X size={14} color={COLORS.textDim}/></button>}
+        </div>
+        {q.trim()&&(
+          <div className="mt-2 rounded-xl overflow-hidden" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
+            {res.length===0
+              ?<p className="text-[11.5px] p-3.5" style={{color:COLORS.textMuted}}>No matches for "{q}"</p>
+              :res.map((m,i)=>(
+                <button key={m.id} onClick={()=>onNav(m.id)} className="w-full flex items-center gap-3 p-3 text-left" style={{borderTop:i>0?`1px solid ${COLORS.border}`:"none"}}>
+                  <p className="text-[12px] font-bold">{m.label}</p>
+                </button>
+              ))
+            }
+          </div>
+        )}
+      </div>
+
+      {/* QUICK ACCESS PORTALS */}
+      <div className="px-5 mb-4">
+        <p className="text-[11px] font-bold tracking-widest mb-3" style={{color:COLORS.textDim}}>QUICK ACCESS</p>
+        <div className="grid grid-cols-2 gap-2.5">
+          {portals.map(t=>{const Icon=t.icon;return(
+            <button key={t.id} onClick={t.act} className="rounded-2xl p-4 text-left flex flex-col gap-2.5 active:scale-95 transition-transform" style={{background:t.bg,border:`1px solid ${t.bd}`}}>
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{background:`${t.color}25`}}><Icon size={18} color={t.color}/></div>
+                <ExternalLink size={11} color={t.color} style={{opacity:.55}}/>
+              </div>
+              <div>
+                <p className="text-[13px] font-extrabold" style={{color:t.color}}>{t.label}</p>
+                <p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{t.sub}</p>
+              </div>
+            </button>
+          );})}
+        </div>
+      </div>
+
+      {/* Next shift */}
+      <button onClick={()=>onNav("calendar")} className="w-full px-5 mb-4">
+        <div className="rounded-2xl p-4 flex items-center justify-between" style={{background:`linear-gradient(135deg, ${COLORS.cardAlt}, #1f1413)`,border:`1px solid ${COLORS.border}`}}>
+          <div className="text-left">
+            <p className="text-[10.5px] font-bold tracking-wide" style={{color:COLORS.goldLight}}>NEXT SHIFT · TAP FOR CALENDAR</p>
+            <p className="text-[15px] font-bold mt-0.5">Tomorrow · Day · 7:00 AM</p>
+            <p className="text-[11.5px] mt-1" style={{color:COLORS.textMuted}}>2 days on, then 2 off · Shift B</p>
+          </div>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:"rgba(201,162,39,.15)"}}><Calendar size={20} color={COLORS.goldLight}/></div>
+        </div>
+      </button>
+
+      {/* Social */}
+      <div className="px-5 pt-4 mt-2" style={{borderTop:`1px solid ${COLORS.border}`}}>
+        <p className="text-[11px] font-bold text-center mb-3" style={{color:COLORS.textMuted}}>FOLLOW DUBAI DUTY FREE</p>
+        <div className="flex justify-center gap-3">{["IG","X","FB","IN"].map(s=><div key={s} className="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`,color:COLORS.goldLight}}>{s}</div>)}</div>
+      </div>
+    </div>
+  );
 }
 
 function SimpleScreen({title,onBack,children}){return(<div className="pb-28"><StatusBar/><TopBar title={title} onBack={onBack}/><div className="px-5">{children}</div></div>);}
