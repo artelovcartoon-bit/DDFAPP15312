@@ -10,7 +10,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 * { -webkit-tap-highlight-color: transparent; }
-body { margin: 0; background: #0a0a0a; overscroll-behavior: none; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #0a0a0a; overscroll-behavior: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 #status { color:#fff; font-family:-apple-system,sans-serif; padding:24px; text-align:center; font-size:13px; opacity:.6; }
@@ -65,7 +65,7 @@ const LOGO_SRC="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcm
 const COLORS={bg:"#0c0c0c",card:"#161210",cardAlt:"#1a1413",border:"#261e19",red:"#c8102e",redLight:"#e8485f",gold:"#c9a227",goldLight:"#e0c267",teal:"#0d9488",tealLight:"#5eead4",text:"#f2efec",textMuted:"#a89e98",textDim:"#6b615a"};
 const DEMO_PASSWORD="ddf2026";
 
-const PhoneFrame=React.forwardRef(({children,onScroll},ref)=>(<div className="w-full min-h-screen flex items-center justify-center bg-neutral-900 py-6 px-3"><div className="relative w-[375px] h-[780px] rounded-[44px] overflow-hidden shadow-2xl border-[6px]" style={{borderColor:"#1c1c1c",backgroundColor:COLORS.bg}}><div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-50"/><div ref={ref} onScroll={onScroll} className="w-full h-full overflow-y-auto no-scrollbar" style={{color:COLORS.text}}>{children}</div></div></div>));
+const PhoneFrame=React.forwardRef(({children,onScroll},ref)=>(<div style={{position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:"#171717",overflow:"hidden"}}><div className="relative w-[375px] h-[780px] rounded-[44px] overflow-hidden shadow-2xl border-[6px]" style={{borderColor:"#1c1c1c",backgroundColor:COLORS.bg}}><div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-50"/><div ref={ref} onScroll={onScroll} className="w-full h-full overflow-y-auto no-scrollbar" style={{color:COLORS.text}}>{children}</div></div></div>));
 function StatusBar(){return(<div className="flex justify-between items-center px-6 pt-3 pb-1 text-[11px] font-semibold" style={{color:COLORS.text}}><span>9:41</span><div className="flex items-center gap-1"><span>●●●●</span><span>Wi-Fi</span><span>🔋</span></div></div>);}
 function TopBar({title,onBack,onCalendar}){const [sn,setSn]=useState(false);const ns=[{from:"Anoop Kumar",msg:"Great work today — 3 big sales! 👏",t:"2h ago",red:true},{from:"Yasa Tahir",msg:"New Wellness Leave policy is live.",t:"1d ago",red:true},{from:"DDF Staff App",msg:"July schedule published.",t:"2d ago",red:false}];return(<div className="px-5 pt-2 pb-4 relative"><div className="flex items-center gap-3">{onBack?(<button onClick={onBack} className="w-8 h-8 rounded-full flex items-center justify-center" style={{background:COLORS.card}}><ChevronLeft size={18} color={COLORS.text}/></button>):(<img src={LOGO_SRC} alt="" className="w-8 h-8 rounded-full"/>)}<h1 className="text-[17px] font-bold flex-1">{title}</h1>{onCalendar&&(<button onClick={onCalendar} className="w-8 h-8 rounded-full flex items-center justify-center" style={{background:COLORS.card}}><Calendar size={15} color={COLORS.text}/></button>)}<button onClick={()=>setSn(!sn)} className="w-8 h-8 rounded-full flex items-center justify-center relative" style={{background:COLORS.card}}><Bell size={15} color={COLORS.text}/><span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{background:COLORS.red,color:"#fff"}}>2</span></button></div>{sn&&(<div className="absolute right-5 top-12 w-72 rounded-2xl overflow-hidden z-50 shadow-2xl" style={{background:COLORS.cardAlt,border:`1px solid ${COLORS.border}`}}><div className="px-4 py-3" style={{borderBottom:`1px solid ${COLORS.border}`}}><p className="text-[11px] font-bold" style={{color:COLORS.textMuted}}>NOTIFICATIONS</p></div>{ns.map((n,i)=>(<div key={i} className="px-4 py-3 flex gap-3" style={{borderBottom:i<ns.length-1?`1px solid ${COLORS.border}`:"none",background:n.red?"rgba(200,16,46,.05)":"transparent"}}><div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{background:n.red?"rgba(200,16,46,.18)":"rgba(255,255,255,.06)"}}>{n.red?<Star size={12} color={COLORS.redLight}/>:<Bell size={12} color={COLORS.textMuted}/>}</div><div className="flex-1"><p className="text-[11px] font-bold">{n.from}</p><p className="text-[11px] mt-0.5" style={{color:COLORS.text}}>{n.msg}</p><p className="text-[9.5px] mt-1" style={{color:COLORS.textDim}}>{n.t}</p></div></div>))}</div>)}</div>);}
 function BottomNav({active,onNav}){const items=[{id:"home",icon:Home,label:"Home"},{id:"shifts",icon:Calendar,label:"Shifts"},{id:"training",icon:GraduationCap,label:"Training"},{id:"team",icon:Users,label:"Leadership"},{id:"profile",icon:User,label:"Profile"}];return(<div className="absolute bottom-0 left-0 right-0 flex justify-around items-center pt-2 pb-6 border-t" style={{background:"#0e0c0c",borderColor:COLORS.border}}>{items.map(it=>{const Icon=it.icon;const a=active===it.id;return(<button key={it.id} onClick={()=>onNav(it.id)} className="flex flex-col items-center gap-1 px-1"><Icon size={20} color={a?COLORS.red:COLORS.textDim} strokeWidth={a?2.4:1.8}/><span className="text-[9.5px] font-medium" style={{color:a?COLORS.red:COLORS.textDim}}>{it.label}</span></button>);})}</div>);}
@@ -82,7 +82,7 @@ function Onboarding({onDone}){
 }
 
 function HomeScreen({onNav,staffNum}){
-  const portals=[{id:"myddf",label:"My DDF",sub:"myddf.ae",icon:Globe,color:COLORS.gold,bg:"rgba(201,162,39,.13)",bd:"rgba(201,162,39,.30)",act:()=>window.open("http://myddf.ae","_blank")},{id:"oracle",label:"Oracle Fusion",sub:"HR & Payroll",icon:Database,color:COLORS.teal,bg:"rgba(13,148,136,.13)",bd:"rgba(13,148,136,.30)",act:()=>window.open("https://www.oracle.com/cloud/saas/fusion-cloud/","_blank")},{id:"isr",label:"ISR",sub:"Incident Reports",icon:Shield,color:"#a78bfa",bg:"rgba(167,139,250,.13)",bd:"rgba(167,139,250,.30)",act:()=>{}},{id:"admin",label:"Manager Panel",sub:"Supervisors only",icon:BarChart2,color:COLORS.red,bg:"rgba(200,16,46,.13)",bd:"rgba(200,16,46,.30)",act:()=>onNav("admin")}];
+  const portals=[{id:"myddf",label:"My DDF",sub:"Community & Culture",icon:Globe,color:COLORS.gold,bg:"rgba(201,162,39,.13)",bd:"rgba(201,162,39,.30)",act:()=>onNav("myddf")},{id:"oracle",label:"Oracle Fusion",sub:"HR & Operations",icon:Database,color:COLORS.teal,bg:"rgba(13,148,136,.13)",bd:"rgba(13,148,136,.30)",act:()=>onNav("oracle")},{id:"isr",label:"ISR",sub:"Individual Sales Report",icon:Shield,color:"#a78bfa",bg:"rgba(167,139,250,.13)",bd:"rgba(167,139,250,.30)",act:()=>onNav("isr")},{id:"admin",label:"Manager Panel",sub:"Supervisors only",icon:BarChart2,color:COLORS.red,bg:"rgba(200,16,46,.13)",bd:"rgba(200,16,46,.30)",act:()=>onNav("admin")}];
   const core=[{id:"leave",icon:Plane,label:"Leave & Wellness",sub:"Annual + sick + wellness",color:COLORS.teal},{id:"shifts",icon:Calendar,label:"My Shifts & Area",sub:"Schedule, zone & supervisor",color:COLORS.gold},{id:"ideas",icon:Lightbulb,label:"Ideas & Suggestions",sub:"Company growth + app feedback",color:COLORS.gold},{id:"quickhelp",icon:BookOpen,label:"Quick Help",sub:"Products, FAQs, phrases & gear",color:COLORS.gold},{id:"points",icon:Sparkles,label:"My Points",sub:"Earn & unlock rewards",color:COLORS.gold},{id:"discounts",icon:Percent,label:"Staff Discounts",sub:"For everyone",color:COLORS.teal},{id:"eom",icon:Star,label:"Employee of the Month",sub:"How to get there",color:COLORS.gold},{id:"bodylanguage",icon:Eye,label:"Body Language",sub:"Do's and don'ts",color:COLORS.gold},{id:"miles",icon:Plane,label:"Skyward Miles",sub:"Payment rules & rates",color:COLORS.teal},{id:"transport",icon:Bell,label:"Transport",sub:"Bus numbers & routes",color:COLORS.gold},{id:"feedback",icon:Lock,label:"Private Feedback",sub:"Confidential channel",color:COLORS.red},{id:"reference",icon:ClipboardList,label:"Quick Reference",sub:"Holidays, currencies & contacts",color:COLORS.red},{id:"docs",icon:FileText,label:"Documents",sub:"Certificates & forms",color:COLORS.gold}];
   const grow=[{id:"training",icon:GraduationCap,label:"Training",sub:"Videos & leaderboard",color:COLORS.red}];
   const svc=[{id:"autism",icon:Sparkles,label:"Autism-Friendly Service",sub:"How to assist with care",color:COLORS.teal},{id:"commendations",icon:Award,label:"Commendation Letters",sub:"What customers said about you",color:COLORS.red}];
@@ -153,7 +153,15 @@ function TrainingScreen({onBack}){const vids=[{t:"Upselling Fragrances",p:50,don
 
 function LeadershipScreen({onBack}){const [sel,setSel]=useState(null);const chain=[{name:"Aibek",role:"You — Sales Associate",initials:"AI",color:COLORS.gold,me:true},{name:"Nickson Nireri",role:"Asst. Supervisor",initials:"NN",color:COLORS.teal},{name:"Anoop Kumar",role:"Supervisor",initials:"AK",color:COLORS.teal},{name:"Ciprian Mazilu",role:"Duty Officer",initials:"CM",color:COLORS.gold},{name:"Fatima Al Suwaidi",role:"Op. Manager — T2",initials:"FS",color:COLORS.red}];const co=[{name:"H.H. Sheikh Ahmed bin Saeed Al Maktoum",role:"Chairman",initials:"AM",color:COLORS.red,bio:"Chairman of DDF since its founding in 1983."},{name:"Ramesh Cidambi",role:"Managing Director",initials:"RC",color:COLORS.gold,bio:"With DDF since 1987. MD since June 2024."},{name:"Salah Tahlak",role:"Deputy MD",initials:"ST",color:COLORS.teal,bio:"Joined 1992 — one of the first Emiratis on the team."},{name:"Yasa Tahir",role:"VP Human Resources",initials:"YT",color:COLORS.teal,bio:"UAE national, MBA, focused on HR strategy."}];if(sel){return(<div className="pb-28"><StatusBar/><TopBar title="Profile" onBack={()=>setSel(null)}/><div className="px-5 flex flex-col items-center text-center mt-4"><div className="w-24 h-24 rounded-full flex items-center justify-center text-[28px] font-extrabold mb-4" style={{background:`${sel.color}22`,color:sel.color,border:`2px solid ${sel.color}55`}}>{sel.initials}</div><p className="text-[18px] font-extrabold">{sel.name}</p><p className="text-[13px] mt-1" style={{color:COLORS.textMuted}}>{sel.role}</p>{sel.bio&&<p className="text-[12px] leading-relaxed mt-4">{sel.bio}</p>}</div></div>);}return(<div className="pb-28"><StatusBar/><TopBar title="Meet Leadership" onBack={onBack}/><div className="px-5"><p className="text-[11.5px] font-bold mb-3 mt-2" style={{color:COLORS.textMuted}}>YOUR CHAIN OF COMMAND</p><div className="relative pl-6 mb-7"><div className="absolute left-2 top-2 bottom-2 w-0.5" style={{background:`linear-gradient(180deg,${COLORS.gold},${COLORS.red})`}}/>{chain.map(p=><button key={p.name} onClick={()=>setSel(p)} className="relative w-full mb-3 last:mb-0 text-left"><div className="absolute -left-6 top-3 w-3.5 h-3.5 rounded-full" style={{background:COLORS.bg,border:`2px solid ${p.color}`}}/><div className="rounded-xl p-3 flex items-center gap-3" style={{background:p.me?`${COLORS.gold}14`:COLORS.card,border:`1px solid ${p.me?COLORS.gold+"55":COLORS.border}`}}><div className="w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-extrabold flex-shrink-0" style={{background:`${p.color}22`,color:p.color}}>{p.initials}</div><div className="flex-1"><p className="text-[12.5px] font-bold leading-tight">{p.name}</p><p className="text-[10.5px] mt-0.5" style={{color:COLORS.textMuted}}>{p.role}</p></div>{!p.me&&<ChevronRight size={14} color={COLORS.textDim}/>}</div></button>)}</div><p className="text-[11.5px] font-bold mb-3" style={{color:COLORS.textMuted}}>COMPANY LEADERSHIP</p><div className="grid grid-cols-2 gap-3">{co.map(p=><button key={p.name} onClick={()=>setSel(p)} className="rounded-2xl p-4 flex flex-col items-center text-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="w-16 h-16 rounded-full flex items-center justify-center text-[18px] font-extrabold" style={{background:`${p.color}22`,color:p.color,border:`2px solid ${p.color}55`}}>{p.initials}</div><div><p className="text-[11.5px] font-bold leading-tight">{p.name}</p><p className="text-[9.5px] mt-1" style={{color:COLORS.textMuted}}>{p.role}</p></div></button>)}</div></div></div>);}
 
-function ProfileScreen({onNav,staffNum,onLogout}){return(<div className="pb-28"><StatusBar/><div className="px-5 pt-3 pb-5"><h1 className="text-[17px] font-bold mb-5">Profile</h1><div className="flex flex-col items-center text-center mb-6"><div className="w-20 h-20 rounded-full flex items-center justify-center text-[22px] font-extrabold mb-3" style={{background:"rgba(200,16,46,.18)",color:COLORS.redLight,border:`2px solid ${COLORS.red}55`}}>A</div><p className="text-[16px] font-extrabold">Staff #{staffNum}</p><p className="text-[11.5px] mt-1" style={{color:COLORS.textMuted}}>Terminal 2 · Electronics · Shift B</p></div><div className="rounded-2xl p-4 mb-3 grid grid-cols-2 gap-4" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div><p className="text-[10px] font-bold" style={{color:COLORS.textMuted}}>WITH DDF SINCE</p><p className="text-[13px] font-bold mt-1">March 2022</p></div><div><p className="text-[10px] font-bold" style={{color:COLORS.textMuted}}>STAFF ID</p><p className="text-[13px] font-bold mt-1">DDF-{staffNum}</p></div></div><p className="text-[10.5px] font-bold mb-2 mt-4" style={{color:COLORS.textMuted}}>PORTALS</p><div className="flex flex-col gap-2 mb-4">{[{label:"My DDF — myddf.ae",color:COLORS.gold,act:()=>window.open("http://myddf.ae","_blank"),icon:Globe},{label:"Oracle Fusion — HR & Payroll",color:COLORS.teal,act:()=>window.open("https://www.oracle.com/cloud/saas/fusion-cloud/","_blank"),icon:Database},{label:"ISR — Incident Reports",color:"#a78bfa",act:()=>{},icon:Shield}].map(p=>{const Icon=p.icon;return(<button key={p.label} onClick={p.act} className="w-full rounded-xl p-3.5 flex items-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><Icon size={15} color={p.color}/><span className="text-[12.5px] font-bold flex-1 text-left" style={{color:p.color}}>{p.label}</span><ExternalLink size={12} color={COLORS.textDim}/></button>);})}</div><p className="text-[10.5px] font-bold mb-2" style={{color:COLORS.textMuted}}>MY RECORDS</p><div className="flex flex-col gap-2 mb-4">{[{id:"certificates",icon:Award,label:"My Certificates"},{id:"commendations",icon:Star,label:"Commendation Letters"},{id:"points",icon:Sparkles,label:"My Points"},{id:"mystery",icon:Eye,label:"Mystery Shopper"}].map(r=>{const Icon=r.icon;return(<button key={r.id} onClick={()=>onNav(r.id)} className="rounded-xl p-3.5 flex items-center justify-between" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="flex items-center gap-3"><Icon size={15} color={COLORS.goldLight}/><span className="text-[12.5px] font-bold">{r.label}</span></div><ChevronRight size={14} color={COLORS.textDim}/></button>);})}</div><button onClick={()=>onNav("admin")} className="w-full rounded-xl p-3.5 mb-4 flex items-center justify-between" style={{background:"rgba(201,162,39,.08)",border:`1px solid ${COLORS.gold}40`}}><div className="flex items-center gap-2.5"><BarChart2 size={15} color={COLORS.goldLight}/><div className="text-left"><p className="text-[12px] font-bold">Manager Panel</p><p className="text-[9px]" style={{color:COLORS.goldLight}}>Supervisors only</p></div></div><ChevronRight size={13} color={COLORS.textDim}/></button><button onClick={onLogout} className="w-full rounded-xl p-3.5 flex items-center justify-center gap-2 mt-2" style={{background:"rgba(200,16,46,.08)",border:`1px solid ${COLORS.red}40`,color:COLORS.redLight}}><X size={14}/><span className="text-[12.5px] font-bold">Sign Out</span></button><button onClick={()=>onNav("about")} className="w-full flex items-center justify-between py-3 mt-2" style={{borderTop:`1px solid ${COLORS.border}`}}><span className="text-[11.5px] font-bold" style={{color:COLORS.textMuted}}>About & Privacy</span><ChevronRight size={13} color={COLORS.textDim}/></button></div></div>);}
+function ProfileScreen({onNav,staffNum,onLogout}){return(<div className="pb-28"><StatusBar/><div className="px-5 pt-3 pb-5"><h1 className="text-[17px] font-bold mb-5">Profile</h1><div className="flex flex-col items-center text-center mb-6"><div className="w-20 h-20 rounded-full flex items-center justify-center text-[22px] font-extrabold mb-3" style={{background:"rgba(200,16,46,.18)",color:COLORS.redLight,border:`2px solid ${COLORS.red}55`}}>A</div><p className="text-[16px] font-extrabold">Staff #{staffNum}</p><p className="text-[11.5px] mt-1" style={{color:COLORS.textMuted}}>Terminal 2 · Electronics · Shift B</p></div><div className="rounded-2xl p-4 mb-3 grid grid-cols-2 gap-4" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div><p className="text-[10px] font-bold" style={{color:COLORS.textMuted}}>WITH DDF SINCE</p><p className="text-[13px] font-bold mt-1">March 2022</p></div><div><p className="text-[10px] font-bold" style={{color:COLORS.textMuted}}>STAFF ID</p><p className="text-[13px] font-bold mt-1">DDF-{staffNum}</p></div></div><p className="text-[10.5px] font-bold mb-2 mt-4" style={{color:COLORS.textMuted}}>PORTALS</p><div className="flex flex-col gap-2 mb-4">{[{label:"My DDF",color:COLORS.gold,act:()=>onNav("myddf"),icon:Globe},{label:"Oracle Fusion",color:COLORS.teal,act:()=>onNav("oracle"),icon:Database},{label:"ISR — Individual Sales Report",color:"#a78bfa",act:()=>onNav("isr"),icon:Shield}].map(p=>{const Icon=p.icon;return(<button key={p.label} onClick={p.act} className="w-full rounded-xl p-3.5 flex items-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><Icon size={15} color={p.color}/><span className="text-[12.5px] font-bold flex-1 text-left" style={{color:p.color}}>{p.label}</span><ExternalLink size={12} color={COLORS.textDim}/></button>);})}</div><p className="text-[10.5px] font-bold mb-2" style={{color:COLORS.textMuted}}>MY RECORDS</p><div className="flex flex-col gap-2 mb-4">{[{id:"certificates",icon:Award,label:"My Certificates"},{id:"commendations",icon:Star,label:"Commendation Letters"},{id:"points",icon:Sparkles,label:"My Points"},{id:"mystery",icon:Eye,label:"Mystery Shopper"}].map(r=>{const Icon=r.icon;return(<button key={r.id} onClick={()=>onNav(r.id)} className="rounded-xl p-3.5 flex items-center justify-between" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="flex items-center gap-3"><Icon size={15} color={COLORS.goldLight}/><span className="text-[12.5px] font-bold">{r.label}</span></div><ChevronRight size={14} color={COLORS.textDim}/></button>);})}</div><button onClick={()=>onNav("admin")} className="w-full rounded-xl p-3.5 mb-4 flex items-center justify-between" style={{background:"rgba(201,162,39,.08)",border:`1px solid ${COLORS.gold}40`}}><div className="flex items-center gap-2.5"><BarChart2 size={15} color={COLORS.goldLight}/><div className="text-left"><p className="text-[12px] font-bold">Manager Panel</p><p className="text-[9px]" style={{color:COLORS.goldLight}}>Supervisors only</p></div></div><ChevronRight size={13} color={COLORS.textDim}/></button><div className="flex flex-col gap-2 mb-4">
+        <button onClick={()=>onNav("feedback")} className="w-full rounded-xl p-3.5 flex items-center gap-3" style={{background:"rgba(13,148,136,.08)",border:`1px solid ${COLORS.teal}40`}}>
+          <Lock size={15} color={COLORS.tealLight}/><span className="text-[12.5px] font-bold flex-1 text-left" style={{color:COLORS.tealLight}}>Private Feedback</span><ChevronRight size={13} color={COLORS.textDim}/>
+        </button>
+        <button onClick={()=>onNav("whatsnew")} className="w-full rounded-xl p-3.5 flex items-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
+          <Clock size={15} color={COLORS.goldLight}/><span className="text-[12.5px] font-bold flex-1 text-left">What's New</span><ChevronRight size={13} color={COLORS.textDim}/>
+        </button>
+      </div>
+      <button onClick={onLogout} className="w-full rounded-xl p-3.5 flex items-center justify-center gap-2 mt-2" style={{background:"rgba(200,16,46,.08)",border:`1px solid ${COLORS.red}40`,color:COLORS.redLight}}><X size={14}/><span className="text-[12.5px] font-bold">Sign Out</span></button><button onClick={()=>onNav("about")} className="w-full flex items-center justify-between py-3 mt-2" style={{borderTop:`1px solid ${COLORS.border}`}}><span className="text-[11.5px] font-bold" style={{color:COLORS.textMuted}}>About & Privacy</span><ChevronRight size={13} color={COLORS.textDim}/></button></div></div>);}
 
 function AdminPanelScreen({onBack}){const tools=[{icon:CheckCircle2,label:"Approve Leave Requests",sub:"3 pending",color:COLORS.teal},{icon:Star,label:"Send a Shoutout",sub:"Recognize someone today",color:COLORS.gold},{icon:Users,label:"Team Overview",sub:"Attendance, sales & points",color:COLORS.red},{icon:FileText,label:"Mystery Shopper Reports",sub:"2 new this week",color:COLORS.gold},{icon:Lightbulb,label:"Ideas & Polls Inbox",sub:"View anonymous submissions",color:COLORS.teal},{icon:BarChart2,label:"Sales Dashboard",sub:"Live PLU & budget view",color:"#a78bfa"}];return(<div className="pb-28"><StatusBar/><TopBar title="Manager Panel" onBack={onBack}/><div className="px-5"><div className="rounded-xl p-3 mb-5 flex items-start gap-2" style={{background:"rgba(201,162,39,.08)",border:`1px solid ${COLORS.gold}40`}}><Shield size={13} color={COLORS.goldLight} className="mt-0.5 flex-shrink-0"/><p className="text-[10.5px] leading-relaxed" style={{color:COLORS.textMuted}}>Visible to Supervisors, Duty Officers and Operation Managers only.</p></div><div className="flex flex-col gap-2.5">{tools.map(t=>{const Icon=t.icon;return(<button key={t.label} className="w-full rounded-xl p-3.5 flex items-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{background:`${t.color}22`}}><Icon size={16} color={t.color}/></div><div className="flex-1 text-left"><p className="text-[12.5px] font-bold">{t.label}</p><p className="text-[10.5px] mt-0.5" style={{color:COLORS.textMuted}}>{t.sub}</p></div><ChevronRight size={14} color={COLORS.textDim}/></button>);})}</div></div></div>);}
 
@@ -177,6 +185,251 @@ function TalentsIdeasScreen({onBack}){const [sub,setSub]=useState(false);return(
 function TalentsCupScreen({onBack}){return(<SimpleScreen title="DDF Talents Cup" onBack={onBack}><div className="rounded-2xl p-5 mb-5 text-center" style={{background:`linear-gradient(145deg,${COLORS.cardAlt},#241313)`,border:`1px solid ${COLORS.red}55`}}><Trophy size={28} color={COLORS.goldLight} className="mx-auto mb-2"/><p className="text-[15px] font-extrabold">Annual Shift & Terminal Competition</p></div>{[{t:"Performance",d:"Music, comedy, or a short skit"},{t:"Creative Showcase",d:"Costume or visual theme the team designs"},{t:"Team Routine",d:"A short coordinated act"},{t:"DDF Knowledge",d:"5 questions about Duty Free"}].map((c,i)=><div key={i} className="rounded-xl p-3.5 flex items-center gap-3 mb-2" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{background:"rgba(200,16,46,.15)",color:COLORS.redLight}}>{i+1}</div><div><p className="text-[12px] font-bold">{c.t}</p><p className="text-[10.5px]" style={{color:COLORS.textMuted}}>{c.d}</p></div></div>)}<button className="w-full py-3.5 rounded-xl font-bold text-[14px] mt-4" style={{background:COLORS.red,color:"#fff"}}>Register Your Team</button></SimpleScreen>);}
 function AboutScreen({onBack}){return(<SimpleScreen title="About & Privacy" onBack={onBack}><div className="flex flex-col items-center text-center mb-6"><img src={LOGO_SRC} alt="logo" className="w-14 h-14 rounded-full mb-3"/><p className="text-[13px] font-bold">DDF Staff App</p><p className="text-[10.5px] mt-1" style={{color:COLORS.textMuted}}>Version 1.0 · Internal use only</p></div><div className="rounded-2xl p-4 mb-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>{["Your data is used only for app functions.","Your information is never sold or shared outside DDF.","Anonymous channels keep your identity hidden from supervisors unless you choose to share."].map((t,i)=><div key={i} className="flex items-start gap-2.5 mb-2"><CheckCircle2 size={13} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0"/><p className="text-[11.5px] leading-relaxed">{t}</p></div>)}</div></SimpleScreen>);}
 function WhatsNewScreen({onBack}){return(<SimpleScreen title="What's New" onBack={onBack}><div className="relative pl-6">{[{d:"June 2026",t:"Login system added",b:"Staff number + password. Demo: ddf2026"},{d:"June 2026",t:"Quick Access portals on Home",b:"My DDF, Oracle Fusion, ISR and Manager Panel — one tap away."},{d:"June 2026",t:"Quick Help launched",b:"Products, FAQs, customer phrases & equipment guides."},{d:"April 2026",t:"Wellness Leave added",b:"Request 4 yearly wellness days — no certificate required."}].map((u,i)=><div key={i} className="relative mb-6 last:mb-0"><div className="absolute -left-6 top-1 w-3.5 h-3.5 rounded-full" style={{background:COLORS.bg,border:`2px solid ${COLORS.gold}`}}/><p className="text-[10.5px] font-bold" style={{color:COLORS.goldLight}}>{u.d}</p><p className="text-[13px] font-bold mt-1">{u.t}</p><p className="text-[11.5px] mt-1 leading-relaxed" style={{color:COLORS.textMuted}}>{u.b}</p></div>)}</div></SimpleScreen>);}
+
+
+function ISRScreen({onNav,onBack}){
+  const items=[
+    {id:"mysales",icon:TrendingUp,label:"My Sales",sub:"Today's sales & leaderboard",color:"#c8102e",bg:"rgba(200,16,46,.13)",bd:"rgba(200,16,46,.30)"},
+    {id:"shifts",icon:Calendar,label:"My Shifts & Area",sub:"Schedule, zone & supervisor",color:"#c9a227",bg:"rgba(201,162,39,.13)",bd:"rgba(201,162,39,.30)"},
+    {id:"miles",icon:Plane,label:"Skyward Miles",sub:"Payment rules & rates",color:"#0d9488",bg:"rgba(13,148,136,.13)",bd:"rgba(13,148,136,.30)"},
+    {id:"points",icon:Sparkles,label:"My Points",sub:"Earn & unlock rewards",color:"#c9a227",bg:"rgba(201,162,39,.13)",bd:"rgba(201,162,39,.30)"},
+    {id:"discounts",icon:Percent,label:"Staff Discounts",sub:"10% across the board",color:"#0d9488",bg:"rgba(13,148,136,.13)",bd:"rgba(13,148,136,.30)"},
+    {id:"mystery",icon:Eye,label:"Mystery Shopper",sub:"Your visit results",color:"#c8102e",bg:"rgba(200,16,46,.13)",bd:"rgba(200,16,46,.30)"},
+  ];
+  return(
+    <div className="pb-28">
+      <StatusBar/>
+      <TopBar title="ISR" onBack={onBack}/>
+      <div className="px-5">
+        <div className="rounded-xl p-3 mb-5 flex items-start gap-2" style={{background:"rgba(167,139,250,.08)",border:"1px solid rgba(167,139,250,.3)"}}>
+          <Shield size={13} color="#a78bfa" className="mt-0.5 flex-shrink-0"/>
+          <div>
+            <p className="text-[11px] font-bold" style={{color:"#a78bfa"}}>INDIVIDUAL SALES REPORT</p>
+            <p className="text-[10.5px] mt-0.5 leading-relaxed" style={{color:"#a89e98"}}>Your personal sales performance, shifts, rewards and benefits.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {items.map(t=>{
+            const Icon=t.icon;
+            return(
+              <button key={t.id} onClick={()=>onNav(t.id)}
+                className="rounded-2xl p-4 text-left flex flex-col gap-2.5 active:scale-95 transition-transform"
+                style={{background:t.bg,border:`1px solid ${t.bd}`}}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{background:`${t.color}25`}}>
+                  <Icon size={18} color={t.color}/>
+                </div>
+                <div>
+                  <p className="text-[13px] font-extrabold" style={{color:t.color}}>{t.label}</p>
+                  <p className="text-[10px] mt-0.5" style={{color:"#a89e98"}}>{t.sub}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function MyDDFScreen({onNav,onBack}){
+  const items=[
+    {id:"ideas",icon:Lightbulb,label:"Ideas & Suggestions",sub:"Company growth + app feedback",color:COLORS.gold},
+    {id:"eom",icon:Star,label:"Employee of the Month",sub:"How to get there",color:COLORS.gold},
+    {id:"transport",icon:Bell,label:"Transport",sub:"Bus numbers & routes",color:COLORS.gold},
+    {id:"reference",icon:ClipboardList,label:"Quick Reference",sub:"Holidays, currencies & contacts",color:COLORS.red},
+    {id:"training",icon:GraduationCap,label:"Training",sub:"Videos & leaderboard",color:COLORS.red},
+    {id:"autism",icon:Sparkles,label:"Autism-Friendly Service",sub:"How to assist with care",color:COLORS.teal},
+    {id:"commendations",icon:Award,label:"Commendation Letters",sub:"What customers said about you",color:COLORS.red},
+    {id:"team",icon:Users,label:"Meet Leadership",sub:"Know your managers",color:COLORS.teal},
+    {id:"talents",icon:Lightbulb,label:"Dubai Talents",sub:"Ideas, art, music & more",color:COLORS.gold},
+    {id:"competition",icon:Trophy,label:"DDF Talents Cup",sub:"Annual team competition",color:COLORS.red},
+    {id:"story",icon:History,label:"Our Story",sub:"DDF history & milestones",color:COLORS.teal},
+    {id:"bodylanguage",icon:Eye,label:"Body Language",sub:"Do's and don'ts on the floor",color:COLORS.gold},
+  ];
+  return(
+    <div className="pb-28">
+      <StatusBar/>
+      <TopBar title="My DDF" onBack={onBack}/>
+      <div className="px-5">
+        <div className="rounded-xl p-3 mb-5 flex items-start gap-2" style={{background:"rgba(201,162,39,.08)",border:`1px solid ${COLORS.gold}40`}}>
+          <Globe size={13} color={COLORS.goldLight} className="mt-0.5 flex-shrink-0"/>
+          <div>
+            <p className="text-[11px] font-bold" style={{color:COLORS.goldLight}}>COMMUNITY & CULTURE</p>
+            <p className="text-[10.5px] mt-0.5 leading-relaxed" style={{color:COLORS.textMuted}}>Training, community, recognition and company culture.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {items.map(m=>{const Icon=m.icon;return(
+            <button key={m.id} onClick={()=>onNav(m.id)}
+              className="rounded-2xl p-4 text-left flex flex-col gap-3 active:scale-95 transition-transform"
+              style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background:`${m.color}22`}}><Icon size={17} color={m.color}/></div>
+              <div><p className="text-[12.5px] font-bold leading-tight">{m.label}</p><p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{m.sub}</p></div>
+            </button>
+          );})}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OracleScreen({onNav,onBack}){
+  const items=[
+    {id:"leave",icon:Plane,label:"Leave & Wellness",sub:"Annual + sick + wellness",color:COLORS.teal},
+    {id:"payslip",icon:FileText,label:"Payslip",sub:"Monthly & annual download",color:COLORS.teal},
+    {id:"docs",icon:ClipboardList,label:"Documents",sub:"Certificates & forms",color:COLORS.gold},
+    {id:"careers",icon:Award,label:"Careers",sub:"Internal open positions",color:COLORS.gold},
+    {id:"quickhelp",icon:BookOpen,label:"Quick Help",sub:"Products, FAQs, phrases & gear",color:COLORS.gold},
+  ];
+  return(
+    <div className="pb-28">
+      <StatusBar/>
+      <TopBar title="Oracle Fusion" onBack={onBack}/>
+      <div className="px-5">
+        <div className="rounded-xl p-3 mb-5 flex items-start gap-2" style={{background:"rgba(13,148,136,.08)",border:`1px solid ${COLORS.teal}40`}}>
+          <Database size={13} color={COLORS.tealLight} className="mt-0.5 flex-shrink-0"/>
+          <div>
+            <p className="text-[11px] font-bold" style={{color:COLORS.tealLight}}>HR & OPERATIONS</p>
+            <p className="text-[10.5px] mt-0.5 leading-relaxed" style={{color:COLORS.textMuted}}>Leave, documents, feedback and HR tools.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {items.map(m=>{const Icon=m.icon;return(
+            <button key={m.id} onClick={()=>onNav(m.id)}
+              className="rounded-2xl p-4 text-left flex flex-col gap-3 active:scale-95 transition-transform"
+              style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background:`${m.color}22`}}><Icon size={17} color={m.color}/></div>
+              <div><p className="text-[12.5px] font-bold leading-tight">{m.label}</p><p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{m.sub}</p></div>
+            </button>
+          );})}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function PayslipScreen({onBack}){
+  const [period,setPeriod]=useState("monthly");
+  const [selectedYear,setSelectedYear]=useState("2026");
+  const months=[
+    {m:"January",net:"AED 8,450",gross:"AED 10,200",status:"paid"},
+    {m:"February",net:"AED 8,450",gross:"AED 10,200",status:"paid"},
+    {m:"March",net:"AED 8,850",gross:"AED 10,600",status:"paid"},
+    {m:"April",net:"AED 8,450",gross:"AED 10,200",status:"paid"},
+    {m:"May",net:"AED 8,450",gross:"AED 10,200",status:"paid"},
+    {m:"June",net:"AED 9,100",gross:"AED 11,000",status:"paid"},
+    {m:"July",net:"AED 8,450",gross:"AED 10,200",status:"pending"},
+  ];
+  const totalNet=months.filter(x=>x.status==="paid").reduce((a,b)=>a+parseInt(b.net.replace(/[^0-9]/g,"")),0);
+  const totalGross=months.filter(x=>x.status==="paid").reduce((a,b)=>a+parseInt(b.gross.replace(/[^0-9]/g,"")),0);
+  const halfYear=months.slice(0,6);
+  const halfNet=halfYear.reduce((a,b)=>a+parseInt(b.net.replace(/[^0-9]/g,"")),0);
+
+  return(
+    <div className="pb-28">
+      <StatusBar/>
+      <TopBar title="Payslip" onBack={onBack}/>
+      <div className="px-5">
+
+        {/* Year selector */}
+        <div className="flex gap-2 mb-4">
+          {["2024","2025","2026"].map(y=>(
+            <button key={y} onClick={()=>setSelectedYear(y)}
+              className="flex-1 py-2.5 rounded-xl text-[12px] font-bold"
+              style={{background:selectedYear===y?COLORS.teal:COLORS.card,color:selectedYear===y?"#fff":COLORS.textMuted,border:`1px solid ${selectedYear===y?COLORS.teal:COLORS.border}`}}>
+              {y}
+            </button>
+          ))}
+        </div>
+
+        {/* Period tabs */}
+        <div className="flex gap-2 mb-5">
+          {[{id:"monthly",label:"Monthly"},{id:"biannual",label:"6 Months"},{id:"annual",label:"Full Year"}].map(p=>(
+            <button key={p.id} onClick={()=>setPeriod(p.id)}
+              className="flex-1 py-2 rounded-xl text-[11px] font-bold"
+              style={{background:period===p.id?COLORS.red:COLORS.card,color:period===p.id?"#fff":COLORS.textMuted,border:`1px solid ${period===p.id?COLORS.red:COLORS.border}`}}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Summary card */}
+        {period==="annual"&&(
+          <div className="rounded-2xl p-5 mb-5" style={{background:`linear-gradient(135deg,${COLORS.cardAlt},#1f1413)`,border:`1px solid ${COLORS.gold}55`}}>
+            <p className="text-[11px] font-bold mb-3" style={{color:COLORS.goldLight}}>ANNUAL SUMMARY {selectedYear}</p>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px]" style={{color:COLORS.textMuted}}>Total Gross</span>
+              <span className="text-[14px] font-bold">AED {totalGross.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between mb-4 pb-4" style={{borderBottom:`1px solid ${COLORS.border}`}}>
+              <span className="text-[11px]" style={{color:COLORS.textMuted}}>Total Net</span>
+              <span className="text-[16px] font-extrabold" style={{color:COLORS.goldLight}}>AED {totalNet.toLocaleString()}</span>
+            </div>
+            <button className="w-full py-3 rounded-xl font-bold text-[13px] flex items-center justify-center gap-2"
+              style={{background:COLORS.gold,color:"#1a1410"}}>
+              <FileText size={15}/> Download Full Year PDF
+            </button>
+          </div>
+        )}
+
+        {period==="biannual"&&(
+          <div className="rounded-2xl p-5 mb-5" style={{background:`linear-gradient(135deg,${COLORS.cardAlt},#1f1413)`,border:`1px solid ${COLORS.teal}55`}}>
+            <p className="text-[11px] font-bold mb-3" style={{color:COLORS.tealLight}}>JAN – JUN {selectedYear}</p>
+            <div className="flex items-center justify-between mb-4 pb-4" style={{borderBottom:`1px solid ${COLORS.border}`}}>
+              <span className="text-[11px]" style={{color:COLORS.textMuted}}>Net Total (6 months)</span>
+              <span className="text-[16px] font-extrabold" style={{color:COLORS.tealLight}}>AED {halfNet.toLocaleString()}</span>
+            </div>
+            <button className="w-full py-3 rounded-xl font-bold text-[13px] flex items-center justify-center gap-2"
+              style={{background:COLORS.teal,color:"#fff"}}>
+              <FileText size={15}/> Download 6-Month PDF
+            </button>
+          </div>
+        )}
+
+        {/* Monthly list */}
+        <p className="text-[11px] font-bold mb-3" style={{color:COLORS.textMuted}}>
+          {period==="monthly"?"ALL MONTHS":period==="biannual"?"MONTHLY BREAKDOWN — H1":"MONTHLY BREAKDOWN"}
+        </p>
+        <div className="flex flex-col gap-2">
+          {(period==="biannual"?halfYear:months).map((m,i)=>(
+            <div key={i} className="rounded-xl p-4 flex items-center gap-3"
+              style={{background:COLORS.card,border:`1px solid ${m.status==="pending"?COLORS.gold+"55":COLORS.border}`}}>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-[12.5px] font-bold">{m.m} {selectedYear}</p>
+                  {m.status==="pending"&&(
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full" style={{background:"rgba(201,162,39,.2)",color:COLORS.goldLight}}>PENDING</span>
+                  )}
+                </div>
+                <p className="text-[10.5px]" style={{color:COLORS.textMuted}}>Gross {m.gross}</p>
+              </div>
+              <div className="text-right mr-2">
+                <p className="text-[13px] font-extrabold" style={{color:m.status==="pending"?COLORS.textMuted:COLORS.tealLight}}>{m.net}</p>
+                <p className="text-[9px]" style={{color:COLORS.textDim}}>net pay</p>
+              </div>
+              {m.status==="paid"&&(
+                <button className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{background:"rgba(13,148,136,.15)"}}>
+                  <FileText size={14} color={COLORS.tealLight}/>
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Download all button for monthly view */}
+        {period==="monthly"&&(
+          <button className="w-full py-3.5 rounded-xl font-bold text-[13px] mt-4 flex items-center justify-center gap-2"
+            style={{background:COLORS.card,border:`1px solid ${COLORS.border}`,color:COLORS.text}}>
+            <FileText size={15} color={COLORS.goldLight}/> Download All as ZIP
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function StaffApp(){
   const [phase,setPhase]=useState("login");
@@ -220,6 +473,10 @@ function StaffApp(){
   else if(screen==="certificates"){content=<CertificatesScreen onBack={()=>setScreen("profile")}/>;activeTab="profile";}
   else if(screen==="commendations"){content=<CommendationsScreen onBack={()=>setScreen("profile")}/>;activeTab="profile";}
   else if(screen==="admin"){content=<AdminPanelScreen onBack={()=>setScreen("profile")}/>;activeTab="profile";}
+  else if(screen==="isr"){content=<ISRScreen onNav={setScreen} onBack={()=>setScreen("home")}/>;activeTab="home";}
+  else if(screen==="myddf"){content=<MyDDFScreen onNav={setScreen} onBack={()=>setScreen("home")}/>;activeTab="home";}
+  else if(screen==="oracle"){content=<OracleScreen onNav={setScreen} onBack={()=>setScreen("home")}/>;activeTab="home";}
+  else if(screen==="payslip"){content=<PayslipScreen onBack={()=>setScreen("oracle")}/>;activeTab="home";}
   else if(screen==="about"){content=<AboutScreen onBack={()=>setScreen("profile")}/>;activeTab="profile";}
   else if(screen==="whatsnew"){content=<WhatsNewScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
   else if(screen==="docs"){content=<SimpleScreen title="Documents" onBack={()=>setScreen("home")}>{["Employment Certificate","Salary Certificate","Uniform Reissue Request"].map(d=><button key={d} className="rounded-xl p-4 flex items-center gap-3 text-left mb-2" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background:"rgba(201,162,39,.15)"}}><FileText size={16} color={COLORS.goldLight}/></div><p className="text-[12.5px] font-bold">{d}</p></button>)}</SimpleScreen>;activeTab="home";}
