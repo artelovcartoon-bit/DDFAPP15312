@@ -514,53 +514,47 @@ function PayslipScreen({onBack}){
 
 function PromotionsScreen(){
   const [tab,setTab]=useState("promotions");
-  const dept="Electronics · Terminal 2";
+  const dept="Electronics - Terminal 2";
 
   const promotions=[
-    {name:"Johnnie Walker Black Label 1L",brand:"Johnnie Walker",pct:"15%",img:"JW"},
-    {name:"Chanel No.5 EDP 100ml",brand:"Chanel",pct:"20%",img:"CH"},
-    {name:"Cadbury Celebration Box 650g",brand:"Cadbury",pct:"10%",img:"CD"},
-    {name:"Davidoff Cool Water EDT 125ml",brand:"Davidoff",pct:"25%",img:"DV"},
-    {name:"Lindt Swiss Luxury Box 445g",brand:"Lindt",pct:"12%",img:"LT"},
-    {name:"Hennessy VS 1L",brand:"Hennessy",pct:"18%",img:"HN"},
+    {name:"Sony WH-1000XM6 Headphones",brand:"Sony",pct:"15%",cat:"Audio"},
+    {name:"Apple AirPods Pro 2nd Gen",brand:"Apple",pct:"20%",cat:"Audio"},
+    {name:"Samsung 65in QLED 4K TV",brand:"Samsung",pct:"10%",cat:"TV"},
+    {name:"Dyson V15 Detect Vacuum",brand:"Dyson",pct:"18%",cat:"Home"},
+    {name:"Bose SoundLink Max Speaker",brand:"Bose",pct:"12%",cat:"Audio"},
+    {name:"Canon EOS R50 Camera Kit",brand:"Canon",pct:"25%",cat:"Camera"},
   ];
 
   const reducedPrice=[
-    {name:"Sony WH-1000XM6",brand:"Sony",was:"AED 1,899",now:"AED 1,549",save:"AED 350"},
-    {name:"Apple AirPods Pro 2nd Gen",brand:"Apple",was:"AED 999",now:"AED 849",save:"AED 150"},
-    {name:"Dyson Airwrap Complete",brand:"Dyson",was:"AED 2,299",now:"AED 1,899",save:"AED 400"},
+    {name:"Sony WH-1000XM6",brand:"Sony",was:"AED 1899",now:"AED 1549",save:"AED 350"},
+    {name:"Apple AirPods Pro 2",brand:"Apple",was:"AED 999",now:"AED 849",save:"AED 150"},
+    {name:"Dyson Airwrap Complete",brand:"Dyson",was:"AED 2299",now:"AED 1899",save:"AED 400"},
     {name:"Samsung Galaxy Buds3 Pro",brand:"Samsung",was:"AED 749",now:"AED 599",save:"AED 150"},
-    {name:"Bose QuietComfort 45",brand:"Bose",was:"AED 1,299",now:"AED 999",save:"AED 300"},
+    {name:"Bose QuietComfort 45",brand:"Bose",was:"AED 1299",now:"AED 999",save:"AED 300"},
+    {name:"Canon EOS R50 Body",brand:"Canon",was:"AED 2199",now:"AED 1799",save:"AED 400"},
   ];
 
   const incentives=[
-    {name:"Sony WH-1000XM6",brand:"Sony",price:"AED 1,549",bonus:"AED 30",icon:"HP"},
-    {name:"Apple AirPods Pro 2nd Gen",brand:"Apple",price:"AED 849",bonus:"AED 20",icon:"AP"},
-    {name:"Merlin Wireless Pro",brand:"Merlin",price:"AED 299",bonus:"AED 20",icon:"HP"},
-    {name:"SanDisk 2TB Flash Drive",brand:"SanDisk",price:"AED 349",bonus:"AED 50",icon:"SD"},
-    {name:"Dyson V15 Detect",brand:"Dyson",price:"AED 2,199",bonus:"AED 75",icon:"DY"},
-    {name:"Samsung 65in QLED TV",brand:"Samsung",price:"AED 4,999",bonus:"AED 150",icon:"TV"},
-    {name:"Apple Watch Series 10",brand:"Apple",price:"AED 1,699",bonus:"AED 40",icon:"AW"},
+    {name:"Sony WH-1000XM6",brand:"Sony",price:"AED 1549",bonus:"AED 30"},
+    {name:"Apple AirPods Pro 2",brand:"Apple",price:"AED 849",bonus:"AED 20"},
+    {name:"Merlin Wireless Pro",brand:"Merlin",price:"AED 299",bonus:"AED 20"},
+    {name:"SanDisk 2TB Flash Drive",brand:"SanDisk",price:"AED 349",bonus:"AED 50"},
+    {name:"Dyson V15 Detect",brand:"Dyson",price:"AED 2199",bonus:"AED 75"},
+    {name:"Samsung 65in QLED TV",brand:"Samsung",price:"AED 4999",bonus:"AED 150"},
+    {name:"Apple Watch Series 10",brand:"Apple",price:"AED 1699",bonus:"AED 40"},
   ];
 
-  const tabs=[
-    {id:"promotions",label:"Promotions"},
-    {id:"reduced",label:"Reduced Price"},
-    {id:"incentives",label:"Incentives"},
-  ];
+  const totalBonus=incentives.reduce((a,b)=>a+parseInt(b.bonus.replace(/[^0-9]/g,"")),0);
 
   return(
     <div className="pb-4">
       <StatusBar/>
-      {/* Header */}
       <div className="px-5 pt-3 pb-4">
         <p className="text-[11px] font-bold tracking-widest mb-1" style={{color:COLORS.textDim}}>YOUR DEPARTMENT</p>
         <p className="text-[18px] font-extrabold">{dept}</p>
       </div>
-
-      {/* Tabs */}
       <div className="px-5 flex gap-2 mb-4 overflow-x-auto no-scrollbar">
-        {tabs.map(t=>(
+        {[{id:"promotions",label:"Promotions"},{id:"reduced",label:"Reduced Price"},{id:"incentives",label:"Incentives"}].map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)}
             className="flex-shrink-0 px-4 py-2.5 rounded-xl text-[12px] font-bold"
             style={{background:tab===t.id?COLORS.red:COLORS.card,color:tab===t.id?"#fff":COLORS.textMuted,border:`1px solid ${tab===t.id?COLORS.red:COLORS.border}`}}>
@@ -568,36 +562,26 @@ function PromotionsScreen(){
           </button>
         ))}
       </div>
-
-      {/* Promotions tab */}
       {tab==="promotions"&&(
         <div className="px-5 flex flex-col gap-2.5">
-          <div className="rounded-xl p-3 mb-1 flex items-center gap-2" style={{background:"rgba(200,16,46,.07)",border:`1px solid ${COLORS.red}30`}}>
-            <Percent size={12} color={COLORS.redLight}/>
-            <p className="text-[10.5px]" style={{color:COLORS.textMuted}}>Active promotional items for your area this month</p>
-          </div>
           {promotions.map((p,i)=>(
             <div key={i} className="rounded-xl p-4 flex items-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-[11px] font-extrabold flex-shrink-0" style={{background:"rgba(255,255,255,.08)",color:COLORS.textMuted}}>{p.img}</div>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:"rgba(200,16,46,.12)"}}>
+                <p className="text-[9px] font-extrabold text-center leading-tight" style={{color:COLORS.redLight}}>{p.cat}</p>
+              </div>
               <div className="flex-1">
                 <p className="text-[12px] font-bold leading-tight">{p.name}</p>
                 <p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{p.brand}</p>
               </div>
-              <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:"rgba(200,16,46,.15)",border:`1px solid ${COLORS.red}40`}}>
-                <p className="text-[16px] font-extrabold" style={{color:COLORS.redLight}}>{p.pct}</p>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:"rgba(200,16,46,.15)",border:`1px solid ${COLORS.red}40`}}>
+                <p className="text-[15px] font-extrabold" style={{color:COLORS.redLight}}>{p.pct}</p>
               </div>
             </div>
           ))}
         </div>
       )}
-
-      {/* Reduced Price tab */}
       {tab==="reduced"&&(
         <div className="px-5 flex flex-col gap-2.5">
-          <div className="rounded-xl p-3 mb-1 flex items-center gap-2" style={{background:"rgba(13,148,136,.07)",border:`1px solid ${COLORS.teal}30`}}>
-            <TrendingUp size={12} color={COLORS.tealLight}/>
-            <p className="text-[10.5px]" style={{color:COLORS.textMuted}}>Current price reductions in your section</p>
-          </div>
           {reducedPrice.map((p,i)=>(
             <div key={i} className="rounded-xl p-4" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
               <div className="flex items-start justify-between mb-2">
@@ -610,40 +594,37 @@ function PromotionsScreen(){
                   <p className="text-[15px] font-extrabold" style={{color:COLORS.tealLight}}>{p.now}</p>
                 </div>
               </div>
-              <div className="flex items-center justify-end">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{background:"rgba(13,148,136,.15)",color:COLORS.tealLight}}>
-                  Save {p.save}
-                </span>
+              <div className="flex justify-end">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{background:"rgba(13,148,136,.15)",color:COLORS.tealLight}}>Save {p.save}</span>
               </div>
             </div>
           ))}
         </div>
       )}
-
-      {/* Incentives tab */}
       {tab==="incentives"&&(
         <div className="px-5 flex flex-col gap-2.5">
           <div className="rounded-xl p-3 mb-1 flex items-center gap-2" style={{background:"rgba(201,162,39,.07)",border:`1px solid ${COLORS.gold}30`}}>
             <Star size={12} color={COLORS.goldLight}/>
-            <p className="text-[10.5px]" style={{color:COLORS.textMuted}}>Your bonus per unit sold — push these today!</p>
+            <p className="text-[10.5px]" style={{color:COLORS.textMuted}}>Your bonus per unit sold - push these today!</p>
           </div>
           {incentives.map((p,i)=>(
             <div key={i} className="rounded-xl p-4 flex items-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-[11px] font-extrabold flex-shrink-0" style={{background:"rgba(255,255,255,.08)",color:COLORS.textMuted}}>{p.icon}</div>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:"rgba(201,162,39,.12)"}}>
+                <BarChart2 size={18} color={COLORS.goldLight}/>
+              </div>
               <div className="flex-1">
                 <p className="text-[12px] font-bold leading-tight">{p.name}</p>
-                <p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{p.brand} · {p.price}</p>
+                <p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{p.brand} - {p.price}</p>
               </div>
               <div className="flex-shrink-0 text-right">
-                <p className="text-[10px] font-bold" style={{color:COLORS.textDim}}>YOUR BONUS</p>
+                <p className="text-[9px] font-bold" style={{color:COLORS.textDim}}>YOUR BONUS</p>
                 <p className="text-[16px] font-extrabold" style={{color:COLORS.goldLight}}>{p.bonus}</p>
               </div>
             </div>
           ))}
-          {/* Total potential */}
           <div className="rounded-xl p-4 mt-2" style={{background:`linear-gradient(135deg,${COLORS.cardAlt},#1f1413)`,border:`1px solid ${COLORS.gold}40`}}>
             <p className="text-[10.5px] font-bold mb-1" style={{color:COLORS.goldLight}}>IF YOU SELL ONE OF EACH</p>
-            <p className="text-[22px] font-extrabold" style={{color:COLORS.goldLight}}>AED 385</p>
+            <p className="text-[22px] font-extrabold" style={{color:COLORS.goldLight}}>AED {totalBonus}</p>
             <p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>potential bonus today</p>
           </div>
         </div>
