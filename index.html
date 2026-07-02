@@ -217,7 +217,7 @@ function MySalesScreen({onBack}){
   const target=3000;const v=sales-target;const pct=((v/target)*100).toFixed(2);const pos=v>=0;
   const leaders=[{name:"You",val:"AED "+sales.toLocaleString(),rank:1,me:true},{name:"Fatima R.",val:"AED 3,180",rank:2},{name:"Omar K.",val:"AED 2,050",rank:3}];
   const add=()=>{const x=parseFloat(inp);if(!isNaN(x)&&x>0){setSales(p=>p+x);setInp("");setLogged(true);setTimeout(()=>setLogged(false),2000);}};
-  return(<div className="pb-4"><StatusBar/><TopBar title="My Sales" onBack={onBack}/><div className="px-5">
+  return(<div className="pb-16"><StatusBar/><TopBar title="My Sales" onBack={onBack}/><div className="px-5">
   <div className="rounded-2xl p-4 mb-5" style={{background:`linear-gradient(135deg,${COLORS.cardAlt},#1f1413)`,border:`1px solid ${COLORS.border}`}}><div className="flex items-center justify-between mb-3"><p className="text-[10.5px] font-bold" style={{color:COLORS.goldLight}}>YOUR AREA</p><span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{background:"rgba(201,162,39,.15)",color:COLORS.goldLight}}>#15312</span></div><p className="text-[16px] font-extrabold">Aibek Electronics · T2</p><div className="flex items-center gap-2 mt-3 pt-3" style={{borderTop:`1px solid ${COLORS.border}`}}><div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{background:"rgba(13,148,136,.18)",color:COLORS.tealLight}}>AK</div><div><p className="text-[11px] font-bold">Anoop Kumar</p><p className="text-[9.5px]" style={{color:COLORS.textMuted}}>Supervisor</p></div></div></div>
   <div className="rounded-2xl p-4 mb-4" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="flex gap-2"><div className="flex-1 rounded-lg px-3 py-2.5 flex items-center gap-1.5" style={{background:"rgba(255,255,255,.04)",border:`1px solid ${COLORS.border}`}}><span className="text-[12px] font-bold" style={{color:COLORS.textMuted}}>AED</span><input value={inp} onChange={e=>setInp(e.target.value.replace(/[^0-9.]/g,""))} placeholder="0.00" inputMode="decimal" className="flex-1 bg-transparent outline-none text-[14px] font-bold" style={{color:COLORS.text}}/></div><button onClick={add} className="px-4 rounded-lg font-bold text-[12.5px] flex items-center gap-1.5" style={{background:logged?"rgba(13,148,136,.18)":COLORS.red,color:logged?COLORS.tealLight:"#fff"}}>{logged?<><CheckCircle2 size={14}/> Logged</>:"Add"}</button></div></div>
   <div className="rounded-2xl p-4 mb-5" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="flex items-center justify-between mb-3"><div><p className="text-[10px] font-bold" style={{color:COLORS.textMuted}}>SALE</p><p className="text-[19px] font-extrabold mt-0.5" style={{color:COLORS.goldLight}}>AED {sales.toLocaleString()}</p></div><div className="text-right"><p className="text-[10px] font-bold" style={{color:COLORS.textMuted}}>TARGET</p><p className="text-[19px] font-extrabold mt-0.5">AED {target.toLocaleString()}</p></div></div><div className="w-full h-2 rounded-full mb-2" style={{background:"rgba(255,255,255,.08)"}}><div className="h-2 rounded-full" style={{width:`${Math.min((sales/target)*100,100)}%`,background:pos?COLORS.teal:COLORS.gold}}/></div><div className="flex items-center justify-between pt-2" style={{borderTop:`1px solid ${COLORS.border}`}}><span className="text-[10.5px]" style={{color:COLORS.textMuted}}>% Var</span><span className="text-[12.5px] font-bold" style={{color:pos?COLORS.tealLight:COLORS.redLight}}>{pos?"+":""}{pct}%</span></div></div>
@@ -637,52 +637,54 @@ function StaffApp(){
   const [phase,setPhase]=useState("login");
   const [staffNum,setStaffNum]=useState("");
   const [screen,setScreenRaw]=useState("home");
+  const [history,setHistory]=useState([]);
   const scrollRef=React.useRef(null);
   const scrollPos=React.useRef({});
   const curScreen=React.useRef("home");
   const handleScroll=()=>{if(scrollRef.current)scrollPos.current[curScreen.current]=scrollRef.current.scrollTop;};
   React.useLayoutEffect(()=>{curScreen.current=screen;const raf=requestAnimationFrame(()=>{if(scrollRef.current)scrollRef.current.scrollTop=scrollPos.current[screen]||0;});return()=>cancelAnimationFrame(raf);},[screen]);
   const handleLogin=(num)=>{setStaffNum(num);setPhase("onboarding");};
-  const handleLogout=()=>{setPhase("login");setStaffNum("");setScreenRaw("home");};
-  const setScreen=(s)=>setScreenRaw(s);
+  const handleLogout=()=>{setPhase("login");setStaffNum("");setScreenRaw("home");setHistory([]);};
+  const setScreen=(s)=>{setHistory(h=>[...h,screen]);setScreenRaw(s);};
+  const goBack=()=>{if(history.length>0){const prev=history[history.length-1];setHistory(h=>h.slice(0,-1));setScreenRaw(prev);}else{setScreenRaw("home");}};
   if(phase==="login")return(<PhoneFrame><LoginScreen onLogin={handleLogin}/></PhoneFrame>);
   if(phase==="onboarding")return(<PhoneFrame><Onboarding onDone={()=>setPhase("app")}/></PhoneFrame>);
   let content;let activeTab="home";
   if(screen==="home"){content=<HomeScreen onNav={setScreen} staffNum={staffNum}/>;activeTab="home";}
-  else if(screen==="leave"){content=<LeaveScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="shifts"){content=<ShiftsScreen onBack={()=>setScreen("home")} onNavCalendar={()=>setScreen("calendar")} onNavMySales={()=>setScreen("mysales")}/>;activeTab="shifts";}
-  else if(screen==="calendar"){content=<CalendarScreen onBack={()=>setScreen("home")}/>;activeTab="shifts";}
-  else if(screen==="mysales"){content=<MySalesScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
+  else if(screen==="leave"){content=<LeaveScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="shifts"){content=<ShiftsScreen onBack={goBack} onNavCalendar={()=>setScreen("calendar")} onNavMySales={()=>setScreen("mysales")}/>;activeTab="shifts";}
+  else if(screen==="calendar"){content=<CalendarScreen onBack={goBack}/>;activeTab="shifts";}
+  else if(screen==="mysales"){content=<MySalesScreen onBack={goBack}/>;activeTab="home";}
   else if(screen==="promotions"){content=<PromotionsScreen/>;activeTab="promotions";}
-  else if(screen==="training"){content=<TrainingScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="team"){content=<LeadershipScreen onBack={()=>setScreen("home")}/>;activeTab="team";}
+  else if(screen==="training"){content=<TrainingScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="team"){content=<LeadershipScreen onBack={goBack}/>;activeTab="team";}
   else if(screen==="profile"){content=<ProfileScreen onNav={setScreen} staffNum={staffNum} onLogout={handleLogout}/>;activeTab="profile";}
-  else if(screen==="points"){content=<PointsScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="discounts"){content=<DiscountsScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="mystery"){content=<MysteryShopperScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="feedback"){content=<FeedbackScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="ideas"){content=<IdeasScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="quickhelp"){content=<QuickHelpScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="miles"){content=<MilesScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="transport"){content=<TransportScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="eom"){content=<EOMScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="bodylanguage"){content=<BodyLanguageScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="autism"){content=<AutismScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="reference"){content=<ReferenceScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="story"){content=<StoryScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="careers"){content=<CareersScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="talents"){content=<TalentsIdeasScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="competition"){content=<TalentsCupScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="certificates"){content=<CertificatesScreen onBack={()=>setScreen("profile")}/>;activeTab="profile";}
-  else if(screen==="commendations"){content=<CommendationsScreen onBack={()=>setScreen("profile")}/>;activeTab="profile";}
-  else if(screen==="admin"){content=<AdminPanelScreen onBack={()=>setScreen("profile")}/>;activeTab="profile";}
-  else if(screen==="isr"){content=<ISRScreen onNav={setScreen} onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="myddf"){content=<MyDDFScreen onNav={setScreen} onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="oracle"){content=<OracleScreen onNav={setScreen} onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="payslip"){content=<PayslipScreen onBack={()=>setScreen("oracle")}/>;activeTab="home";}
-  else if(screen==="about"){content=<AboutScreen onBack={()=>setScreen("profile")}/>;activeTab="profile";}
-  else if(screen==="whatsnew"){content=<WhatsNewScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="docs"){content=<SimpleScreen title="Documents" onBack={()=>setScreen("home")}>{["Employment Certificate","Salary Certificate","Uniform Reissue Request"].map(d=><button key={d} className="rounded-xl p-4 flex items-center gap-3 text-left mb-2" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background:"rgba(201,162,39,.15)"}}><FileText size={16} color={COLORS.goldLight}/></div><p className="text-[12.5px] font-bold">{d}</p></button>)}</SimpleScreen>;activeTab="home";}
+  else if(screen==="points"){content=<PointsScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="discounts"){content=<DiscountsScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="mystery"){content=<MysteryShopperScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="feedback"){content=<FeedbackScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="ideas"){content=<IdeasScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="quickhelp"){content=<QuickHelpScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="miles"){content=<MilesScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="transport"){content=<TransportScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="eom"){content=<EOMScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="bodylanguage"){content=<BodyLanguageScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="autism"){content=<AutismScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="reference"){content=<ReferenceScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="story"){content=<StoryScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="careers"){content=<CareersScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="talents"){content=<TalentsIdeasScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="competition"){content=<TalentsCupScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="certificates"){content=<CertificatesScreen onBack={goBack}/>;activeTab="profile";}
+  else if(screen==="commendations"){content=<CommendationsScreen onBack={goBack}/>;activeTab="profile";}
+  else if(screen==="admin"){content=<AdminPanelScreen onBack={goBack}/>;activeTab="profile";}
+  else if(screen==="isr"){content=<ISRScreen onNav={setScreen} onBack={goBack}/>;activeTab="home";}
+  else if(screen==="myddf"){content=<MyDDFScreen onNav={setScreen} onBack={goBack}/>;activeTab="home";}
+  else if(screen==="oracle"){content=<OracleScreen onNav={setScreen} onBack={goBack}/>;activeTab="home";}
+  else if(screen==="payslip"){content=<PayslipScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="about"){content=<AboutScreen onBack={goBack}/>;activeTab="profile";}
+  else if(screen==="whatsnew"){content=<WhatsNewScreen onBack={goBack}/>;activeTab="home";}
+  else if(screen==="docs"){content=<SimpleScreen title="Documents" onBack={goBack}>{["Employment Certificate","Salary Certificate","Uniform Reissue Request"].map(d=><button key={d} className="rounded-xl p-4 flex items-center gap-3 text-left mb-2" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background:"rgba(201,162,39,.15)"}}><FileText size={16} color={COLORS.goldLight}/></div><p className="text-[12.5px] font-bold">{d}</p></button>)}</SimpleScreen>;activeTab="home";}
   return(<PhoneFrame ref={scrollRef} onScroll={handleScroll}><div style={{width:"100%",height:"100%",display:"flex",flexDirection:"column",overflow:"hidden"}}><div style={{flex:1,overflowY:"auto",WebkitOverflowScrolling:"touch"}} className="no-scrollbar">{content}</div><BottomNav active={activeTab} onNav={setScreen}/></div></PhoneFrame>);
 }
 
