@@ -65,10 +65,10 @@ const LOGO_SRC="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcm
 const COLORS={bg:"#0c0c0c",card:"#161210",cardAlt:"#1a1413",border:"#261e19",red:"#c8102e",redLight:"#e8485f",gold:"#c9a227",goldLight:"#e0c267",teal:"#0d9488",tealLight:"#5eead4",text:"#f2efec",textMuted:"#a89e98",textDim:"#6b615a"};
 const DEMO_PASSWORD="ddf2026";
 
-const PhoneFrame=React.forwardRef(({children,onScroll},ref)=>(<div style={{position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:"#171717",overflow:"hidden"}}><div className="relative w-[375px] h-[780px] rounded-[44px] overflow-hidden shadow-2xl border-[6px]" style={{borderColor:"#1c1c1c",backgroundColor:COLORS.bg}}><div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-50"/><div ref={ref} onScroll={onScroll} className="w-full h-full overflow-y-auto no-scrollbar" style={{color:COLORS.text}}>{children}</div></div></div>));
+const PhoneFrame=React.forwardRef(({children,onScroll},ref)=>(<div style={{position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:"#171717",overflow:"hidden"}}><div style={{position:"relative",width:"min(375px, 100vw)",height:"min(780px, 100vh)",borderRadius:"44px",overflow:"hidden",boxShadow:"0 25px 60px rgba(0,0,0,.8)",border:"6px solid #1c1c1c",backgroundColor:COLORS.bg,flexShrink:0}}><div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-50"/><div ref={ref} onScroll={onScroll} style={{width:"100%",height:"100%",overflowY:"auto",overflowX:"hidden",WebkitOverflowScrolling:"touch",color:COLORS.text}} className="no-scrollbar">{children}</div></div></div>));
 function StatusBar(){return(<div className="flex justify-between items-center px-6 pt-3 pb-1 text-[11px] font-semibold" style={{color:COLORS.text}}><span>9:41</span><div className="flex items-center gap-1"><span>●●●●</span><span>Wi-Fi</span><span>🔋</span></div></div>);}
-function TopBar({title,onBack,onCalendar}){const [sn,setSn]=useState(false);const ns=[{from:"Anoop Kumar",msg:"Great work today — 3 big sales! 👏",t:"2h ago",red:true},{from:"Yasa Tahir",msg:"New Wellness Leave policy is live.",t:"1d ago",red:true},{from:"DDF Staff App",msg:"July schedule published.",t:"2d ago",red:false}];return(<div className="px-5 pt-2 pb-4 relative"><div className="flex items-center gap-3">{onBack?(<button onClick={onBack} className="w-8 h-8 rounded-full flex items-center justify-center" style={{background:COLORS.card}}><ChevronLeft size={18} color={COLORS.text}/></button>):(<img src={LOGO_SRC} alt="" className="w-8 h-8 rounded-full"/>)}<h1 className="text-[17px] font-bold flex-1">{title}</h1>{onCalendar&&(<button onClick={onCalendar} className="w-8 h-8 rounded-full flex items-center justify-center" style={{background:COLORS.card}}><Calendar size={15} color={COLORS.text}/></button>)}<button onClick={()=>setSn(!sn)} className="w-8 h-8 rounded-full flex items-center justify-center relative" style={{background:COLORS.card}}><Bell size={15} color={COLORS.text}/><span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{background:COLORS.red,color:"#fff"}}>2</span></button></div>{sn&&(<div className="absolute right-5 top-12 w-72 rounded-2xl overflow-hidden z-50 shadow-2xl" style={{background:COLORS.cardAlt,border:`1px solid ${COLORS.border}`}}><div className="px-4 py-3" style={{borderBottom:`1px solid ${COLORS.border}`}}><p className="text-[11px] font-bold" style={{color:COLORS.textMuted}}>NOTIFICATIONS</p></div>{ns.map((n,i)=>(<div key={i} className="px-4 py-3 flex gap-3" style={{borderBottom:i<ns.length-1?`1px solid ${COLORS.border}`:"none",background:n.red?"rgba(200,16,46,.05)":"transparent"}}><div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{background:n.red?"rgba(200,16,46,.18)":"rgba(255,255,255,.06)"}}>{n.red?<Star size={12} color={COLORS.redLight}/>:<Bell size={12} color={COLORS.textMuted}/>}</div><div className="flex-1"><p className="text-[11px] font-bold">{n.from}</p><p className="text-[11px] mt-0.5" style={{color:COLORS.text}}>{n.msg}</p><p className="text-[9.5px] mt-1" style={{color:COLORS.textDim}}>{n.t}</p></div></div>))}</div>)}</div>);}
-function BottomNav({active,onNav}){const items=[{id:"home",icon:Home,label:"Home"},{id:"shifts",icon:Calendar,label:"Shifts"},{id:"training",icon:GraduationCap,label:"Training"},{id:"team",icon:Users,label:"Leadership"},{id:"profile",icon:User,label:"Profile"}];return(<div className="absolute bottom-0 left-0 right-0 flex justify-around items-center pt-2 pb-6 border-t" style={{background:"#0e0c0c",borderColor:COLORS.border}}>{items.map(it=>{const Icon=it.icon;const a=active===it.id;return(<button key={it.id} onClick={()=>onNav(it.id)} className="flex flex-col items-center gap-1 px-1"><Icon size={20} color={a?COLORS.red:COLORS.textDim} strokeWidth={a?2.4:1.8}/><span className="text-[9.5px] font-medium" style={{color:a?COLORS.red:COLORS.textDim}}>{it.label}</span></button>);})}</div>);}
+function TopBar({title,onBack,onCalendar}){const [sn,setSn]=useState(false);const ns=[{from:"Anoop Kumar",msg:"Great work today — 3 big sales! 👏",t:"2h ago",red:true},{from:"Yasa Tahir",msg:"New Wellness Leave policy is live.",t:"1d ago",red:true},{from:"DDF Staff App",msg:"July schedule published.",t:"2d ago",red:false}];return(<div className="px-5 pt-2 pb-4 relative"><div className="flex items-center gap-3">{onBack?(<button onClick={onBack} className="w-8 h-8 rounded-full flex items-center justify-center" style={{background:COLORS.card}}><ChevronLeft size={18} color={COLORS.text}/></button>):(<img src={LOGO_SRC} alt="" className="w-8 h-8 rounded-full"/>)}<h1 className="text-[17px] font-bold flex-1">{title}</h1>{onCalendar&&(<button onClick={onCalendar} className="w-8 h-8 rounded-full flex items-center justify-center" style={{background:COLORS.card}}><Calendar size={15} color={COLORS.text}/></button>)}<button onClick={()=>setSn(!sn)} className="w-8 h-8 rounded-full flex items-center justify-center relative" style={{background:COLORS.card}}><Bell size={15} color={COLORS.text}/><span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{background:COLORS.red,color:"#fff"}}>4</span></button></div>{sn&&(<div className="absolute right-5 top-12 w-72 rounded-2xl overflow-hidden z-50 shadow-2xl" style={{background:COLORS.cardAlt,border:`1px solid ${COLORS.border}`}}><div className="px-4 py-3" style={{borderBottom:`1px solid ${COLORS.border}`}}><p className="text-[11px] font-bold" style={{color:COLORS.textMuted}}>NOTIFICATIONS</p></div>{ns.map((n,i)=>(<div key={i} className="px-4 py-3 flex gap-3" style={{borderBottom:i<ns.length-1?`1px solid ${COLORS.border}`:"none",background:n.red?"rgba(200,16,46,.05)":"transparent"}}><div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{background:n.red?"rgba(200,16,46,.18)":"rgba(255,255,255,.06)"}}>{n.red?<Star size={12} color={COLORS.redLight}/>:<Bell size={12} color={COLORS.textMuted}/>}</div><div className="flex-1"><p className="text-[11px] font-bold">{n.from}</p><p className="text-[11px] mt-0.5" style={{color:COLORS.text}}>{n.msg}</p><p className="text-[9.5px] mt-1" style={{color:COLORS.textDim}}>{n.t}</p></div></div>))}</div>)}</div>);}
+function BottomNav({active,onNav}){const items=[{id:"home",icon:Home,label:"Home"},{id:"shifts",icon:Calendar,label:"Shifts"},{id:"promotions",icon:Percent,label:"Promotions"},{id:"team",icon:Users,label:"Leadership"},{id:"profile",icon:User,label:"Profile"}];return(<div style={{position:"absolute",bottom:0,left:0,right:0,display:"flex",justifyContent:"space-around",alignItems:"center",paddingTop:"8px",paddingBottom:"24px",background:"#0e0c0c",borderTop:`1px solid ${COLORS.border}`,zIndex:50}}>{items.map(it=>{const Icon=it.icon;const a=active===it.id;return(<button key={it.id} onClick={()=>onNav(it.id)} className="flex flex-col items-center gap-1 px-1"><Icon size={20} color={a?COLORS.red:COLORS.textDim} strokeWidth={a?2.4:1.8}/><span className="text-[9.5px] font-medium" style={{color:a?COLORS.red:COLORS.textDim}}>{it.label}</span></button>);})}</div>);}
 
 function LoginScreen({onLogin}){
   const [num,setNum]=useState("");const [pass,setPass]=useState("");const [sp,setSp]=useState(false);const [err,setErr]=useState("");const [loading,setLoading]=useState(false);
@@ -82,25 +82,106 @@ function Onboarding({onDone}){
 }
 
 function HomeScreen({onNav,staffNum}){
-  const portals=[{id:"myddf",label:"My DDF",sub:"Community & Culture",icon:Globe,color:COLORS.gold,bg:"rgba(201,162,39,.13)",bd:"rgba(201,162,39,.30)",act:()=>onNav("myddf")},{id:"oracle",label:"Oracle Fusion",sub:"HR & Operations",icon:Database,color:COLORS.teal,bg:"rgba(13,148,136,.13)",bd:"rgba(13,148,136,.30)",act:()=>onNav("oracle")},{id:"isr",label:"ISR",sub:"Individual Sales Report",icon:Shield,color:"#a78bfa",bg:"rgba(167,139,250,.13)",bd:"rgba(167,139,250,.30)",act:()=>onNav("isr")},{id:"admin",label:"Manager Panel",sub:"Supervisors only",icon:BarChart2,color:COLORS.red,bg:"rgba(200,16,46,.13)",bd:"rgba(200,16,46,.30)",act:()=>onNav("admin")}];
-  const core=[{id:"leave",icon:Plane,label:"Leave & Wellness",sub:"Annual + sick + wellness",color:COLORS.teal},{id:"shifts",icon:Calendar,label:"My Shifts & Area",sub:"Schedule, zone & supervisor",color:COLORS.gold},{id:"ideas",icon:Lightbulb,label:"Ideas & Suggestions",sub:"Company growth + app feedback",color:COLORS.gold},{id:"quickhelp",icon:BookOpen,label:"Quick Help",sub:"Products, FAQs, phrases & gear",color:COLORS.gold},{id:"points",icon:Sparkles,label:"My Points",sub:"Earn & unlock rewards",color:COLORS.gold},{id:"discounts",icon:Percent,label:"Staff Discounts",sub:"For everyone",color:COLORS.teal},{id:"eom",icon:Star,label:"Employee of the Month",sub:"How to get there",color:COLORS.gold},{id:"bodylanguage",icon:Eye,label:"Body Language",sub:"Do's and don'ts",color:COLORS.gold},{id:"miles",icon:Plane,label:"Skyward Miles",sub:"Payment rules & rates",color:COLORS.teal},{id:"transport",icon:Bell,label:"Transport",sub:"Bus numbers & routes",color:COLORS.gold},{id:"feedback",icon:Lock,label:"Private Feedback",sub:"Confidential channel",color:COLORS.red},{id:"reference",icon:ClipboardList,label:"Quick Reference",sub:"Holidays, currencies & contacts",color:COLORS.red},{id:"docs",icon:FileText,label:"Documents",sub:"Certificates & forms",color:COLORS.gold}];
-  const grow=[{id:"training",icon:GraduationCap,label:"Training",sub:"Videos & leaderboard",color:COLORS.red}];
-  const svc=[{id:"autism",icon:Sparkles,label:"Autism-Friendly Service",sub:"How to assist with care",color:COLORS.teal},{id:"commendations",icon:Award,label:"Commendation Letters",sub:"What customers said about you",color:COLORS.red}];
-  const rewards=[{id:"mystery",icon:Eye,label:"Mystery Shopper",sub:"Your visit results",color:COLORS.red}];
-  const community=[{id:"team",icon:Users,label:"Meet Leadership",sub:"Know your managers",color:COLORS.teal},{id:"talents",icon:Lightbulb,label:"Dubai Talents",sub:"Ideas, art, music & more",color:COLORS.gold},{id:"competition",icon:Trophy,label:"DDF Talents Cup",sub:"Annual team competition",color:COLORS.red},{id:"story",icon:History,label:"Our Story",sub:"DDF history & milestones",color:COLORS.teal},{id:"careers",icon:ClipboardList,label:"Careers",sub:"Internal open positions",color:COLORS.gold}];
-  const all=[...core,...grow,...svc,...rewards,...community];
-  const [q,setQ]=useState("");const [sn,setSn]=useState(false);
-  const res=q.trim()?all.filter(m=>m.label.toLowerCase().includes(q.toLowerCase())||m.sub.toLowerCase().includes(q.toLowerCase())):[];
-  const Sec=({title,items})=>(<><div className="px-5 mb-3 mt-6"><p className="text-[11px] font-bold tracking-widest" style={{color:COLORS.textDim}}>{title}</p></div><div className="px-5 grid grid-cols-2 gap-3">{items.map(m=>{const Icon=m.icon;return(<button key={m.id} onClick={()=>onNav(m.id)} className="rounded-2xl p-4 text-left flex flex-col gap-3 active:scale-95 transition-transform" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background:`${m.color}22`}}><Icon size={17} color={m.color}/></div><div><p className="text-[12.5px] font-bold leading-tight">{m.label}</p><p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{m.sub}</p></div></button>);})}</div></>);
-  return(<div className="pb-28"><StatusBar/><div className="px-5 pt-3 pb-4 flex items-center gap-3 relative"><img src={LOGO_SRC} alt="" className="w-11 h-11 rounded-full"/><div className="flex-1"><p className="text-[11px]" style={{color:COLORS.textMuted}}>Good evening</p><p className="text-[16px] font-bold">#{staffNum} · Terminal 2</p></div><button onClick={()=>setSn(!sn)} className="w-9 h-9 rounded-full flex items-center justify-center relative flex-shrink-0" style={{background:COLORS.card}}><Bell size={16} color={COLORS.text}/><span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{background:COLORS.red,color:"#fff"}}>2</span></button>{sn&&(<div className="absolute right-5 top-16 w-72 rounded-2xl overflow-hidden z-50 shadow-2xl" style={{background:COLORS.cardAlt,border:`1px solid ${COLORS.border}`}}><div className="px-4 py-3" style={{borderBottom:`1px solid ${COLORS.border}`}}><p className="text-[11px] font-bold" style={{color:COLORS.textMuted}}>NOTIFICATIONS</p></div>{[{from:"Anoop Kumar",msg:"Great work — 3 big sales! 👏",t:"2h ago",red:true},{from:"Yasa Tahir",msg:"Wellness Leave policy is live.",t:"1d ago",red:true},{from:"DDF App",msg:"July schedule published.",t:"2d ago",red:false}].map((n,i,a)=>(<div key={i} className="px-4 py-3 flex gap-3" style={{borderBottom:i<a.length-1?`1px solid ${COLORS.border}`:"none",background:n.red?"rgba(200,16,46,.05)":"transparent"}}><div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{background:n.red?"rgba(200,16,46,.18)":"rgba(255,255,255,.06)"}}>{n.red?<Star size={12} color={COLORS.redLight}/>:<Bell size={12} color={COLORS.textMuted}/>}</div><div className="flex-1"><p className="text-[11px] font-bold">{n.from}</p><p className="text-[11px] mt-0.5" style={{color:COLORS.text}}>{n.msg}</p><p className="text-[9.5px] mt-1" style={{color:COLORS.textDim}}>{n.t}</p></div></div>))}</div>)}</div>
-  <div className="px-5 mb-4"><div className="rounded-xl px-3.5 py-2.5 flex items-center gap-2.5" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><Search size={15} color={COLORS.textDim}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search leave, training, discounts…" className="flex-1 bg-transparent outline-none text-[12.5px]" style={{color:COLORS.text}}/>{q&&<button onClick={()=>setQ("")}><X size={14} color={COLORS.textDim}/></button>}</div>{q.trim()&&(<div className="mt-2 rounded-xl overflow-hidden" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>{res.length===0?<p className="text-[11.5px] p-3.5" style={{color:COLORS.textMuted}}>No matches for "{q}"</p>:res.map((m,i)=>{const Icon=m.icon;return(<button key={m.id} onClick={()=>onNav(m.id)} className="w-full flex items-center gap-3 p-3 text-left" style={{borderTop:i>0?`1px solid ${COLORS.border}`:"none"}}><Icon size={14} color={m.color}/><div><p className="text-[12px] font-bold">{m.label}</p><p className="text-[10px]" style={{color:COLORS.textMuted}}>{m.sub}</p></div></button>);})}</div>)}</div>
-  <div className="px-5 mb-1"><p className="text-[11px] font-bold tracking-widest mb-3" style={{color:COLORS.textDim}}>QUICK ACCESS</p><div className="grid grid-cols-2 gap-2.5">{portals.map(t=>{const Icon=t.icon;return(<button key={t.id} onClick={t.act} className="rounded-2xl p-4 text-left flex flex-col gap-2.5 active:scale-95 transition-transform" style={{background:t.bg,border:`1px solid ${t.bd}`}}><div className="flex items-center justify-between"><div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{background:`${t.color}25`}}><Icon size={18} color={t.color}/></div><ExternalLink size={11} color={t.color} style={{opacity:.55}}/></div><div><p className="text-[13px] font-extrabold" style={{color:t.color}}>{t.label}</p><p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{t.sub}</p></div></button>);})}</div></div>
-  <div className="px-5 mt-5 mb-2"><button onClick={()=>onNav("mysales")} className="w-full rounded-2xl p-4 text-left" style={{background:"linear-gradient(135deg, rgba(200,16,46,.16), rgba(200,16,46,.04))",border:`1px solid ${COLORS.red}50`}}><div className="flex items-center justify-between mb-2"><p className="text-[10.5px] font-bold tracking-wide" style={{color:COLORS.redLight}}>TODAY'S SALES</p><ChevronRight size={14} color={COLORS.redLight}/></div><div className="flex items-end justify-between"><p className="text-[24px] font-extrabold">AED 13,000</p><p className="text-[11px] font-bold" style={{color:COLORS.tealLight}}>78% of target</p></div><div className="w-full h-2 rounded-full mt-2" style={{background:"rgba(255,255,255,.08)"}}><div className="h-2 rounded-full" style={{width:"78%",background:COLORS.red}}/></div></button></div>
-  <button onClick={()=>onNav("calendar")} className="w-full px-5"><div className="rounded-2xl p-4 mb-2 flex items-center justify-between" style={{background:`linear-gradient(135deg, ${COLORS.cardAlt}, #1f1413)`,border:`1px solid ${COLORS.border}`}}><div className="text-left"><p className="text-[10.5px] font-bold tracking-wide" style={{color:COLORS.goldLight}}>NEXT SHIFT</p><p className="text-[15px] font-bold mt-0.5">Tomorrow · Day · 7:00 AM</p><p className="text-[11.5px] mt-1" style={{color:COLORS.textMuted}}>2 days on, then 2 off</p></div><div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:"rgba(201,162,39,.15)"}}><Calendar size={20} color={COLORS.goldLight}/></div></div></button>
-  <Sec title="DAILY ESSENTIALS" items={core}/><Sec title="LEARN & SELL BETTER" items={grow}/><Sec title="SERVICE EXCELLENCE" items={svc}/><Sec title="REWARDS & RECOGNITION" items={rewards}/><Sec title="COMMUNITY" items={community}/>
-  <div className="px-5 mt-6"><button onClick={()=>onNav("whatsnew")} className="w-full rounded-xl p-3.5 flex items-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><Clock size={15} color={COLORS.goldLight}/><span className="text-[12px] font-bold flex-1 text-left">What's New in the App</span><ChevronRight size={14} color={COLORS.textDim}/></button></div>
-  <div className="px-5 mt-6 pt-5" style={{borderTop:`1px solid ${COLORS.border}`}}><p className="text-[11px] font-bold text-center mb-3" style={{color:COLORS.textMuted}}>FOLLOW DUBAI DUTY FREE</p><div className="flex justify-center gap-3 mb-5">{["IG","X","FB","IN"].map(s=><div key={s} className="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`,color:COLORS.goldLight}}>{s}</div>)}</div></div>
-  </div>);
+  const portals=[
+    {id:"myddf",label:"My DDF",sub:"Community & Culture",icon:Globe,color:COLORS.gold,bg:"rgba(201,162,39,.13)",bd:"rgba(201,162,39,.30)",act:()=>onNav("myddf")},
+    {id:"oracle",label:"Oracle Fusion",sub:"HR & Operations",icon:Database,color:COLORS.teal,bg:"rgba(13,148,136,.13)",bd:"rgba(13,148,136,.30)",act:()=>onNav("oracle")},
+    {id:"isr",label:"ISR",sub:"Individual Sales Report",icon:Shield,color:"#a78bfa",bg:"rgba(167,139,250,.13)",bd:"rgba(167,139,250,.30)",act:()=>onNav("isr")},
+    {id:"admin",label:"Manager Panel",sub:"Supervisors only",icon:BarChart2,color:COLORS.red,bg:"rgba(200,16,46,.13)",bd:"rgba(200,16,46,.30)",act:()=>onNav("admin")},
+  ];
+  const allItems=[
+    {id:"leave",label:"Leave & Wellness"},{id:"shifts",label:"My Shifts & Area"},
+    {id:"ideas",label:"Ideas & Suggestions"},{id:"quickhelp",label:"Quick Help"},
+    {id:"points",label:"My Points"},{id:"discounts",label:"Staff Discounts"},
+    {id:"eom",label:"Employee of the Month"},{id:"bodylanguage",label:"Body Language"},
+    {id:"miles",label:"Skyward Miles"},{id:"transport",label:"Transport"},
+    {id:"feedback",label:"Private Feedback"},{id:"reference",label:"Quick Reference"},
+    {id:"docs",label:"Documents"},{id:"training",label:"Training"},
+    {id:"autism",label:"Autism-Friendly Service"},{id:"commendations",label:"Commendation Letters"},
+    {id:"mystery",label:"Mystery Shopper"},{id:"team",label:"Meet Leadership"},
+    {id:"talents",label:"Dubai Talents"},{id:"competition",label:"DDF Talents Cup"},
+    {id:"story",label:"Our Story"},{id:"careers",label:"Careers"},
+    {id:"mysales",label:"My Sales"},{id:"payslip",label:"Payslip"},
+  ];
+  const [q,setQ]=useState("");
+  const [sn,setSn]=useState(false);
+  const res=q.trim()?allItems.filter(m=>m.label.toLowerCase().includes(q.toLowerCase())):[];
+  return(
+    <div className="pb-4">
+      <StatusBar/>
+      <div className="px-5 pt-3 pb-4 flex items-center gap-3 relative">
+        <img src={LOGO_SRC} alt="" className="w-11 h-11 rounded-full"/>
+        <div className="flex-1">
+          <p className="text-[11px]" style={{color:COLORS.textMuted}}>Good evening</p>
+          <p className="text-[16px] font-bold">#{staffNum} · Terminal 2</p>
+        </div>
+        <button onClick={()=>setSn(!sn)} className="w-9 h-9 rounded-full flex items-center justify-center relative flex-shrink-0" style={{background:COLORS.card}}>
+          <Bell size={16} color={COLORS.text}/>
+          <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{background:COLORS.red,color:"#fff"}}>4</span>
+        </button>
+        {sn&&(
+          <div className="absolute right-5 top-16 w-72 rounded-2xl overflow-hidden z-50 shadow-2xl" style={{background:COLORS.cardAlt,border:`1px solid ${COLORS.border}`}}>
+            <div className="px-4 py-3" style={{borderBottom:`1px solid ${COLORS.border}`}}><p className="text-[11px] font-bold" style={{color:COLORS.textMuted}}>NOTIFICATIONS</p></div>
+            {[{from:"Ciprian Mazilu",role:"Duty Officer",msg:"Great push today — close strong before shift change.",t:"Today · 2:15 PM",red:true},{from:"Ciprian Mazilu",role:"Duty Officer",msg:"Tomorrow push on AirPods Pro — prioritize the bundle.",t:"Today · 9:00 AM",red:true},{from:"Anoop Kumar",role:"Supervisor",msg:"Great work — 3 big sales! 👏",t:"2h ago",red:true},{from:"Yasa Tahir",role:"VP HR",msg:"Wellness Leave policy is live.",t:"1d ago",red:false},{from:"DDF App",role:"System",msg:"July schedule published.",t:"2d ago",red:false}].map((n,i,a)=>(
+              <div key={i} className="px-4 py-3 flex gap-3" style={{borderBottom:i<a.length-1?`1px solid ${COLORS.border}`:"none",background:n.red?"rgba(200,16,46,.05)":"transparent"}}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{background:n.red?"rgba(200,16,46,.18)":"rgba(255,255,255,.06)"}}>{n.red?<Star size={12} color={COLORS.redLight}/>:<Bell size={12} color={COLORS.textMuted}/>}</div>
+                <div className="flex-1"><p className="text-[11px] font-bold">{n.from}</p><p className="text-[11px] mt-0.5" style={{color:COLORS.text}}>{n.msg}</p><p className="text-[9.5px] mt-1" style={{color:COLORS.textDim}}>{n.t}</p></div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="px-5 mb-4">
+        <div className="rounded-xl px-3.5 py-2.5 flex items-center gap-2.5" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
+          <Search size={15} color={COLORS.textDim}/>
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search anything…" className="flex-1 bg-transparent outline-none text-[12.5px]" style={{color:COLORS.text}}/>
+          {q&&<button onClick={()=>setQ("")}><X size={14} color={COLORS.textDim}/></button>}
+        </div>
+        {q.trim()&&(
+          <div className="mt-2 rounded-xl overflow-hidden" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
+            {res.length===0
+              ?<p className="text-[11.5px] p-3.5" style={{color:COLORS.textMuted}}>No matches for "{q}"</p>
+              :res.map((m,i)=>(
+                <button key={m.id} onClick={()=>onNav(m.id)} className="w-full flex items-center gap-3 p-3 text-left" style={{borderTop:i>0?`1px solid ${COLORS.border}`:"none"}}>
+                  <p className="text-[12px] font-bold">{m.label}</p>
+                </button>
+              ))
+            }
+          </div>
+        )}
+      </div>
+      <div className="px-5 mb-4">
+        <p className="text-[11px] font-bold tracking-widest mb-3" style={{color:COLORS.textDim}}>QUICK ACCESS</p>
+        <div className="grid grid-cols-2 gap-2.5">
+          {portals.map(t=>{const Icon=t.icon;return(
+            <button key={t.id} onClick={t.act} className="rounded-2xl p-4 text-left flex flex-col gap-2.5 active:scale-95 transition-transform" style={{background:t.bg,border:`1px solid ${t.bd}`}}>
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{background:`${t.color}25`}}><Icon size={18} color={t.color}/></div>
+                <ExternalLink size={11} color={t.color} style={{opacity:.55}}/>
+              </div>
+              <div>
+                <p className="text-[13px] font-extrabold" style={{color:t.color}}>{t.label}</p>
+                <p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{t.sub}</p>
+              </div>
+            </button>
+          );})}
+        </div>
+      </div>
+      <button onClick={()=>onNav("calendar")} className="w-full px-5 mb-4">
+        <div className="rounded-2xl p-4 flex items-center justify-between" style={{background:`linear-gradient(135deg, ${COLORS.cardAlt}, #1f1413)`,border:`1px solid ${COLORS.border}`}}>
+          <div className="text-left">
+            <p className="text-[10.5px] font-bold tracking-wide" style={{color:COLORS.goldLight}}>NEXT SHIFT · TAP FOR CALENDAR</p>
+            <p className="text-[15px] font-bold mt-0.5">Tomorrow · Day · 7:00 AM</p>
+            <p className="text-[11.5px] mt-1" style={{color:COLORS.textMuted}}>2 days on, then 2 off · Shift B</p>
+          </div>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:"rgba(201,162,39,.15)"}}><Calendar size={20} color={COLORS.goldLight}/></div>
+        </div>
+      </button>
+      <div className="px-5 pt-4 mt-2" style={{borderTop:`1px solid ${COLORS.border}`}}>
+        <p className="text-[11px] font-bold text-center mb-3" style={{color:COLORS.textMuted}}>FOLLOW DUBAI DUTY FREE</p>
+        <div className="flex justify-center gap-3">{["IG","X","FB","IN"].map(s=><div key={s} className="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`,color:COLORS.goldLight}}>{s}</div>)}</div>
+      </div>
+    </div>
+  );
 }
 
 function SimpleScreen({title,onBack,children}){return(<div className="pb-28"><StatusBar/><TopBar title={title} onBack={onBack}/><div className="px-5">{children}</div></div>);}
@@ -120,9 +201,8 @@ function ShiftsScreen({onBack,onNavCalendar,onNavMySales}){
   <div className="grid grid-cols-2 gap-2.5 mb-4"><div className="rounded-xl p-3.5" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><p className="text-[10px] font-bold" style={{color:COLORS.textMuted}}>MTD SALE</p><p className="text-[13.5px] font-extrabold mt-1" style={{color:COLORS.goldLight}}>{fmt(b.mtd)}</p></div><div className="rounded-xl p-3.5" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><p className="text-[10px] font-bold" style={{color:COLORS.textMuted}}>MTD BUDGET</p><p className="text-[13.5px] font-extrabold mt-1">{fmt(b.mtdB)}</p></div></div>
   <button onClick={()=>setShowLoc(!showLoc)} className="w-full rounded-xl p-3.5 mb-4 flex items-center justify-between" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><span className="text-[12px] font-bold">Sales by location — 20 Jun 2026</span><ChevronRight size={14} color={COLORS.textDim} style={{transform:showLoc?"rotate(90deg)":"none"}}/></button>
   {showLoc&&<div className="mb-4 overflow-x-auto no-scrollbar -mx-5 px-5"><table className="w-full" style={{minWidth:400,borderCollapse:"collapse"}}><thead><tr>{["Location","2025","2026","Budget","vs"].map(h=><th key={h} className="text-[9px] font-bold pb-2 text-right first:text-left" style={{color:COLORS.textMuted}}>{h}</th>)}</tr></thead><tbody>{locs.map(l=>{const p=(((l.s26-l.s25)/l.s25)*100).toFixed(1);return(<tr key={l.l} style={{borderTop:`1px solid ${COLORS.border}`}}><td className="text-[10px] font-bold py-2 pr-2">{l.l}</td><td className="text-[10px] text-right py-2" style={{color:COLORS.textMuted}}>{l.s25.toLocaleString()}</td><td className="text-[10px] text-right py-2 font-bold">{l.s26.toLocaleString()}</td><td className="text-[10px] text-right py-2" style={{color:COLORS.textMuted}}>{l.fb.toLocaleString()}</td><td className="text-[10px] text-right py-2 font-bold" style={{color:p>=0?COLORS.tealLight:COLORS.redLight}}>{p>=0?"+":""}{p}%</td></tr>);})}</tbody></table></div>}
-  <p className="text-[12.5px] font-bold mb-3" style={{color:COLORS.textMuted}}>FROM YOUR DUTY OFFICER</p>
-  <div className="flex flex-col gap-2 mb-5">{msgs.map((u,i)=><div key={i} className="rounded-xl p-3.5 flex items-start gap-3" style={{background:i===0?"rgba(201,162,39,.08)":COLORS.card,border:`1px solid ${i===0?COLORS.gold+"40":COLORS.border}`}}><div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{background:"rgba(201,162,39,.18)",color:COLORS.goldLight}}>CM</div><div className="flex-1"><p className="text-[11.5px] leading-relaxed">{u.m}</p><p className="text-[9.5px] mt-1.5" style={{color:COLORS.textDim}}>Ciprian Mazilu · {u.t}</p></div></div>)}</div>
-  <button onClick={()=>onNavMySales&&onNavMySales()} className="w-full rounded-xl p-3.5 mb-5 flex items-center gap-3" style={{background:"rgba(200,16,46,.07)",border:`1px solid ${COLORS.red}40`}}><TrendingUp size={16} color={COLORS.redLight}/><span className="text-[12px] font-bold flex-1 text-left">Personal sales & area → My Sales</span><ChevronRight size={14} color={COLORS.redLight}/></button>
+
+
   <p className="text-[12.5px] font-bold mb-3" style={{color:COLORS.textMuted}}>AREA SALE vs BUDGET — TODAY</p>
   <div className="flex flex-col gap-2 mb-5">{zones.map(z=>{const v=z.sale-z.bgt;const p=((v/z.bgt)*100).toFixed(2);return(<div key={z.z} className="rounded-xl p-3.5" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><p className="text-[11px] font-bold mb-2">{z.z}</p><div className="w-full h-1.5 rounded-full mb-2" style={{background:"rgba(255,255,255,.08)"}}><div className="h-1.5 rounded-full" style={{width:`${Math.min((z.sale/z.bgt)*100,100)}%`,background:v>=0?COLORS.teal:COLORS.red}}/></div><div className="flex items-center justify-between"><span className="text-[10px]" style={{color:COLORS.textMuted}}>AED {z.sale.toLocaleString()} / {z.bgt.toLocaleString()}</span><span className="text-[12px] font-bold" style={{color:v>=0?COLORS.tealLight:COLORS.redLight}}>{v>=0?"+":""}{p}%</span></div></div>);})}</div>
   <p className="text-[12.5px] font-bold mb-1" style={{color:COLORS.textMuted}}>TERMINAL — LINDT PISTACHIO KUNAFA</p>
@@ -431,6 +511,147 @@ function PayslipScreen({onBack}){
   );
 }
 
+
+function PromotionsScreen(){
+  const [tab,setTab]=useState("promotions");
+  const dept="Electronics · Terminal 2";
+
+  const promotions=[
+    {name:"Johnnie Walker Black Label 1L",brand:"Johnnie Walker",pct:"15%",img:"JW"},
+    {name:"Chanel No.5 EDP 100ml",brand:"Chanel",pct:"20%",img:"CH"},
+    {name:"Cadbury Celebration Box 650g",brand:"Cadbury",pct:"10%",img:"CD"},
+    {name:"Davidoff Cool Water EDT 125ml",brand:"Davidoff",pct:"25%",img:"DV"},
+    {name:"Lindt Swiss Luxury Box 445g",brand:"Lindt",pct:"12%",img:"LT"},
+    {name:"Hennessy VS 1L",brand:"Hennessy",pct:"18%",img:"HN"},
+  ];
+
+  const reducedPrice=[
+    {name:"Sony WH-1000XM6",brand:"Sony",was:"AED 1,899",now:"AED 1,549",save:"AED 350"},
+    {name:"Apple AirPods Pro 2nd Gen",brand:"Apple",was:"AED 999",now:"AED 849",save:"AED 150"},
+    {name:"Dyson Airwrap Complete",brand:"Dyson",was:"AED 2,299",now:"AED 1,899",save:"AED 400"},
+    {name:"Samsung Galaxy Buds3 Pro",brand:"Samsung",was:"AED 749",now:"AED 599",save:"AED 150"},
+    {name:"Bose QuietComfort 45",brand:"Bose",was:"AED 1,299",now:"AED 999",save:"AED 300"},
+  ];
+
+  const incentives=[
+    {name:"Sony WH-1000XM6",brand:"Sony",price:"AED 1,549",bonus:"AED 30",icon:"HP"},
+    {name:"Apple AirPods Pro 2nd Gen",brand:"Apple",price:"AED 849",bonus:"AED 20",icon:"AP"},
+    {name:"Merlin Wireless Pro",brand:"Merlin",price:"AED 299",bonus:"AED 20",icon:"HP"},
+    {name:"SanDisk 2TB Flash Drive",brand:"SanDisk",price:"AED 349",bonus:"AED 50",icon:"SD"},
+    {name:"Dyson V15 Detect",brand:"Dyson",price:"AED 2,199",bonus:"AED 75",icon:"DY"},
+    {name:"Samsung 65in QLED TV",brand:"Samsung",price:"AED 4,999",bonus:"AED 150",icon:"TV"},
+    {name:"Apple Watch Series 10",brand:"Apple",price:"AED 1,699",bonus:"AED 40",icon:"AW"},
+  ];
+
+  const tabs=[
+    {id:"promotions",label:"Promotions"},
+    {id:"reduced",label:"Reduced Price"},
+    {id:"incentives",label:"Incentives"},
+  ];
+
+  return(
+    <div className="pb-4">
+      <StatusBar/>
+      {/* Header */}
+      <div className="px-5 pt-3 pb-4">
+        <p className="text-[11px] font-bold tracking-widest mb-1" style={{color:COLORS.textDim}}>YOUR DEPARTMENT</p>
+        <p className="text-[18px] font-extrabold">{dept}</p>
+      </div>
+
+      {/* Tabs */}
+      <div className="px-5 flex gap-2 mb-4 overflow-x-auto no-scrollbar">
+        {tabs.map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)}
+            className="flex-shrink-0 px-4 py-2.5 rounded-xl text-[12px] font-bold"
+            style={{background:tab===t.id?COLORS.red:COLORS.card,color:tab===t.id?"#fff":COLORS.textMuted,border:`1px solid ${tab===t.id?COLORS.red:COLORS.border}`}}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Promotions tab */}
+      {tab==="promotions"&&(
+        <div className="px-5 flex flex-col gap-2.5">
+          <div className="rounded-xl p-3 mb-1 flex items-center gap-2" style={{background:"rgba(200,16,46,.07)",border:`1px solid ${COLORS.red}30`}}>
+            <Percent size={12} color={COLORS.redLight}/>
+            <p className="text-[10.5px]" style={{color:COLORS.textMuted}}>Active promotional items for your area this month</p>
+          </div>
+          {promotions.map((p,i)=>(
+            <div key={i} className="rounded-xl p-4 flex items-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-[11px] font-extrabold flex-shrink-0" style={{background:"rgba(255,255,255,.08)",color:COLORS.textMuted}}>{p.img}</div>
+              <div className="flex-1">
+                <p className="text-[12px] font-bold leading-tight">{p.name}</p>
+                <p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{p.brand}</p>
+              </div>
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:"rgba(200,16,46,.15)",border:`1px solid ${COLORS.red}40`}}>
+                <p className="text-[16px] font-extrabold" style={{color:COLORS.redLight}}>{p.pct}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Reduced Price tab */}
+      {tab==="reduced"&&(
+        <div className="px-5 flex flex-col gap-2.5">
+          <div className="rounded-xl p-3 mb-1 flex items-center gap-2" style={{background:"rgba(13,148,136,.07)",border:`1px solid ${COLORS.teal}30`}}>
+            <TrendingUp size={12} color={COLORS.tealLight}/>
+            <p className="text-[10.5px]" style={{color:COLORS.textMuted}}>Current price reductions in your section</p>
+          </div>
+          {reducedPrice.map((p,i)=>(
+            <div key={i} className="rounded-xl p-4" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1 pr-3">
+                  <p className="text-[12.5px] font-bold leading-tight">{p.name}</p>
+                  <p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{p.brand}</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-[10px] line-through" style={{color:COLORS.textDim}}>{p.was}</p>
+                  <p className="text-[15px] font-extrabold" style={{color:COLORS.tealLight}}>{p.now}</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-end">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{background:"rgba(13,148,136,.15)",color:COLORS.tealLight}}>
+                  Save {p.save}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Incentives tab */}
+      {tab==="incentives"&&(
+        <div className="px-5 flex flex-col gap-2.5">
+          <div className="rounded-xl p-3 mb-1 flex items-center gap-2" style={{background:"rgba(201,162,39,.07)",border:`1px solid ${COLORS.gold}30`}}>
+            <Star size={12} color={COLORS.goldLight}/>
+            <p className="text-[10.5px]" style={{color:COLORS.textMuted}}>Your bonus per unit sold — push these today!</p>
+          </div>
+          {incentives.map((p,i)=>(
+            <div key={i} className="rounded-xl p-4 flex items-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-[11px] font-extrabold flex-shrink-0" style={{background:"rgba(255,255,255,.08)",color:COLORS.textMuted}}>{p.icon}</div>
+              <div className="flex-1">
+                <p className="text-[12px] font-bold leading-tight">{p.name}</p>
+                <p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{p.brand} · {p.price}</p>
+              </div>
+              <div className="flex-shrink-0 text-right">
+                <p className="text-[10px] font-bold" style={{color:COLORS.textDim}}>YOUR BONUS</p>
+                <p className="text-[16px] font-extrabold" style={{color:COLORS.goldLight}}>{p.bonus}</p>
+              </div>
+            </div>
+          ))}
+          {/* Total potential */}
+          <div className="rounded-xl p-4 mt-2" style={{background:`linear-gradient(135deg,${COLORS.cardAlt},#1f1413)`,border:`1px solid ${COLORS.gold}40`}}>
+            <p className="text-[10.5px] font-bold mb-1" style={{color:COLORS.goldLight}}>IF YOU SELL ONE OF EACH</p>
+            <p className="text-[22px] font-extrabold" style={{color:COLORS.goldLight}}>AED 385</p>
+            <p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>potential bonus today</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function StaffApp(){
   const [phase,setPhase]=useState("login");
   const [staffNum,setStaffNum]=useState("");
@@ -451,7 +672,8 @@ function StaffApp(){
   else if(screen==="shifts"){content=<ShiftsScreen onBack={()=>setScreen("home")} onNavCalendar={()=>setScreen("calendar")} onNavMySales={()=>setScreen("mysales")}/>;activeTab="shifts";}
   else if(screen==="calendar"){content=<CalendarScreen onBack={()=>setScreen("home")}/>;activeTab="shifts";}
   else if(screen==="mysales"){content=<MySalesScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
-  else if(screen==="training"){content=<TrainingScreen onBack={()=>setScreen("home")}/>;activeTab="training";}
+  else if(screen==="promotions"){content=<PromotionsScreen/>;activeTab="promotions";}
+  else if(screen==="training"){content=<TrainingScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
   else if(screen==="team"){content=<LeadershipScreen onBack={()=>setScreen("home")}/>;activeTab="team";}
   else if(screen==="profile"){content=<ProfileScreen onNav={setScreen} staffNum={staffNum} onLogout={handleLogout}/>;activeTab="profile";}
   else if(screen==="points"){content=<PointsScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
@@ -480,7 +702,7 @@ function StaffApp(){
   else if(screen==="about"){content=<AboutScreen onBack={()=>setScreen("profile")}/>;activeTab="profile";}
   else if(screen==="whatsnew"){content=<WhatsNewScreen onBack={()=>setScreen("home")}/>;activeTab="home";}
   else if(screen==="docs"){content=<SimpleScreen title="Documents" onBack={()=>setScreen("home")}>{["Employment Certificate","Salary Certificate","Uniform Reissue Request"].map(d=><button key={d} className="rounded-xl p-4 flex items-center gap-3 text-left mb-2" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}><div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background:"rgba(201,162,39,.15)"}}><FileText size={16} color={COLORS.goldLight}/></div><p className="text-[12.5px] font-bold">{d}</p></button>)}</SimpleScreen>;activeTab="home";}
-  return(<PhoneFrame ref={scrollRef} onScroll={handleScroll}><div className="relative h-full">{content}<BottomNav active={activeTab} onNav={setScreen}/></div></PhoneFrame>);
+  return(<PhoneFrame ref={scrollRef} onScroll={handleScroll}><div style={{width:"100%",height:"100%",display:"flex",flexDirection:"column",overflow:"hidden"}}><div style={{flex:1,overflowY:"auto",WebkitOverflowScrolling:"touch"}} className="no-scrollbar">{content}</div><BottomNav active={activeTab} onNav={setScreen}/></div></PhoneFrame>);
 }
 
 </script>
