@@ -517,12 +517,12 @@ function PromotionsScreen(){
   const dept="Electronics · Terminal 2";
 
   const promotions=[
-    {name:"Johnnie Walker Black Label 1L",brand:"Johnnie Walker",pct:"15%",img:"🥃"},
-    {name:"Chanel No.5 EDP 100ml",brand:"Chanel",pct:"20%",img:"🌸"},
-    {name:"Cadbury Celebration Box 650g",brand:"Cadbury",pct:"10%",img:"🍫"},
-    {name:"Davidoff Cool Water EDT 125ml",brand:"Davidoff",pct:"25%",img:"💧"},
-    {name:"Lindt Swiss Luxury Box 445g",brand:"Lindt",pct:"12%",img:"🍬"},
-    {name:"Hennessy VS 1L",brand:"Hennessy",pct:"18%",img:"🥃"},
+    {name:"Johnnie Walker Black Label 1L",brand:"Johnnie Walker",pct:"15%",img:"JW"},
+    {name:"Chanel No.5 EDP 100ml",brand:"Chanel",pct:"20%",img:"CH"},
+    {name:"Cadbury Celebration Box 650g",brand:"Cadbury",pct:"10%",img:"CD"},
+    {name:"Davidoff Cool Water EDT 125ml",brand:"Davidoff",pct:"25%",img:"DV"},
+    {name:"Lindt Swiss Luxury Box 445g",brand:"Lindt",pct:"12%",img:"LT"},
+    {name:"Hennessy VS 1L",brand:"Hennessy",pct:"18%",img:"HN"},
   ];
 
   const reducedPrice=[
@@ -578,9 +578,7 @@ function PromotionsScreen(){
           </div>
           {promotions.map((p,i)=>(
             <div key={i} className="rounded-xl p-4 flex items-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-[22px] flex-shrink-0" style={{background:"rgba(255,255,255,.05)"}}>
-                {p.img}
-              </div>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-[11px] font-extrabold flex-shrink-0" style={{background:"rgba(255,255,255,.08)",color:COLORS.textMuted}}>{p.img}</div>
               <div className="flex-1">
                 <p className="text-[12px] font-bold leading-tight">{p.name}</p>
                 <p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{p.brand}</p>
@@ -631,9 +629,7 @@ function PromotionsScreen(){
           </div>
           {incentives.map((p,i)=>(
             <div key={i} className="rounded-xl p-4 flex items-center gap-3" style={{background:COLORS.card,border:`1px solid ${COLORS.border}`}}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-[22px] flex-shrink-0" style={{background:"rgba(255,255,255,.05)"}}>
-                {p.icon}
-              </div>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-[11px] font-extrabold flex-shrink-0" style={{background:"rgba(255,255,255,.08)",color:COLORS.textMuted}}>{p.icon}</div>
               <div className="flex-1">
                 <p className="text-[12px] font-bold leading-tight">{p.name}</p>
                 <p className="text-[10px] mt-0.5" style={{color:COLORS.textMuted}}>{p.brand} · {p.price}</p>
